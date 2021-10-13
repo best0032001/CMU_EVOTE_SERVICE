@@ -1,0 +1,15 @@
+version: '3.4'
+services:
+        evote:
+                build:
+                        context: Evote_Service
+                container_name: evote
+                ports:
+                        - "98:80"
+                restart: always
+                env_file:
+                        - .env
+                environment:
+                        - TZ=Asia/Bangkok
+
+

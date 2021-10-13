@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30907.101
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Evote_Service", "Evote_Service\Evote_Service.csproj", "{C0A13866-49F8-42E6-81AD-41B54B50ED14}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiTest", "ApiTest\ApiTest.csproj", "{3B0DE3DD-1AB2-4BF9-A703-2CB7F2B7610B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C0A13866-49F8-42E6-81AD-41B54B50ED14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C0A13866-49F8-42E6-81AD-41B54B50ED14}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C0A13866-49F8-42E6-81AD-41B54B50ED14}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C0A13866-49F8-42E6-81AD-41B54B50ED14}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B0DE3DD-1AB2-4BF9-A703-2CB7F2B7610B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B0DE3DD-1AB2-4BF9-A703-2CB7F2B7610B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B0DE3DD-1AB2-4BF9-A703-2CB7F2B7610B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B0DE3DD-1AB2-4BF9-A703-2CB7F2B7610B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {491F0F73-722F-40DF-BFAF-129A9D356AB4}
+	EndGlobalSection
+EndGlobal
