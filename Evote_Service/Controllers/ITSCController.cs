@@ -59,6 +59,7 @@ namespace Evote_Service.Controllers
             httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + _accesstoken);
             var response = await httpClient.GetAsync(urlLine);
             if (response.IsSuccessStatusCode) { dynamic data = JsonConvert.DeserializeObject<dynamic>(await response.Content.ReadAsStringAsync()); _lineId = data.data.userId; }
+            else { _lineId = "unauthorized"; }
             return _lineId;
 
         }
