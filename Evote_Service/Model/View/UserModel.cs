@@ -9,5 +9,6 @@ namespace Evote_Service.Model.View
     {
         public String Email { get; set; }
         public String FullName { get; set; }
+        public int UserStage { get; set; }
     }
 }

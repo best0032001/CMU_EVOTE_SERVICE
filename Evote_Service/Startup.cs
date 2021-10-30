@@ -41,6 +41,17 @@ namespace Evote_Service
             }
             services.AddDbContext<EvoteContext>(options => options.UseInMemoryDatabase(databaseName: "ApplicationDBContext").ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning)));
             services.AddScoped<ICheckUserRepository, CheckUserRepository>();
+            services.AddCors(options =>
+            {
+                options.AddPolicy(name: MyAllowSpecificOrigins,
+                                  builder =>
+                                  {
+                                      builder.WithOrigins(Environment.GetEnvironmentVariable("ORIGIN"))
+                                               .AllowAnyMethod()
+                                               .AllowAnyHeader()
+                                               .AllowCredentials();
+                                  });
+            });
             services.AddControllers(options =>
             {
                 options.InputFormatters.Insert(0, new ITSCInputFormatter());
@@ -48,6 +59,8 @@ namespace Evote_Service
                 {
                 }
             });
+
+          
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

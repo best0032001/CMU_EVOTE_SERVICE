@@ -13,6 +13,6 @@ namespace Evote_Service.Model.Entity
         public int UserStage { get; set; }   //0  no regis //1 regis 2 confirm
         public int UserType { get; set; } // 1 CMU 2 non CMU
         public String LineId { get; set; }
-        public DateTime CrreateDate { get; set; }
+        public DateTime CreateTime { get; set; }
     }
 }

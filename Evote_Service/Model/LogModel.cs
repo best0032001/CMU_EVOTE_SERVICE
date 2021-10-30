@@ -9,7 +9,9 @@ namespace Evote_Service.Model
     {
      
         public DateTime Timestamp { get; set; }
+        public String UserType { get; set; }
         public String cmuaccount { get; set; }
+        public String LineID { get; set; }
         public String scope { get; set; }
         public String action { get; set; }
         public String granttype { get; set; }

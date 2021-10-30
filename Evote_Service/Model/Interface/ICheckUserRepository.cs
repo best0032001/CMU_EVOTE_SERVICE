@@ -1,4 +1,5 @@
-﻿using Evote_Service.Model.View;
+﻿using Evote_Service.Model.Entity;
+using Evote_Service.Model.View;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,7 @@ namespace Evote_Service.Model.Interface
     public interface ICheckUserRepository
     {
 
-        Task<UserModel> CheckLineUser(String lineId);
+        Task<UserModel> GetLineUser(String lineId);
+        Task<Boolean> RegisLineUser(UserEntity userEntity);
     }
 }

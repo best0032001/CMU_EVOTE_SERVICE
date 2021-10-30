@@ -63,9 +63,12 @@ namespace Evote_Service.Controllers
             return _lineId;
 
         }
-        protected StatusCodeResult StatusErrorITSC(String action, Exception ex)
+        protected StatusCodeResult StatusErrorITSC(String UserType, String LineID,String cmuaccount, String action, Exception ex)
         {
             LogModel log = new LogModel();
+            log.UserType = UserType;
+            log.LineID = LineID;
+            log.cmuaccount = cmuaccount;
             log.HttpCode = "500";
             log.action = action;
             log.level = "Error";
@@ -79,6 +82,22 @@ namespace Evote_Service.Controllers
             log.responseTime = (log.Timestamp - _timestart).TotalSeconds;
             _logger.LogInformation(log.logdate + " " + Newtonsoft.Json.JsonConvert.SerializeObject(log));
             return this.StatusCode(500);
+        }
+        protected ObjectResult StatusCodeITSC(String UserType, String LineID, String cmuaccount, String action, Int32 code, APIModel aPIModel)
+        {
+            LogModel log = new LogModel();
+            log.UserType = UserType;
+            log.LineID = LineID;
+            log.cmuaccount = cmuaccount;
+            log.HttpCode = ""+code;
+            log.action = action;
+            log.level = "Info";
+            log.Timestamp = DateTime.Now;
+            log.logdate = DateTime.Now.ToString("MM/dd/yyyy HH:mm");
+            log.logdata = "";
+            log.responseTime = (log.Timestamp - _timestart).TotalSeconds;
+            _logger.LogInformation(log.logdate + " " + Newtonsoft.Json.JsonConvert.SerializeObject(log));
+            return this.StatusCode(code, aPIModel);
         }
 
     }
