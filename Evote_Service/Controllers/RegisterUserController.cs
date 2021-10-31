@@ -60,18 +60,135 @@ namespace Evote_Service.Controllers
                 userEntity.Email = email;
                 userEntity.LineId = lineId;
                 APIModel aPIModel = new APIModel();
-                aPIModel.message = "ระบบขัดข้องบันทึกข้อมูลไม่สำเร็จ";
+              
                 if (await _ICheckUserRepository.RegisLineUser(userEntity) == false)
                 {
                     StatusCodeITSC("line", lineId, "", "RegisterUserController.UserRegisLiff", 503, aPIModel);
+                    aPIModel.message = "ระบบขัดข้องบันทึกข้อมูลไม่สำเร็จ";
                 }
-                aPIModel.data = await _ICheckUserRepository.GetLineUser(lineId);
+                UserModel userModel = await _ICheckUserRepository.GetLineUser(lineId);
+                aPIModel.data = userModel;
                 aPIModel.message = "Success";
-                return StatusCodeITSC("line", lineId, "", "RegisterUserController.UserRegisLiff", 201, aPIModel);
+                return StatusCodeITSC("line", lineId, userModel.Email, "RegisterUserController.UserRegisLiff", 201, aPIModel);
             }
             catch (Exception ex) 
             { 
-                return StatusErrorITSC("line", lineId, "", "RegisterUserController.CheckStage", ex); 
+                return StatusErrorITSC("line", lineId, "", "RegisterUserController.UserRegisLiff", ex); 
+            }
+        }
+
+        [HttpPost("v1/User/Tel")]
+        public async Task<IActionResult> UserSendTel([FromBody] string body)
+        {
+            String lineId = "";
+            try
+            {
+                lineId = await getLineUser();
+                if (lineId == "unauthorized") { return Unauthorized(); }
+                dynamic data = JsonConvert.DeserializeObject<dynamic>(body);
+                if (data.tel == null) { return BadRequest(); }
+                if (data.tel == "") { return BadRequest(); }
+                String tel = data.tel;
+
+                APIModel aPIModel = new APIModel();
+                if (await _ICheckUserRepository.UserSendTel(lineId, tel) == false)
+                {
+                    StatusCodeITSC("line", lineId, "", "RegisterUserController.UserSendTel", 503, aPIModel);
+                    aPIModel.message = "ระบบขัดข้องบันทึกข้อมูลไม่สำเร็จ";
+                }
+                UserModel userModel   = await _ICheckUserRepository.GetLineUser(lineId);
+                aPIModel.data = userModel;
+                aPIModel.message = "Success";
+                return StatusCodeITSC("line", lineId, userModel.Email, "RegisterUserController.UserSendTel", 200, aPIModel);
+            }
+            catch (Exception ex)
+            {
+                return StatusErrorITSC("line", lineId, "", "RegisterUserController.UserSendTel", ex);
+            }
+        }
+
+        [HttpPost("v1/User/SMSOTP")]
+        public async Task<IActionResult> UserSendSMSOTP([FromBody] string body)
+        {
+            String lineId = "";
+            try
+            {
+                lineId = await getLineUser();
+                if (lineId == "unauthorized") { return Unauthorized(); }
+                dynamic data = JsonConvert.DeserializeObject<dynamic>(body);
+                if (data.otp == null) { return BadRequest(); }
+                if (data.otp == "") { return BadRequest(); }
+                String otp = data.otp;
+
+                APIModel aPIModel = new APIModel();
+                if (await _ICheckUserRepository.UserConfirmSMSOTP(lineId, otp) == false)
+                {
+                    StatusCodeITSC("line", lineId, "", "RegisterUserController.UserSendSMSOTP", 503, aPIModel);
+                    aPIModel.message = "รหัส OTP ไม่ถูกต้อง";
+                }
+                UserModel userModel = await _ICheckUserRepository.GetLineUser(lineId);
+                aPIModel.data = userModel;
+                aPIModel.message = "Success";
+                return StatusCodeITSC("line", lineId, userModel.Email, "RegisterUserController.UserSendSMSOTP", 200, aPIModel);
+            }
+            catch (Exception ex)
+            {
+                return StatusErrorITSC("line", lineId, "", "RegisterUserController.UserSendSMSOTP", ex);
+            }
+        }
+
+        [HttpGet("v1/User/getEmailOTP")]
+        public async Task<IActionResult> getEMAILOTP()
+        {
+            String lineId = "";
+            try
+            {
+                lineId = await getLineUser();
+                if (lineId == "unauthorized") { return Unauthorized(); }
+                APIModel aPIModel = new APIModel();
+                if (await _ICheckUserRepository.getEMAILOTP(lineId) == false)
+                {
+                    StatusCodeITSC("line", lineId, "", "RegisterUserController.getEMAILOTP", 503, aPIModel);
+                    aPIModel.message = "รหัส OTP ไม่ถูกต้อง";
+                }
+                UserModel userModel = await _ICheckUserRepository.GetLineUser(lineId);
+                aPIModel.data = userModel;
+                aPIModel.message = "Success";
+                return StatusCodeITSC("line", lineId, userModel.Email, "RegisterUserController.getEMAILOTP", 200, aPIModel);
+            }
+            catch (Exception ex)
+            {
+                return StatusErrorITSC("line", lineId, "", "RegisterUserController.getEMAILOTP", ex);
+            }
+        }
+
+        [HttpPost("v1/User/EmailOTP")]
+        public async Task<IActionResult> UserSendEmailOTP([FromBody] string body)
+        {
+            String lineId = "";
+            try
+            {
+                lineId = await getLineUser();
+                if (lineId == "unauthorized") { return Unauthorized(); }
+                dynamic data = JsonConvert.DeserializeObject<dynamic>(body);
+                if (data.otp == null) { return BadRequest(); }
+                if (data.otp == "") { return BadRequest(); }
+                String otp = data.otp;
+
+                APIModel aPIModel = new APIModel();
+                if (await _ICheckUserRepository.UserConfirmEmailOTP(lineId, otp) == false)
+                {
+                    StatusCodeITSC("line", lineId, "", "RegisterUserController.UserSendEmailOTP", 503, aPIModel);
+                    aPIModel.message = "รหัส OTP ไม่ถูกต้อง";
+                }
+                UserModel userModel = await _ICheckUserRepository.GetLineUser(lineId);
+                aPIModel.data = userModel;
+                aPIModel.message = "Success";
+                return StatusCodeITSC("line", lineId, userModel.Email, "RegisterUserController.UserSendEmailOTP", 200, aPIModel);
+            }
+            catch (Exception ex)
+            {
+                return StatusErrorITSC("line", lineId, "", "RegisterUserController.UserSendEmailOTP", ex);
             }
         }
     }

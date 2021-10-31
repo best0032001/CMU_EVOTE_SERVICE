@@ -14,7 +14,9 @@ namespace Evote_Service.Model.Repository
     {
         private EvoteContext _evoteContext;
         private readonly IHttpClientFactory _clientFactory;
-        public CheckUserRepository(EvoteContext evoteContext, IHttpClientFactory clientFactory)
+        private ISMSRepository _sMSRepository;
+        private IEmailRepository  _emailRepository;
+        public CheckUserRepository(EvoteContext evoteContext, IHttpClientFactory clientFactory,ISMSRepository sMSRepository, IEmailRepository emailRepository)
         {
             if (evoteContext == null)
             {
@@ -22,6 +24,8 @@ namespace Evote_Service.Model.Repository
             }
             _evoteContext = evoteContext;
             _clientFactory = clientFactory;
+            _sMSRepository = sMSRepository;
+            _emailRepository = emailRepository;
         }
         public async Task<UserModel> GetLineUser(string lineId)
         {
@@ -37,6 +41,60 @@ namespace Evote_Service.Model.Repository
             userEntity.CreateTime = DateTime.Now;
             userEntity.UserStage = 1;
             _evoteContext.UserEntitys.Add(userEntity);
+            _evoteContext.SaveChanges();
+            return true;
+        }
+
+        public async Task<bool> UserSendTel(string lineId, string tel)
+        {
+            UserEntity userEntitys= _evoteContext.UserEntitys.Where(w => w.LineId == lineId).FirstOrDefault();
+            if (userEntitys == null) { return false; }
+            if (userEntitys.UserStage!=1) { return false; }
+            if (userEntitys.IsConfirmTel ==true) { return false; }
+            userEntitys.Tel = tel;
+
+            //  sent OTP
+            userEntitys.SMSOTP = await _sMSRepository.getOTP() ;
+            _evoteContext.SaveChanges();
+            return true;
+        }
+
+        public async Task<bool> UserConfirmSMSOTP(string lineId, string otp)
+        {
+            UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.LineId == lineId).FirstOrDefault();
+            if (userEntitys == null) { return false; }
+            if (userEntitys.UserStage != 1) { return false; }
+            if (userEntitys.IsConfirmTel == true) { return false; }
+
+            if (userEntitys.SMSOTP != otp) { return false; }
+            userEntitys.IsConfirmTel = true;
+            userEntitys.ConfirmTelTime = DateTime.Now;
+            _evoteContext.SaveChanges();
+            return true;
+        }
+
+        public async Task<bool> getEMAILOTP(string lineId)
+        {
+            UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.LineId == lineId).FirstOrDefault();
+            if (userEntitys == null) { return false; }
+            if (userEntitys.UserStage != 1) { return false; }
+            if (userEntitys.IsConfirmEmail == true) { return false; }
+
+            userEntitys.EmailOTP = await _emailRepository.SendEmailOTP(userEntitys.Email);
+            _evoteContext.SaveChanges();
+            return true;
+        }
+
+        public async Task<bool> UserConfirmEmailOTP(string lineId, string otp)
+        {
+            UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.LineId == lineId).FirstOrDefault();
+            if (userEntitys == null) { return false; }
+            if (userEntitys.UserStage != 1) { return false; }
+            if (userEntitys.IsConfirmEmail == true) { return false; }
+
+            if (userEntitys.EmailOTP != otp) { return false; }
+            userEntitys.IsConfirmEmail = true;
+            userEntitys.ConfirmEmailTime = DateTime.Now;
             _evoteContext.SaveChanges();
             return true;
         }

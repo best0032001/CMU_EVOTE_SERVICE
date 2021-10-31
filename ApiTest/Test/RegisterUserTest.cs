@@ -1,5 +1,6 @@
 ﻿using Evote_Service;
 using Evote_Service.Model.Entity;
+using Evote_Service.Model.View;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using System;
@@ -40,9 +41,40 @@ namespace ApiTest.Test
             APIModel dataTemp = JsonConvert.DeserializeObject<APIModel>(responseString);
             Assert.IsTrue(dataTemp.message == "Success"); ;
             String data = JsonConvert.SerializeObject(dataTemp.data);
-            UserEntity userEntity = JsonConvert.DeserializeObject<UserEntity>(data);
-            Assert.IsTrue(userEntity.UserStage==1); ;
-            Assert.IsTrue(userEntity.Email == "test@test.com");
+            UserModel userModel = JsonConvert.DeserializeObject<UserModel>(data);
+            Assert.IsTrue(userModel.UserStage==1); ;
+            Assert.IsTrue(userModel.Email == "test@test.com");
+
+            json = "{ \"tel\":\"000000\"}";
+            response = await _client.PostAsync("api/v1/User/Tel", new StringContent(json));
+            Assert.IsTrue((int)response.StatusCode == 200);
+
+            json = "{ \"otp\":\"1234\"}";
+            response = await _client.PostAsync("api/v1/User/SMSOTP", new StringContent(json));
+            Assert.IsTrue((int)response.StatusCode == 200);
+             responseString = await response.Content.ReadAsStringAsync();
+             dataTemp = JsonConvert.DeserializeObject<APIModel>(responseString);
+            Assert.IsTrue(dataTemp.message == "Success"); ;
+             data = JsonConvert.SerializeObject(dataTemp.data);
+            userModel = JsonConvert.DeserializeObject<UserModel>(data);
+            Assert.IsTrue(userModel.IsConfirmTel == true); ;
+            Assert.IsTrue(userModel.ConfirmTelTime != null);
+
+
+            response = await _client.GetAsync("api/v1/User/getEmailOTP");
+            Assert.IsTrue((int)response.StatusCode == 200);
+
+            json = "{ \"otp\":\"1234\"}";
+            response = await _client.PostAsync("api/v1/User/EmailOTP", new StringContent(json));
+            Assert.IsTrue((int)response.StatusCode == 200);
+            responseString = await response.Content.ReadAsStringAsync();
+            dataTemp = JsonConvert.DeserializeObject<APIModel>(responseString);
+            Assert.IsTrue(dataTemp.message == "Success"); ;
+            data = JsonConvert.SerializeObject(dataTemp.data);
+            userModel = JsonConvert.DeserializeObject<UserModel>(data);
+            Assert.IsTrue(userModel.IsConfirmEmail == true); ;
+            Assert.IsTrue(userModel.ConfirmEmailTime != null);
+
         }
     }
 }

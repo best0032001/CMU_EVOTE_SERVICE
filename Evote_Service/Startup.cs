@@ -15,6 +15,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Evote_Service.Model.Repository.Mock;
 
 namespace Evote_Service
 {
@@ -38,6 +39,12 @@ namespace Evote_Service
             if (webHostEnvironment.IsEnvironment("test"))
             {
                 services.AddDbContext<EvoteContext>(options => options.UseInMemoryDatabase(databaseName: "ApplicationDBContext").ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning)));
+                services.AddScoped<ISMSRepository, SMSRepositoryMock>();
+                services.AddScoped<IEmailRepository, EmailRepositoryMock>();
+            }
+            else {
+                services.AddScoped<ISMSRepository, SMSRepository>();
+                services.AddScoped<IEmailRepository, EmailRepository>();
             }
             services.AddDbContext<EvoteContext>(options => options.UseInMemoryDatabase(databaseName: "ApplicationDBContext").ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning)));
             services.AddScoped<ICheckUserRepository, CheckUserRepository>();
