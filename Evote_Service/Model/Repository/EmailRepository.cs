@@ -1,7 +1,13 @@
 ﻿using Evote_Service.Model.Interface;
+using MailKit.Net.Smtp;
+using MailKit.Security;
+using Microsoft.AspNetCore.Http;
+using MimeKit;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+
 using System.Threading.Tasks;
 
 namespace Evote_Service.Model.Repository
@@ -10,7 +16,50 @@ namespace Evote_Service.Model.Repository
     {
         public async Task<string> SendEmailOTP(string Email)
         {
-            throw new NotImplementedException();
+            Random _random = new Random();
+            String Code = _random.Next(0, 999999).ToString("D6");
+            await SendEmailAsync("CMU Evote service", Email, "Confirm Email", Code, null);
+            return Code;
+        }
+
+        public async Task SendEmailAsync(String nameSender, string email_To, string subject, string message, List<IFormFile> Attachment)
+        {
+            String _mailServer = Environment.GetEnvironmentVariable("MAIL_SENDER");
+            Int32 _mailPort = Convert.ToInt32(Environment.GetEnvironmentVariable("MAIL_PORT"));
+            String _mailSender = Environment.GetEnvironmentVariable("MAIL_SERVER");
+
+
+            var emailMessage = new MimeMessage();
+            emailMessage.From.Add(new MailboxAddress(nameSender, _mailSender));
+            emailMessage.To.Add(new MailboxAddress(" ", email_To));
+            emailMessage.Subject = subject;
+            var builder = new BodyBuilder { HtmlBody = message };
+            if (Attachment != null)
+            {
+                foreach (IFormFile formFile in Attachment)
+                {
+                    using (MemoryStream memoryStream = new MemoryStream())
+                    {
+                        await formFile.CopyToAsync(memoryStream);
+                        builder.Attachments.Add(formFile.FileName, memoryStream.ToArray());
+                    }
+                }
+            }
+            emailMessage.Body = builder.ToMessageBody();
+            await Task.Run(() =>
+            {
+                using (var client = new SmtpClient())
+                {
+                    client.ServerCertificateValidationCallback = (s, c, h, e) => true;
+
+                    client.Connect(_mailServer, _mailPort, SecureSocketOptions.Auto);
+                    client.AuthenticationMechanisms.Remove("XOAUTH2");
+                    client.Send(emailMessage);
+                    client.Disconnect(true);
+                }
+            });
+
+
         }
     }
 }

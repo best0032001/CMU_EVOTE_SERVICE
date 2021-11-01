@@ -19,9 +19,9 @@ namespace Evote_Service.Controllers
     public class RegisterUserController : ITSCController
     {
         private ICheckUserRepository _ICheckUserRepository;
-        public RegisterUserController(ILogger<ITSCController> logger, IHttpClientFactory clientFactory, ICheckUserRepository CheckUserRepository, IWebHostEnvironment env)
+        public RegisterUserController(ILogger<ITSCController> logger, IHttpClientFactory clientFactory, ICheckUserRepository CheckUserRepository, IWebHostEnvironment env, IEmailRepository emailRepository)
         {
-            this.loadConfig(logger, clientFactory, env); _ICheckUserRepository = CheckUserRepository;
+            this.loadConfig(logger, clientFactory, env); _ICheckUserRepository = CheckUserRepository; _emailRepository = emailRepository;
         }
         [HttpGet("v1/User/liff")]
         public async Task<IActionResult> getUserLiff()
@@ -149,7 +149,7 @@ namespace Evote_Service.Controllers
                 if (await _ICheckUserRepository.getEMAILOTP(lineId) == false)
                 {
                     StatusCodeITSC("line", lineId, "", "RegisterUserController.getEMAILOTP", 503, aPIModel);
-                    aPIModel.message = "รหัส OTP ไม่ถูกต้อง";
+                    aPIModel.message = "ระบบขัดข้องไม่สามารถส่ง Email ได้";
                 }
                 UserModel userModel = await _ICheckUserRepository.GetLineUser(lineId);
                 aPIModel.data = userModel;

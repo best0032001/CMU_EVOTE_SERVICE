@@ -1,4 +1,5 @@
 ﻿using Evote_Service.Model;
+using Evote_Service.Model.Interface;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
@@ -22,6 +23,7 @@ namespace Evote_Service.Controllers
         protected IHttpClientFactory _clientFactory;
         protected IWebHostEnvironment _env;
         protected String _accesstoken = "";
+        protected IEmailRepository _emailRepository;
         private String urlLine = "https://api.line.me/v2/profile";
         public ITSCController()
         {
@@ -58,12 +60,12 @@ namespace Evote_Service.Controllers
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + _accesstoken);
             var response = await httpClient.GetAsync(urlLine);
-            if (response.IsSuccessStatusCode) { dynamic data = JsonConvert.DeserializeObject<dynamic>(await response.Content.ReadAsStringAsync()); _lineId = data.data.userId; }
+            if (response.IsSuccessStatusCode) { dynamic data = JsonConvert.DeserializeObject<dynamic>(await response.Content.ReadAsStringAsync()); _lineId = data.userId; }
             else { _lineId = "unauthorized"; }
             return _lineId;
 
         }
-        protected StatusCodeResult StatusErrorITSC(String UserType, String LineID,String cmuaccount, String action, Exception ex)
+        protected StatusCodeResult StatusErrorITSC(String UserType, String LineID, String cmuaccount, String action, Exception ex)
         {
             LogModel log = new LogModel();
             log.UserType = UserType;
@@ -80,7 +82,10 @@ namespace Evote_Service.Controllers
                 log.logdata = log.logdata + " " + ex.InnerException.Message + " " + ex.InnerException.StackTrace.Replace("\\", "").Replace(":", "");
             }
             log.responseTime = (log.Timestamp - _timestart).TotalSeconds;
-            _logger.LogInformation(log.logdate + " " + Newtonsoft.Json.JsonConvert.SerializeObject(log));
+            String errorText = log.logdate + " " + Newtonsoft.Json.JsonConvert.SerializeObject(log);
+            _logger.LogInformation(errorText);
+            String NOTI_ADMIN = Environment.GetEnvironmentVariable("NOTI_ADMIN");
+            _emailRepository.SendEmailAsync("CMU Evote service", NOTI_ADMIN, "Error Alert", errorText, null);
             return this.StatusCode(500);
         }
         protected ObjectResult StatusCodeITSC(String UserType, String LineID, String cmuaccount, String action, Int32 code, APIModel aPIModel)
@@ -89,7 +94,7 @@ namespace Evote_Service.Controllers
             log.UserType = UserType;
             log.LineID = LineID;
             log.cmuaccount = cmuaccount;
-            log.HttpCode = ""+code;
+            log.HttpCode = "" + code;
             log.action = action;
             log.level = "Info";
             log.Timestamp = DateTime.Now;

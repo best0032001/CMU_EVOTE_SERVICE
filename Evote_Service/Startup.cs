@@ -43,7 +43,7 @@ namespace Evote_Service
                 services.AddScoped<IEmailRepository, EmailRepositoryMock>();
             }
             else {
-                services.AddScoped<ISMSRepository, SMSRepository>();
+                services.AddScoped<ISMSRepository, SMSRepositoryMock>();
                 services.AddScoped<IEmailRepository, EmailRepository>();
             }
             services.AddDbContext<EvoteContext>(options => options.UseInMemoryDatabase(databaseName: "ApplicationDBContext").ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning)));
