@@ -24,9 +24,9 @@ namespace Evote_Service.Model.Repository
 
         public async Task SendEmailAsync(String nameSender, string email_To, string subject, string message, List<IFormFile> Attachment)
         {
-            String _mailServer = Environment.GetEnvironmentVariable("MAIL_SENDER");
-            Int32 _mailPort = Convert.ToInt32(Environment.GetEnvironmentVariable("MAIL_PORT"));
-            String _mailSender = Environment.GetEnvironmentVariable("MAIL_SERVER");
+            String _mailServer = Environment.GetEnvironmentVariable("MAIL_SERVER"); 
+             Int32 _mailPort = Convert.ToInt32(Environment.GetEnvironmentVariable("MAIL_PORT"));
+            String _mailSender = Environment.GetEnvironmentVariable("MAIL_SENDER");
 
 
             var emailMessage = new MimeMessage();
