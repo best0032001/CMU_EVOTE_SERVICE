@@ -178,8 +178,9 @@ namespace Evote_Service.Controllers
                 APIModel aPIModel = new APIModel();
                 if (await _ICheckUserRepository.UserConfirmEmailOTP(lineId, otp) == false)
                 {
-                    StatusCodeITSC("line", lineId, "", "RegisterUserController.UserSendEmailOTP", 503, aPIModel);
                     aPIModel.message = "รหัส OTP ไม่ถูกต้อง";
+                    return StatusCodeITSC("line", lineId, "", "RegisterUserController.UserSendEmailOTP", 503, aPIModel);
+                  
                 }
                 UserModel userModel = await _ICheckUserRepository.GetLineUser(lineId);
                 aPIModel.data = userModel;

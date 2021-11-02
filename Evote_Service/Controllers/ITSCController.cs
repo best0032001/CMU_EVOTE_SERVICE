@@ -34,6 +34,7 @@ namespace Evote_Service.Controllers
             _clientFactory = clientFactory;
             _env = env;
             _logger = logger;
+            //throw new NotImplementedException();
 
         }
         protected void loadConfig(ILogger<ITSCController> logger, IHttpClientFactory clientFactory)

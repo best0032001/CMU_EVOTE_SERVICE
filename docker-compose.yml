@@ -6,6 +6,8 @@ services:
                 container_name: evote
                 ports:
                         - "98:80"
+                volumes:
+                        - /home/cnoc/logsEvoteService:/app/logs
                 restart: always
                 env_file:
                         - .env
