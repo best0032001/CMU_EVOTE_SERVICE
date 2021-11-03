@@ -34,29 +34,32 @@ namespace Evote_Service
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
+            String origin = "";
             services.AddHttpClient();
             if (webHostEnvironment.IsEnvironment("test"))
             {
                 services.AddDbContext<EvoteContext>(options => options.UseInMemoryDatabase(databaseName: "ApplicationDBContext").ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning)));
                 services.AddScoped<ISMSRepository, SMSRepositoryMock>();
                 services.AddScoped<IEmailRepository, EmailRepositoryMock>();
+                origin = "*";
             }
             else {
                 services.AddScoped<ISMSRepository, SMSRepositoryMock>();
                 services.AddScoped<IEmailRepository, EmailRepository>();
+                origin = Environment.GetEnvironmentVariable("ORIGIN");
             }
             services.AddDbContext<EvoteContext>(options => options.UseInMemoryDatabase(databaseName: "ApplicationDBContext").ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning)));
             services.AddScoped<ICheckUserRepository, CheckUserRepository>();
+    
             services.AddCors(options =>
             {
                 options.AddPolicy(name: MyAllowSpecificOrigins,
                                   builder =>
                                   {
-                                      builder.WithOrigins(Environment.GetEnvironmentVariable("ORIGIN"))
+                                      builder.WithOrigins(origin)
                                                .AllowAnyMethod()
-                                               .AllowAnyHeader()
-                                               .AllowCredentials();
+                                               .AllowAnyHeader();
+                                             
                                   });
             });
             services.AddControllers(options =>
@@ -81,7 +84,7 @@ namespace Evote_Service
             app.UseRouting();
 
             app.UseAuthorization();
-
+            app.UseCors(MyAllowSpecificOrigins);
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
