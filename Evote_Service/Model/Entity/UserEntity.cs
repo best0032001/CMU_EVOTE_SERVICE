@@ -18,6 +18,8 @@ namespace Evote_Service.Model.Entity
 
         public String SMSOTP { get; set; }
         public String EmailOTP { get; set; }
+        public String EmailOTPRef { get; set; }
+
 
         public Boolean IsConfirmEmail { get; set; }
         public DateTime? ConfirmEmailTime { get; set; }

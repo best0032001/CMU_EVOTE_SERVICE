@@ -34,6 +34,21 @@ namespace Evote_Service.Controllers
             _clientFactory = clientFactory;
             _env = env;
             _logger = logger;
+            if (!_env.IsEnvironment("test"))
+            {
+                if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != "Development")
+                {
+                    var req = Request;
+                    String remoteIpAddress = req.HttpContext.Connection.RemoteIpAddress.ToString();
+                    remoteIpAddress = remoteIpAddress.Split(":")[3];
+
+                    String gateWayIP = Environment.GetEnvironmentVariable("GATEWAY_IP");
+                    List<String> gateWayIPList = gateWayIP.Split(" ").ToList() ;
+                    if (!gateWayIPList.Contains(remoteIpAddress)) { throw new UnauthorizedAccessException(); }
+                  
+                }
+            }
+
             //throw new NotImplementedException();
 
         }

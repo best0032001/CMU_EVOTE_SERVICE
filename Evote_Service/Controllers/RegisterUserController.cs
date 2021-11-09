@@ -51,20 +51,21 @@ namespace Evote_Service.Controllers
                 lineId = await getLineUser();
                 if (lineId == "unauthorized") { return Unauthorized(); }
                 dynamic data = JsonConvert.DeserializeObject<dynamic>(body);
-                if (data.firstName == null || data.lastname == null || data.email == null) { return BadRequest(); }
-                if (data.firstName == "" || data.lastname == "" || data.email == "") { return BadRequest(); }
-                String firstName = data.firstName; String lastname = data.lastname; String email = data.email;
+                if (data.firstName == null || data.lastName == null || data.email == null) { return BadRequest(); }
+                if (data.firstName == "" || data.lastName == "" || data.email == "") { return BadRequest(); }
+                String firstName = data.firstName; String lastName = data.lastName; String email = data.email;
 
                 UserEntity userEntity = new UserEntity();
-                userEntity.FullName = firstName + " " + lastname;
+                userEntity.FullName = firstName + " " + lastName;
                 userEntity.Email = email;
                 userEntity.LineId = lineId;
                 APIModel aPIModel = new APIModel();
               
                 if (await _ICheckUserRepository.RegisLineUser(userEntity) == false)
                 {
-                    StatusCodeITSC("line", lineId, "", "RegisterUserController.UserRegisLiff", 503, aPIModel);
                     aPIModel.message = "ระบบขัดข้องบันทึกข้อมูลไม่สำเร็จ";
+                    return StatusCodeITSC("line", lineId, "", "RegisterUserController.UserRegisLiff", 503, aPIModel);
+                   
                 }
                 UserModel userModel = await _ICheckUserRepository.GetLineUser(lineId);
                 aPIModel.data = userModel;
@@ -93,8 +94,9 @@ namespace Evote_Service.Controllers
                 APIModel aPIModel = new APIModel();
                 if (await _ICheckUserRepository.UserSendTel(lineId, tel) == false)
                 {
-                    StatusCodeITSC("line", lineId, "", "RegisterUserController.UserSendTel", 503, aPIModel);
                     aPIModel.message = "ระบบขัดข้องบันทึกข้อมูลไม่สำเร็จ";
+                    return StatusCodeITSC("line", lineId, "", "RegisterUserController.UserSendTel", 503, aPIModel);
+                  
                 }
                 UserModel userModel   = await _ICheckUserRepository.GetLineUser(lineId);
                 aPIModel.data = userModel;
@@ -123,8 +125,9 @@ namespace Evote_Service.Controllers
                 APIModel aPIModel = new APIModel();
                 if (await _ICheckUserRepository.UserConfirmSMSOTP(lineId, otp) == false)
                 {
-                    StatusCodeITSC("line", lineId, "", "RegisterUserController.UserSendSMSOTP", 503, aPIModel);
                     aPIModel.message = "รหัส OTP ไม่ถูกต้อง";
+                    return StatusCodeITSC("line", lineId, "", "RegisterUserController.UserSendSMSOTP", 503, aPIModel);
+                  
                 }
                 UserModel userModel = await _ICheckUserRepository.GetLineUser(lineId);
                 aPIModel.data = userModel;
@@ -148,8 +151,9 @@ namespace Evote_Service.Controllers
                 APIModel aPIModel = new APIModel();
                 if (await _ICheckUserRepository.getEMAILOTP(lineId) == false)
                 {
-                    StatusCodeITSC("line", lineId, "", "RegisterUserController.getEMAILOTP", 503, aPIModel);
                     aPIModel.message = "ระบบขัดข้องไม่สามารถส่ง Email ได้";
+                    return StatusCodeITSC("line", lineId, "", "RegisterUserController.getEMAILOTP", 503, aPIModel);
+                   
                 }
                 UserModel userModel = await _ICheckUserRepository.GetLineUser(lineId);
                 aPIModel.data = userModel;

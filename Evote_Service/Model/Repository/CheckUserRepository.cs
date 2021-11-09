@@ -81,6 +81,12 @@ namespace Evote_Service.Model.Repository
             if (userEntitys.IsConfirmEmail == true) { return false; }
 
             userEntitys.EmailOTP = await _emailRepository.SendEmailOTP(userEntitys.Email);
+            Random random = new Random();
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            String code= new string(Enumerable.Repeat(chars, 4)
+              .Select(s => s[random.Next(s.Length)]).ToArray());
+            userEntitys.EmailOTPRef = code;
+
             _evoteContext.SaveChanges();
             return true;
         }
@@ -95,6 +101,7 @@ namespace Evote_Service.Model.Repository
             if (userEntitys.EmailOTP != otp) { return false; }
             userEntitys.IsConfirmEmail = true;
             userEntitys.ConfirmEmailTime = DateTime.Now;
+            userEntitys.EmailOTPRef = "";
             _evoteContext.SaveChanges();
             return true;
         }

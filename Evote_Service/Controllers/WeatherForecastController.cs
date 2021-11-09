@@ -26,7 +26,11 @@ namespace Evote_Service.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-              return Ok(DateTime.Now.ToString());
+            var req = Request;
+            String remoteIpAddress = req.HttpContext.Connection.RemoteIpAddress.ToString();
+            remoteIpAddress = remoteIpAddress.Split(":")[3];
+            String dataTest = DateTime.Now.ToString() + " " + remoteIpAddress;
+            return Ok(dataTest);
             //return Ok(Environment.GetEnvironmentVariable("CONNECTIONSTRINGS"));
         }
     }

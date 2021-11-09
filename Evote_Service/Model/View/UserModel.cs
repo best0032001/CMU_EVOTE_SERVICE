@@ -7,12 +7,14 @@ namespace Evote_Service.Model.View
 {
     public class UserModel
     {
+
         public String Email { get; set; }
         public String FullName { get; set; }
         public int UserStage { get; set; }
         public int UserType { get; set; }
 
         public String Tel { get; set; }
+        public String EmailOTPRef { get; set; }
         public Boolean IsConfirmEmail { get; set; }
         public DateTime? ConfirmEmailTime { get; set; }
         public Boolean IsConfirmTel { get; set; }

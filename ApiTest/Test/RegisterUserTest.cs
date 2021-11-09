@@ -33,7 +33,7 @@ namespace ApiTest.Test
             var response = await _client.GetAsync("api/v1/User/liff");
             Assert.IsTrue((int)response.StatusCode == 204);
 
-            String json = "{ \"firstName\":\"firstNameTest1\" ,\"lastname\":\"lastnameTest1\",\"email\":\"test@test.com\"}";
+            String json = "{ \"firstName\":\"firstNameTest1\" ,\"lastName\":\"lastnameTest1\",\"email\":\"test@test.com\"}";
 
             response = await _client.PostAsync("api/v1/User/RegisLiff", new StringContent(json));
             Assert.IsTrue((int)response.StatusCode == 201);
