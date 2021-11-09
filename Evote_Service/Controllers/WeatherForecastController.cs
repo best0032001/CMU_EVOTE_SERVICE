@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Evote_Service.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class WeatherForecastController : ControllerBase
     {
         private static readonly string[] Summaries = new[]
@@ -29,7 +29,12 @@ namespace Evote_Service.Controllers
             var req = Request;
             String remoteIpAddress = req.HttpContext.Connection.RemoteIpAddress.ToString();
             remoteIpAddress = remoteIpAddress.Split(":")[3];
-            String dataTest = DateTime.Now.ToString() + " " + remoteIpAddress;
+
+            String forwardIP = Request.Headers["x-forwarded-for"];
+            forwardIP= forwardIP.Split(',')[0];
+            String dataTest = DateTime.Now.ToString() + " " + remoteIpAddress+" "+ forwardIP+ " "+ Environment.GetEnvironmentVariable("GATEWAY_IP"); ;
+
+       
             return Ok(dataTest);
             //return Ok(Environment.GetEnvironmentVariable("CONNECTIONSTRINGS"));
         }

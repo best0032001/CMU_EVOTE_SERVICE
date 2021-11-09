@@ -23,6 +23,13 @@ namespace Evote_Service.Controllers
         {
             this.loadConfig(logger, clientFactory, env); _ICheckUserRepository = CheckUserRepository; _emailRepository = emailRepository;
         }
+
+        [HttpGet("v1/ip")]
+        public async Task<IActionResult> ip()
+        {
+          
+            return Ok(this.getClientIP());
+        }
         [HttpGet("v1/User/liff")]
         public async Task<IActionResult> getUserLiff()
         {
@@ -60,21 +67,21 @@ namespace Evote_Service.Controllers
                 userEntity.Email = email;
                 userEntity.LineId = lineId;
                 APIModel aPIModel = new APIModel();
-              
+
                 if (await _ICheckUserRepository.RegisLineUser(userEntity) == false)
                 {
                     aPIModel.message = "ระบบขัดข้องบันทึกข้อมูลไม่สำเร็จ";
                     return StatusCodeITSC("line", lineId, "", "RegisterUserController.UserRegisLiff", 503, aPIModel);
-                   
+
                 }
                 UserModel userModel = await _ICheckUserRepository.GetLineUser(lineId);
                 aPIModel.data = userModel;
                 aPIModel.message = "Success";
                 return StatusCodeITSC("line", lineId, userModel.Email, "RegisterUserController.UserRegisLiff", 201, aPIModel);
             }
-            catch (Exception ex) 
-            { 
-                return StatusErrorITSC("line", lineId, "", "RegisterUserController.UserRegisLiff", ex); 
+            catch (Exception ex)
+            {
+                return StatusErrorITSC("line", lineId, "", "RegisterUserController.UserRegisLiff", ex);
             }
         }
 
@@ -96,9 +103,9 @@ namespace Evote_Service.Controllers
                 {
                     aPIModel.message = "ระบบขัดข้องบันทึกข้อมูลไม่สำเร็จ";
                     return StatusCodeITSC("line", lineId, "", "RegisterUserController.UserSendTel", 503, aPIModel);
-                  
+
                 }
-                UserModel userModel   = await _ICheckUserRepository.GetLineUser(lineId);
+                UserModel userModel = await _ICheckUserRepository.GetLineUser(lineId);
                 aPIModel.data = userModel;
                 aPIModel.message = "Success";
                 return StatusCodeITSC("line", lineId, userModel.Email, "RegisterUserController.UserSendTel", 200, aPIModel);
@@ -127,7 +134,7 @@ namespace Evote_Service.Controllers
                 {
                     aPIModel.message = "รหัส OTP ไม่ถูกต้อง";
                     return StatusCodeITSC("line", lineId, "", "RegisterUserController.UserSendSMSOTP", 503, aPIModel);
-                  
+
                 }
                 UserModel userModel = await _ICheckUserRepository.GetLineUser(lineId);
                 aPIModel.data = userModel;
@@ -153,7 +160,7 @@ namespace Evote_Service.Controllers
                 {
                     aPIModel.message = "ระบบขัดข้องไม่สามารถส่ง Email ได้";
                     return StatusCodeITSC("line", lineId, "", "RegisterUserController.getEMAILOTP", 503, aPIModel);
-                   
+
                 }
                 UserModel userModel = await _ICheckUserRepository.GetLineUser(lineId);
                 aPIModel.data = userModel;
@@ -184,7 +191,7 @@ namespace Evote_Service.Controllers
                 {
                     aPIModel.message = "รหัส OTP ไม่ถูกต้อง";
                     return StatusCodeITSC("line", lineId, "", "RegisterUserController.UserSendEmailOTP", 503, aPIModel);
-                  
+
                 }
                 UserModel userModel = await _ICheckUserRepository.GetLineUser(lineId);
                 aPIModel.data = userModel;

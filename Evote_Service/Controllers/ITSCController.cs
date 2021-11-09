@@ -24,6 +24,7 @@ namespace Evote_Service.Controllers
         protected IWebHostEnvironment _env;
         protected String _accesstoken = "";
         protected IEmailRepository _emailRepository;
+
         private String urlLine = "https://api.line.me/v2/profile";
         public ITSCController()
         {
@@ -34,6 +35,10 @@ namespace Evote_Service.Controllers
             _clientFactory = clientFactory;
             _env = env;
             _logger = logger;
+        }
+        protected String getClientIP()
+        {
+            String _forwardIPTemp = "";
             if (!_env.IsEnvironment("test"))
             {
                 if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != "Development")
@@ -43,14 +48,17 @@ namespace Evote_Service.Controllers
                     remoteIpAddress = remoteIpAddress.Split(":")[3];
 
                     String gateWayIP = Environment.GetEnvironmentVariable("GATEWAY_IP");
-                    List<String> gateWayIPList = gateWayIP.Split(" ").ToList() ;
-                    if (!gateWayIPList.Contains(remoteIpAddress)) { throw new UnauthorizedAccessException(); }
-                  
+                    List<String> gateWayIPList = gateWayIP.Split(" ").ToList();
+                    if (!gateWayIPList.Contains(remoteIpAddress.Trim()))
+                    {
+                         throw new UnauthorizedAccessException(); 
+                    }
+                    _forwardIPTemp = Request.Headers["x-forwarded-for"];
+                    _forwardIPTemp = _forwardIPTemp.Split(',')[0];
+
                 }
             }
-
-            //throw new NotImplementedException();
-
+            return _forwardIPTemp;
         }
         protected void loadConfig(ILogger<ITSCController> logger, IHttpClientFactory clientFactory)
         {
