@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -32,9 +33,11 @@ namespace Evote_Service.Controllers
 
             String forwardIP = Request.Headers["x-forwarded-for"];
             forwardIP= forwardIP.Split(',')[0];
-            String dataTest = DateTime.Now.ToString() + " " + remoteIpAddress+" "+ forwardIP+ " "+ Environment.GetEnvironmentVariable("GATEWAY_IP"); ;
+            var isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == Environments.Development;
+            String dataTest = DateTime.Now.ToString() + " " + remoteIpAddress+" "+ forwardIP+ " "+ Environment.GetEnvironmentVariable("GATEWAY_IP")+" "+ isDevelopment;
+           
 
-       
+
             return Ok(dataTest);
             //return Ok(Environment.GetEnvironmentVariable("CONNECTIONSTRINGS"));
         }

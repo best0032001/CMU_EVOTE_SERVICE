@@ -22,3 +22,8 @@ MAIL_SERVER="x"
 
 GATEWAY_IP=""
 GATEWAY_MODE=""
+
+SMS_SENDER="x"
+SMS_API="x"
+SMS_USER="x"
+SMS_Pass="x"

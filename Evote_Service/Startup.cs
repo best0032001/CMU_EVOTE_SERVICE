@@ -44,7 +44,7 @@ namespace Evote_Service
                 origin = "*";
             }
             else {
-                services.AddScoped<ISMSRepository, SMSRepositoryMock>();
+                services.AddScoped<ISMSRepository, SMSRepository>();
                 services.AddScoped<IEmailRepository, EmailRepository>();
                 origin = Environment.GetEnvironmentVariable("ORIGIN");
             }
@@ -80,7 +80,7 @@ namespace Evote_Service
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            env.IsProduction();
             app.UseRouting();
 
             app.UseAuthorization();

@@ -52,9 +52,12 @@ namespace Evote_Service.Model.Repository
             if (userEntitys.UserStage!=1) { return false; }
             if (userEntitys.IsConfirmTel ==true) { return false; }
             userEntitys.Tel = tel;
-
+            
+            Random _random = new Random();
+            String code = _random.Next(0, 99999999).ToString("D8");
             //  sent OTP
-            userEntitys.SMSOTP = await _sMSRepository.getOTP() ;
+            userEntitys.SMSOTP = await _sMSRepository.getOTP(code, userEntitys.Tel) ;
+            userEntitys.SMSOTPRef = code;
             _evoteContext.SaveChanges();
             return true;
         }
@@ -79,12 +82,11 @@ namespace Evote_Service.Model.Repository
             if (userEntitys == null) { return false; }
             if (userEntitys.UserStage != 1) { return false; }
             if (userEntitys.IsConfirmEmail == true) { return false; }
-
-            userEntitys.EmailOTP = await _emailRepository.SendEmailOTP(userEntitys.Email);
             Random random = new Random();
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            String code= new string(Enumerable.Repeat(chars, 4)
+            String code = new string(Enumerable.Repeat(chars, 4)
               .Select(s => s[random.Next(s.Length)]).ToArray());
+            userEntitys.EmailOTP = await _emailRepository.SendEmailOTP(userEntitys.Email, code);
             userEntitys.EmailOTPRef = code;
 
             _evoteContext.SaveChanges();
@@ -102,6 +104,24 @@ namespace Evote_Service.Model.Repository
             userEntitys.IsConfirmEmail = true;
             userEntitys.ConfirmEmailTime = DateTime.Now;
             userEntitys.EmailOTPRef = "";
+            _evoteContext.SaveChanges();
+            return true;
+        }
+
+        public async Task<bool> UserSendEmail(string lineId, string email)
+        {
+            UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.LineId == lineId).FirstOrDefault();
+            if (userEntitys == null) { return false; }
+            if (userEntitys.UserStage != 1) { return false; }
+            if (userEntitys.IsConfirmEmail == true) { return false; }
+            userEntitys.Email = email;
+
+            Random random = new Random();
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            String code = new string(Enumerable.Repeat(chars, 4)
+              .Select(s => s[random.Next(s.Length)]).ToArray());
+            userEntitys.EmailOTP = await _emailRepository.SendEmailOTP(userEntitys.Email, code);
+            userEntitys.EmailOTPRef = code;
             _evoteContext.SaveChanges();
             return true;
         }

@@ -33,7 +33,8 @@ namespace ApiTest.Test
             var response = await _client.GetAsync("api/v1/User/liff");
             Assert.IsTrue((int)response.StatusCode == 204);
 
-            String json = "{ \"firstName\":\"firstNameTest1\" ,\"lastName\":\"lastnameTest1\",\"email\":\"test@test.com\"}";
+            //String json = "{ \"firstName\":\"firstNameTest1\" ,\"lastName\":\"lastnameTest1\",\"email\":\"test@test.com\"}";
+            String json = "{ \"firstName\":\"firstNameTest1\" ,\"lastName\":\"lastnameTest1\"}";
 
             response = await _client.PostAsync("api/v1/User/RegisLiff", new StringContent(json));
             Assert.IsTrue((int)response.StatusCode == 201);
@@ -43,7 +44,9 @@ namespace ApiTest.Test
             String data = JsonConvert.SerializeObject(dataTemp.data);
             UserModel userModel = JsonConvert.DeserializeObject<UserModel>(data);
             Assert.IsTrue(userModel.UserStage==1); ;
-            Assert.IsTrue(userModel.Email == "test@test.com");
+           
+
+            //  กรอกเบอร์โทร
 
             json = "{ \"tel\":\"000000\"}";
             response = await _client.PostAsync("api/v1/User/Tel", new StringContent(json));
@@ -60,8 +63,8 @@ namespace ApiTest.Test
             Assert.IsTrue(userModel.IsConfirmTel == true); ;
             Assert.IsTrue(userModel.ConfirmTelTime != null);
 
-
-            response = await _client.GetAsync("api/v1/User/getEmailOTP");
+            json = "{ \"email\":\"test@test.com\"}";
+            response = await _client.PostAsync("api/v1/User/email", new StringContent(json));
             Assert.IsTrue((int)response.StatusCode == 200);
 
             json = "{ \"otp\":\"1234\"}";

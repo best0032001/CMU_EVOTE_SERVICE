@@ -7,6 +7,6 @@ namespace Evote_Service.Model.Interface
 {
     public interface ISMSRepository
     {
-        Task<String> getOTP();
+        Task<String> getOTP(String RefCode, String tel);
     }
 }

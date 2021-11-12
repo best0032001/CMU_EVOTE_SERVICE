@@ -14,7 +14,7 @@ namespace Evote_Service.Model.Repository.Mock
             throw new NotImplementedException();
         }
 
-        public async Task<string> SendEmailOTP(string Email)
+        public async Task<string> SendEmailOTP(string Email, String codeRef)
         {
             return "1234";
         }

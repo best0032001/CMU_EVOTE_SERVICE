@@ -14,11 +14,11 @@ namespace Evote_Service.Model.Repository
 {
     public class EmailRepository : IEmailRepository
     {
-        public async Task<string> SendEmailOTP(string Email)
+        public async Task<string> SendEmailOTP(string Email,String codeRef)
         {
             Random _random = new Random();
             String Code = _random.Next(0, 999999).ToString("D6");
-            await SendEmailAsync("CMU Evote service", Email, "Confirm Email", Code, null);
+            await SendEmailAsync("CMU Evote service", Email, "Confirm Email","รหัสยืนยัน "+ Code+ " RefCode:"+ codeRef, null);
             return Code;
         }
 
@@ -44,7 +44,7 @@ namespace Evote_Service.Model.Repository
                         builder.Attachments.Add(formFile.FileName, memoryStream.ToArray());
                     }
                 }
-            }
+            } 
             emailMessage.Body = builder.ToMessageBody();
             await Task.Run(() =>
             {

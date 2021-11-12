@@ -58,13 +58,15 @@ namespace Evote_Service.Controllers
                 lineId = await getLineUser();
                 if (lineId == "unauthorized") { return Unauthorized(); }
                 dynamic data = JsonConvert.DeserializeObject<dynamic>(body);
-                if (data.firstName == null || data.lastName == null || data.email == null) { return BadRequest(); }
-                if (data.firstName == "" || data.lastName == "" || data.email == "") { return BadRequest(); }
-                String firstName = data.firstName; String lastName = data.lastName; String email = data.email;
+               // if (data.firstName == null || data.lastName == null || data.email == null) { return BadRequest(); }
+                if (data.firstName == null || data.lastName == null ) { return BadRequest(); }
+              //  if (data.firstName == "" || data.lastName == "" || data.email == "") { return BadRequest(); }
+                if (data.firstName == "" || data.lastName == "" ) { return BadRequest(); }
+                String firstName = data.firstName; String lastName = data.lastName; 
 
                 UserEntity userEntity = new UserEntity();
                 userEntity.FullName = firstName + " " + lastName;
-                userEntity.Email = email;
+                userEntity.Email = "";
                 userEntity.LineId = lineId;
                 APIModel aPIModel = new APIModel();
 
@@ -82,6 +84,38 @@ namespace Evote_Service.Controllers
             catch (Exception ex)
             {
                 return StatusErrorITSC("line", lineId, "", "RegisterUserController.UserRegisLiff", ex);
+            }
+        }
+
+
+        [HttpPost("v1/User/email")]
+        public async Task<IActionResult> UserSendemail([FromBody] string body)
+        {
+            String lineId = "";
+            try
+            {
+                lineId = await getLineUser();
+                if (lineId == "unauthorized") { return Unauthorized(); }
+                dynamic data = JsonConvert.DeserializeObject<dynamic>(body);
+                if (data.email == null) { return BadRequest(); }
+                if (data.email == "") { return BadRequest(); }
+                String email = data.email;
+
+                APIModel aPIModel = new APIModel();
+                if (await _ICheckUserRepository.UserSendEmail(lineId, email) == false)
+                {
+                    aPIModel.message = "ระบบขัดข้องบันทึกข้อมูลไม่สำเร็จ";
+                    return StatusCodeITSC("line", lineId, "", "RegisterUserController.UserSendTel", 503, aPIModel);
+
+                }
+                UserModel userModel = await _ICheckUserRepository.GetLineUser(lineId);
+                aPIModel.data = userModel;
+                aPIModel.message = "Success";
+                return StatusCodeITSC("line", lineId, userModel.Email, "RegisterUserController.UserSendTel", 200, aPIModel);
+            }
+            catch (Exception ex)
+            {
+                return StatusErrorITSC("line", lineId, "", "RegisterUserController.UserSendTel", ex);
             }
         }
 
@@ -147,31 +181,31 @@ namespace Evote_Service.Controllers
             }
         }
 
-        [HttpGet("v1/User/getEmailOTP")]
-        public async Task<IActionResult> getEMAILOTP()
-        {
-            String lineId = "";
-            try
-            {
-                lineId = await getLineUser();
-                if (lineId == "unauthorized") { return Unauthorized(); }
-                APIModel aPIModel = new APIModel();
-                if (await _ICheckUserRepository.getEMAILOTP(lineId) == false)
-                {
-                    aPIModel.message = "ระบบขัดข้องไม่สามารถส่ง Email ได้";
-                    return StatusCodeITSC("line", lineId, "", "RegisterUserController.getEMAILOTP", 503, aPIModel);
+        //[HttpGet("v1/User/getEmailOTP")]
+        //public async Task<IActionResult> getEMAILOTP()
+        //{
+        //    String lineId = "";
+        //    try
+        //    {
+        //        lineId = await getLineUser();
+        //        if (lineId == "unauthorized") { return Unauthorized(); }
+        //        APIModel aPIModel = new APIModel();
+        //        if (await _ICheckUserRepository.getEMAILOTP(lineId) == false)
+        //        {
+        //            aPIModel.message = "ระบบขัดข้องไม่สามารถส่ง Email ได้";
+        //            return StatusCodeITSC("line", lineId, "", "RegisterUserController.getEMAILOTP", 503, aPIModel);
 
-                }
-                UserModel userModel = await _ICheckUserRepository.GetLineUser(lineId);
-                aPIModel.data = userModel;
-                aPIModel.message = "Success";
-                return StatusCodeITSC("line", lineId, userModel.Email, "RegisterUserController.getEMAILOTP", 200, aPIModel);
-            }
-            catch (Exception ex)
-            {
-                return StatusErrorITSC("line", lineId, "", "RegisterUserController.getEMAILOTP", ex);
-            }
-        }
+        //        }
+        //        UserModel userModel = await _ICheckUserRepository.GetLineUser(lineId);
+        //        aPIModel.data = userModel;
+        //        aPIModel.message = "Success";
+        //        return StatusCodeITSC("line", lineId, userModel.Email, "RegisterUserController.getEMAILOTP", 200, aPIModel);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusErrorITSC("line", lineId, "", "RegisterUserController.getEMAILOTP", ex);
+        //    }
+        //}
 
         [HttpPost("v1/User/EmailOTP")]
         public async Task<IActionResult> UserSendEmailOTP([FromBody] string body)

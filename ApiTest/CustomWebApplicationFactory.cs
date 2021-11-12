@@ -12,7 +12,6 @@ namespace ApiTest
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder.UseEnvironment("test");
-         
         }
     }
 }
