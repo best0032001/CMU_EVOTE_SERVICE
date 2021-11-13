@@ -10,7 +10,9 @@ namespace Evote_Service.Model.Interface
     public interface ICheckUserRepository
     {
 
-        Task<UserModel> GetLineUser(String lineId);
+        Task<UserModel> GetLineUserModel(String lineId);
+
+        Task<UserEntity> GetLineUserEntity(String lineId);
         Task<Boolean> RegisLineUser(UserEntity userEntity);
 
         Task<Boolean> UserSendTel(String lineId, String tel);
@@ -19,5 +21,7 @@ namespace Evote_Service.Model.Interface
         Task<Boolean> getEMAILOTP(String lineId);
 
         Task<Boolean> UserConfirmEmailOTP(String lineId, String otp);
+
+        Task<Boolean> UserPostphotoId(String lineId, FileModel fileModel);
     }
 }

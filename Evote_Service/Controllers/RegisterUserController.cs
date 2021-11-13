@@ -3,11 +3,13 @@ using Evote_Service.Model.Entity;
 using Evote_Service.Model.Interface;
 using Evote_Service.Model.View;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -40,7 +42,7 @@ namespace Evote_Service.Controllers
                 lineId = await getLineUser();
                 if (lineId == "unauthorized") { return Unauthorized(); }
                 APIModel aPIModel = new APIModel();
-                UserModel userModel = await _ICheckUserRepository.GetLineUser(lineId);
+                UserModel userModel = await _ICheckUserRepository.GetLineUserModel(lineId);
                 if (userModel == null) { return StatusCode(204); }
                 aPIModel.data = userModel;
                 aPIModel.message = "Success";
@@ -76,7 +78,7 @@ namespace Evote_Service.Controllers
                     return StatusCodeITSC("line", lineId, "", "RegisterUserController.UserRegisLiff", 503, aPIModel);
 
                 }
-                UserModel userModel = await _ICheckUserRepository.GetLineUser(lineId);
+                UserModel userModel = await _ICheckUserRepository.GetLineUserModel(lineId);
                 aPIModel.data = userModel;
                 aPIModel.message = "Success";
                 return StatusCodeITSC("line", lineId, userModel.Email, "RegisterUserController.UserRegisLiff", 201, aPIModel);
@@ -105,17 +107,17 @@ namespace Evote_Service.Controllers
                 if (await _ICheckUserRepository.UserSendEmail(lineId, email) == false)
                 {
                     aPIModel.message = "ระบบขัดข้องบันทึกข้อมูลไม่สำเร็จ";
-                    return StatusCodeITSC("line", lineId, "", "RegisterUserController.UserSendTel", 503, aPIModel);
+                    return StatusCodeITSC("line", lineId, "", "RegisterUserController.UserSendemail", 503, aPIModel);
 
                 }
-                UserModel userModel = await _ICheckUserRepository.GetLineUser(lineId);
+                UserModel userModel = await _ICheckUserRepository.GetLineUserModel(lineId);
                 aPIModel.data = userModel;
                 aPIModel.message = "Success";
-                return StatusCodeITSC("line", lineId, userModel.Email, "RegisterUserController.UserSendTel", 200, aPIModel);
+                return StatusCodeITSC("line", lineId, userModel.Email, "RegisterUserController.UserSendemail", 200, aPIModel);
             }
             catch (Exception ex)
             {
-                return StatusErrorITSC("line", lineId, "", "RegisterUserController.UserSendTel", ex);
+                return StatusErrorITSC("line", lineId, "", "RegisterUserController.UserSendemail", ex);
             }
         }
 
@@ -139,7 +141,7 @@ namespace Evote_Service.Controllers
                     return StatusCodeITSC("line", lineId, "", "RegisterUserController.UserSendTel", 503, aPIModel);
 
                 }
-                UserModel userModel = await _ICheckUserRepository.GetLineUser(lineId);
+                UserModel userModel = await _ICheckUserRepository.GetLineUserModel(lineId);
                 aPIModel.data = userModel;
                 aPIModel.message = "Success";
                 return StatusCodeITSC("line", lineId, userModel.Email, "RegisterUserController.UserSendTel", 200, aPIModel);
@@ -170,7 +172,7 @@ namespace Evote_Service.Controllers
                     return StatusCodeITSC("line", lineId, "", "RegisterUserController.UserSendSMSOTP", 503, aPIModel);
 
                 }
-                UserModel userModel = await _ICheckUserRepository.GetLineUser(lineId);
+                UserModel userModel = await _ICheckUserRepository.GetLineUserModel(lineId);
                 aPIModel.data = userModel;
                 aPIModel.message = "Success";
                 return StatusCodeITSC("line", lineId, userModel.Email, "RegisterUserController.UserSendSMSOTP", 200, aPIModel);
@@ -227,7 +229,7 @@ namespace Evote_Service.Controllers
                     return StatusCodeITSC("line", lineId, "", "RegisterUserController.UserSendEmailOTP", 503, aPIModel);
 
                 }
-                UserModel userModel = await _ICheckUserRepository.GetLineUser(lineId);
+                UserModel userModel = await _ICheckUserRepository.GetLineUserModel(lineId);
                 aPIModel.data = userModel;
                 aPIModel.message = "Success";
                 return StatusCodeITSC("line", lineId, userModel.Email, "RegisterUserController.UserSendEmailOTP", 200, aPIModel);
@@ -235,6 +237,61 @@ namespace Evote_Service.Controllers
             catch (Exception ex)
             {
                 return StatusErrorITSC("line", lineId, "", "RegisterUserController.UserSendEmailOTP", ex);
+            }
+        }
+
+        [HttpPost("v1/User/photoId")]
+        public async Task<IActionResult> UserPostphotoId([FromBody] string body)
+        {
+            String lineId = "";
+            try
+            {
+                lineId = await getLineUser();
+                if (lineId == "unauthorized") { return Unauthorized(); }
+
+                int countFiles = Request.Form.Files.Count;
+                if (countFiles != 1) { return BadRequest(); }
+                IFormFile file01 = Request.Form.Files["filename"];
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "uploadphotoid");
+                FileModel fileModel = this.SaveFile(path, file01, 20);
+                APIModel aPIModel = new APIModel();
+                if (await _ICheckUserRepository.UserPostphotoId(lineId, fileModel) == false)
+                {
+                    aPIModel.message = "ระบบขัดข้องบันทึกข้อมูลไม่สำเร็จ";
+                    return StatusCodeITSC("line", lineId, "", "RegisterUserController.UserPostphotoId", 503, aPIModel);
+
+                }
+
+              
+                UserModel userModel = await _ICheckUserRepository.GetLineUserModel(lineId);
+                aPIModel.data = userModel;
+                aPIModel.message = "Success";
+                return StatusCodeITSC("line", lineId, userModel.Email, "RegisterUserController.UserPostphotoId", 200, aPIModel);
+            }
+            catch (Exception ex)
+            {
+                return StatusErrorITSC("line", lineId, "", "RegisterUserController.UserPostphotoId", ex);
+            }
+        }
+
+
+        [HttpGet("v1/User/photoId")]
+        public async Task<IActionResult> UserGetphotoId()
+        {
+            String lineId = "";
+            try
+            {
+                lineId = await getLineUser();
+                if (lineId == "unauthorized") { return Unauthorized(); }
+                UserEntity userEntity = await _ICheckUserRepository.GetLineUserEntity(lineId);
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "uploadphotoid", userEntity.fileNamePersonalID);
+                var memory = this.loadFile(path);
+                memory.Position = 0;
+                return File(memory, GetContentType(path), Path.GetFileName(path));
+            }
+            catch (Exception ex)
+            {
+                return StatusErrorITSC("line", lineId, "", "RegisterUserController.UserGetphotoId", ex);
             }
         }
     }

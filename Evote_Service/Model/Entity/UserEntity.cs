@@ -26,8 +26,19 @@ namespace Evote_Service.Model.Entity
         public DateTime? ConfirmEmailTime { get; set; }
         public Boolean IsConfirmTel { get; set; }
         public DateTime? ConfirmTelTime { get; set; }
+
+
         public Boolean IsConfirmPersonalID { get; set; }
+        public String fileNamePersonalID { get; set; }
+        public String fullPathPersonalID { get; set; }
+        public String dbPathPersonalID { get; set; }
+
+
         public Boolean IsConfirmKYC { get; set; }
+
+        public String fileNameKYC { get; set; }
+        public String fullPathKYC { get; set; }
+        public String dbPathKYC { get; set; }
 
         public String UserApproved { get; set; }
     }

@@ -27,7 +27,7 @@ namespace Evote_Service.Model.Repository
             _sMSRepository = sMSRepository;
             _emailRepository = emailRepository;
         }
-        public async Task<UserModel> GetLineUser(string lineId)
+        public async Task<UserModel> GetLineUserModel(string lineId)
         {
             UserEntity userEntitys= _evoteContext.UserEntitys.Where(w => w.LineId == lineId).FirstOrDefault();
             if (userEntitys == null){ return null; }
@@ -124,6 +124,27 @@ namespace Evote_Service.Model.Repository
             userEntitys.EmailOTPRef = code;
             _evoteContext.SaveChanges();
             return true;
+        }
+
+        public async Task<bool> UserPostphotoId(string lineId, FileModel fileModel)
+        {
+            UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.LineId == lineId).FirstOrDefault();
+            if (userEntitys == null) { return false; }
+            if (userEntitys.UserStage != 1) { return false; }
+
+            userEntitys.fileNamePersonalID = fileModel.fileName;
+            userEntitys.fullPathPersonalID = fileModel.fullPath;
+            userEntitys.dbPathPersonalID = fileModel.dbPath;
+            userEntitys.IsConfirmPersonalID = true;
+            _evoteContext.SaveChanges();
+
+
+            return true;
+        }
+
+        public async Task<UserEntity> GetLineUserEntity(string lineId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

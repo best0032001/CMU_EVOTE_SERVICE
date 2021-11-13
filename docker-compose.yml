@@ -8,6 +8,7 @@ services:
                         - "98:80"
                 volumes:
                         - /home/cnoc/logsEvoteService:/app/logs
+                        - /home/cnoc/uploadphotoid:/app/uploadphotoid
                 restart: always
                 env_file:
                         - .env
