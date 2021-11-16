@@ -27,3 +27,5 @@ SMS_SENDER="x"
 SMS_API="x"
 SMS_USER="x"
 SMS_Pass="x"
+
+OAUTH_INTROSPEC="x"

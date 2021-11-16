@@ -13,5 +13,6 @@ namespace Evote_Service.Model
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder){}
 
         public DbSet<UserEntity> UserEntitys { get; set; }
+        public DbSet<UserAdminEntity> UserAdminEntitys { get; set; }
     }
 }

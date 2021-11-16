@@ -23,6 +23,7 @@ namespace Evote_Service.Controllers
     [ApiController]
     public class ITSCController : ControllerBase
     {
+
         protected DateTime _timestart;
         protected ILogger<ITSCController> _logger;
         protected IHttpClientFactory _clientFactory;
@@ -94,6 +95,42 @@ namespace Evote_Service.Controllers
             return _lineId;
 
         }
+        public async Task<String> getCmuaccount()
+        {
+            if (_accesstoken == "") { getTokenFormHeader(); }
+            String _cmuaccount = "";
+            if (_env.IsEnvironment("test")) { return DataCache.AdminMocks.Where(w => w.token == _accesstoken).First().Cmuaccount; }
+
+            String urlOauthIntrospection = Environment.GetEnvironmentVariable("OAUTH_INTROSPEC");
+            var postData = new Dictionary<string, string>
+            {
+                { "token", _accesstoken }
+            };
+            var content = new FormUrlEncodedContent(postData);
+            content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/x-www-form-urlencoded");
+            HttpClient httpClient = _clientFactory.CreateClient();
+            var response = await httpClient.PostAsync(urlOauthIntrospection, content);
+            var responseString = await response.Content.ReadAsStringAsync();
+            dynamic responseGetToken = JsonConvert.DeserializeObject<dynamic>(responseString);
+            try {
+                Boolean active = responseGetToken.active;
+                if (active == false) { return "unauthorized"; }
+            }
+            catch { }
+         
+            String _scope = responseGetToken.scope;
+            String _granttype = responseGetToken.app.grant_type_value;
+            String _appID = responseGetToken.app.client_id;
+            String CMU_CLIENT_ID = Environment.GetEnvironmentVariable("CMU_CLIENT_ID");
+            if (_scope.Contains(DataCache.cmuitaccount_basicinfo) && _appID.Equals(CMU_CLIENT_ID)&& _granttype.ToUpper() == DataCache.authorization_code.ToUpper())
+            {
+                _cmuaccount = responseGetToken.user.user_id + "@cmu.ac.th";
+            }
+            else { _cmuaccount = "unauthorized"; }
+            return _cmuaccount;
+
+        }
+
         protected StatusCodeResult StatusErrorITSC(String UserType, String LineID, String cmuaccount, String action, Exception ex)
         {
             LogModel log = new LogModel();

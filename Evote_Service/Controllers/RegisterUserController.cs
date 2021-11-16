@@ -294,5 +294,58 @@ namespace Evote_Service.Controllers
                 return StatusErrorITSC("line", lineId, "", "RegisterUserController.UserGetphotoId", ex);
             }
         }
+
+
+        [HttpPost("v1/User/kyc")]
+        public async Task<IActionResult> UserPostKyc([FromBody] string body)
+        {
+            String lineId = "";
+            try
+            {
+                lineId = await getLineUser();
+                if (lineId == "unauthorized") { return Unauthorized(); }
+
+                int countFiles = Request.Form.Files.Count;
+                if (countFiles != 1) { return BadRequest(); }
+                IFormFile file01 = Request.Form.Files["filename"];
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "uploadkyc");
+                FileModel fileModel = this.SaveFile(path, file01, 20);
+                APIModel aPIModel = new APIModel();
+                if (await _ICheckUserRepository.UserPostphotoKyc(lineId, fileModel) == false)
+                {
+                    aPIModel.message = "ระบบขัดข้องบันทึกข้อมูลไม่สำเร็จ";
+                    return StatusCodeITSC("line", lineId, "", "RegisterUserController.UserPostKyc", 503, aPIModel);
+
+                }
+                UserModel userModel = await _ICheckUserRepository.GetLineUserModel(lineId);
+                aPIModel.data = userModel;
+                aPIModel.message = "Success";
+                return StatusCodeITSC("line", lineId, userModel.Email, "RegisterUserController.UserPostKyc", 200, aPIModel);
+            }
+            catch (Exception ex)
+            {
+                return StatusErrorITSC("line", lineId, "", "RegisterUserController.UserPostKyc", ex);
+            }
+        }
+        [HttpGet("v1/User/kyc")]
+        public async Task<IActionResult> UserGetKyc()
+        {
+            String lineId = "";
+            try
+            {
+                lineId = await getLineUser();
+                if (lineId == "unauthorized") { return Unauthorized(); }
+                UserEntity userEntity = await _ICheckUserRepository.GetLineUserEntity(lineId);
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "uploadkyc", userEntity.fileNameKYC);
+                var memory = this.loadFile(path);
+                memory.Position = 0;
+                return File(memory, GetContentType(path), Path.GetFileName(path));
+            }
+            catch (Exception ex)
+            {
+                return StatusErrorITSC("line", lineId, "", "RegisterUserController.UserGetphotoId", ex);
+            }
+        }
+
     }
 }

@@ -72,6 +72,7 @@ namespace Evote_Service.Model.Repository
             if (userEntitys.SMSOTP != otp) { return false; }
             userEntitys.IsConfirmTel = true;
             userEntitys.ConfirmTelTime = DateTime.Now;
+            CheckUserStage(userEntitys);
             _evoteContext.SaveChanges();
             return true;
         }
@@ -104,6 +105,7 @@ namespace Evote_Service.Model.Repository
             userEntitys.IsConfirmEmail = true;
             userEntitys.ConfirmEmailTime = DateTime.Now;
             userEntitys.EmailOTPRef = "";
+            CheckUserStage(userEntitys);
             _evoteContext.SaveChanges();
             return true;
         }
@@ -131,20 +133,42 @@ namespace Evote_Service.Model.Repository
             UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.LineId == lineId).FirstOrDefault();
             if (userEntitys == null) { return false; }
             if (userEntitys.UserStage != 1) { return false; }
-
             userEntitys.fileNamePersonalID = fileModel.fileName;
             userEntitys.fullPathPersonalID = fileModel.fullPath;
             userEntitys.dbPathPersonalID = fileModel.dbPath;
             userEntitys.IsConfirmPersonalID = true;
+            CheckUserStage(userEntitys);
             _evoteContext.SaveChanges();
-
-
             return true;
         }
 
         public async Task<UserEntity> GetLineUserEntity(string lineId)
         {
-            throw new NotImplementedException();
+            UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.LineId == lineId).FirstOrDefault();
+            if (userEntitys == null) { return null; }
+            return userEntitys;
+        }
+
+        public async Task<bool> UserPostphotoKyc(string lineId, FileModel fileModel)
+        {
+            UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.LineId == lineId).FirstOrDefault();
+            if (userEntitys == null) { return false; }
+            if (userEntitys.UserStage != 1) { return false; }
+            userEntitys.fileNameKYC = fileModel.fileName;
+            userEntitys.fullPathKYC = fileModel.fullPath;
+            userEntitys.dbPathKYC = fileModel.dbPath;
+            userEntitys.IsConfirmKYC = true;
+            CheckUserStage(userEntitys);
+            _evoteContext.SaveChanges();
+            return true;
+        }
+
+        private void CheckUserStage(UserEntity userEntitys)
+        {
+            if (userEntitys.IsConfirmEmail == true && userEntitys.IsConfirmKYC == true && userEntitys.IsConfirmPersonalID == true && userEntitys.IsConfirmTel == true)
+            {
+                userEntitys.UserStage = 2;
+            }
         }
     }
 }

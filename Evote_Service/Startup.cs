@@ -41,10 +41,12 @@ namespace Evote_Service
                 services.AddDbContext<EvoteContext>(options => options.UseInMemoryDatabase(databaseName: "ApplicationDBContext").ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning)));
                 services.AddScoped<ISMSRepository, SMSRepositoryMock>();
                 services.AddScoped<IEmailRepository, EmailRepositoryMock>();
+                services.AddScoped<IAdminRepository, AdminRepositoryMock>();
                 origin = "*";
             }
             else {
                 services.AddScoped<ISMSRepository, SMSRepository>();
+                services.AddScoped<IAdminRepository, AdminRepository>();
                 services.AddScoped<IEmailRepository, EmailRepository>();
                 origin = Environment.GetEnvironmentVariable("ORIGIN");
             }
@@ -74,7 +76,7 @@ namespace Evote_Service
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, EvoteContext evoteContext)
         {
             if (env.IsDevelopment())
             {
@@ -89,7 +91,7 @@ namespace Evote_Service
             {
                 endpoints.MapControllers();
             });
-            SetData setData = new SetData(env);
+            SetData setData = new SetData(env, evoteContext);
             setData = null;
         }
     }
