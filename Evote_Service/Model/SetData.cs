@@ -13,12 +13,12 @@ namespace Evote_Service.Model
         private EvoteContext _evoteContext;
         public SetData(IWebHostEnvironment env, EvoteContext evoteContext)
         {
+            _evoteContext = evoteContext;
             if (env.IsEnvironment("test")) { innitMock(); }
             if (evoteContext == null)
             {
                 throw new System.ArgumentNullException(nameof(evoteContext));
             }
-            _evoteContext = evoteContext;
             innit();
         }
         private void innitMock()
@@ -34,6 +34,17 @@ namespace Evote_Service.Model
             adminMock.token = "a01";
             adminMock.Cmuaccount = "cheewin.b@cmu.ac.th";
             DataCache.AdminMocks.Add(adminMock);
+
+            UserEntity userEntity = new UserEntity();
+            userEntity.Email = "test@test.cmu.ac.th";
+            userEntity.FullName = "test";
+            userEntity.Tel = "1234";
+            userEntity.UserStage = 2;
+
+
+            _evoteContext.UserEntitys.Add(userEntity);
+            _evoteContext.SaveChanges();
+
 
         }
         private void innit()

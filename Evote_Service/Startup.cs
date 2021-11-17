@@ -41,7 +41,7 @@ namespace Evote_Service
                 services.AddDbContext<EvoteContext>(options => options.UseInMemoryDatabase(databaseName: "ApplicationDBContext").ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning)));
                 services.AddScoped<ISMSRepository, SMSRepositoryMock>();
                 services.AddScoped<IEmailRepository, EmailRepositoryMock>();
-                services.AddScoped<IAdminRepository, AdminRepositoryMock>();
+                services.AddScoped<IAdminRepository, AdminRepository>();
                 origin = "*";
             }
             else {
