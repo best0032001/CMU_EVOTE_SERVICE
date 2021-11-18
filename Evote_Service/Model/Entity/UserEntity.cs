@@ -40,6 +40,12 @@ namespace Evote_Service.Model.Entity
         public String fullPathKYC { get; set; }
         public String dbPathKYC { get; set; }
 
-        public String UserApproved { get; set; }
+        public String AdminApproved { get; set; }
+        public String AdminApprovedIP { get; set; }
+        public String AdminNotApproved { get; set; }
+        public String AdminNotApprovedIP { get; set; }
+        public String CommetNotApproved { get; set; }
+        public DateTime? ApprovedTime { get; set; }
+        public DateTime? NotApprovedTime { get; set; }
     }
 }

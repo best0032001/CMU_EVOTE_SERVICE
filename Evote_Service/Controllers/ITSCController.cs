@@ -134,6 +134,7 @@ namespace Evote_Service.Controllers
         protected StatusCodeResult StatusErrorITSC(String UserType, String LineID, String cmuaccount, String action, Exception ex)
         {
             LogModel log = new LogModel();
+            log.ClientIp = getClientIP();
             log.UserType = UserType;
             log.LineID = LineID;
             log.cmuaccount = cmuaccount;
@@ -157,6 +158,7 @@ namespace Evote_Service.Controllers
         protected ObjectResult StatusCodeITSC(String UserType, String LineID, String cmuaccount, String action, Int32 code, APIModel aPIModel)
         {
             LogModel log = new LogModel();
+            log.ClientIp = getClientIP();
             log.UserType = UserType;
             log.LineID = LineID;
             log.cmuaccount = cmuaccount;

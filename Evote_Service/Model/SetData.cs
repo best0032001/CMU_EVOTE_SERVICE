@@ -1,4 +1,5 @@
 ﻿using Evote_Service.Model.Entity;
+using Evote_Service.Model.Entity.Ref;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using System;
@@ -36,7 +37,7 @@ namespace Evote_Service.Model
             DataCache.AdminMocks.Add(adminMock);
 
             UserEntity userEntity = new UserEntity();
-            userEntity.Email = "test@test.cmu.ac.th";
+            userEntity.Email = "cheewin.b@cmu.ac.th";
             userEntity.FullName = "test";
             userEntity.Tel = "1234";
             userEntity.UserStage = 2;
@@ -50,6 +51,7 @@ namespace Evote_Service.Model
         private void innit()
         {
             setDefaultAdmin();
+            setRefUserStage();
         }
         private void setDefaultAdmin()
         {
@@ -57,6 +59,32 @@ namespace Evote_Service.Model
             userAdminEntity.Cmuaccount = "cheewin.b@cmu.ac.th";
             _evoteContext.UserAdminEntitys.Add(userAdminEntity);
             _evoteContext.SaveChanges();
+        }
+        private void setRefUserStage()
+        {
+            List<RefUserStage> list = _evoteContext.RefUserStages.ToList();
+            if (list.Count == 0)
+            {
+                RefUserStage refUserStage1 = new RefUserStage();
+                refUserStage1.RefUserStageID = 1;
+                refUserStage1.UserStageName = "regis";
+                _evoteContext.RefUserStages.Add(refUserStage1);
+
+                RefUserStage refUserStage2 = new RefUserStage();
+                refUserStage2.RefUserStageID = 2;
+                refUserStage2.UserStageName = "confirm";
+                _evoteContext.RefUserStages.Add(refUserStage2);
+
+                RefUserStage refUserStage3 = new RefUserStage();
+                refUserStage3.RefUserStageID = 3;
+                refUserStage3.UserStageName = "approved";
+                _evoteContext.RefUserStages.Add(refUserStage3);
+
+                RefUserStage refUserStage4 = new RefUserStage();
+                refUserStage4.RefUserStageID = 4;
+                refUserStage4.UserStageName = "rejected";
+                _evoteContext.RefUserStages.Add(refUserStage4);
+            }
         }
     }
 }

@@ -109,7 +109,18 @@ namespace Evote_Service.Model.Repository
             _evoteContext.SaveChanges();
             return true;
         }
-
+        public async Task<bool> checkEmail(string email)
+        {
+            UserEntity userEntitys= _evoteContext.UserEntitys.Where(w => w.Email == email).FirstOrDefault();
+            if (userEntitys == null) { return true; }
+            return false;
+        }
+        public async Task<bool> CheckTel(string tel)
+        {
+            UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.Tel == tel).FirstOrDefault();
+            if (userEntitys == null) { return true; }
+            return false;
+        }
         public async Task<bool> UserSendEmail(string lineId, string email)
         {
             UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.LineId == lineId).FirstOrDefault();

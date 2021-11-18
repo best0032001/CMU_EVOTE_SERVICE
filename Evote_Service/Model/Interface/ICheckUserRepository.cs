@@ -15,7 +15,9 @@ namespace Evote_Service.Model.Interface
         Task<UserEntity> GetLineUserEntity(String lineId);
         Task<Boolean> RegisLineUser(UserEntity userEntity);
 
+        Task<Boolean> CheckTel(String tel);
         Task<Boolean> UserSendTel(String lineId, String tel);
+        Task<Boolean> checkEmail(String email);
         Task<Boolean> UserSendEmail(String lineId, String email);
         Task<Boolean> UserConfirmSMSOTP(String lineId, String otp);
         Task<Boolean> getEMAILOTP(String lineId);

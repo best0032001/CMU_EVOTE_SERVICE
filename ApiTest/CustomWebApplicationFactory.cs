@@ -12,6 +12,7 @@ namespace ApiTest
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder.UseEnvironment("test");
+            Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");
         }
     }
 }

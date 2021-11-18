@@ -41,18 +41,18 @@ namespace Evote_Service
                 services.AddDbContext<EvoteContext>(options => options.UseInMemoryDatabase(databaseName: "ApplicationDBContext").ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning)));
                 services.AddScoped<ISMSRepository, SMSRepositoryMock>();
                 services.AddScoped<IEmailRepository, EmailRepositoryMock>();
-                services.AddScoped<IAdminRepository, AdminRepository>();
+     
                 origin = "*";
             }
             else {
                 services.AddScoped<ISMSRepository, SMSRepository>();
-                services.AddScoped<IAdminRepository, AdminRepository>();
                 services.AddScoped<IEmailRepository, EmailRepository>();
                 origin = Environment.GetEnvironmentVariable("ORIGIN");
             }
             services.AddDbContext<EvoteContext>(options => options.UseInMemoryDatabase(databaseName: "ApplicationDBContext").ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning)));
             services.AddScoped<ICheckUserRepository, CheckUserRepository>();
-    
+            services.AddScoped<IAdminRepository, AdminRepository>();
+
             services.AddCors(options =>
             {
                 options.AddPolicy(name: MyAllowSpecificOrigins,
@@ -91,8 +91,28 @@ namespace Evote_Service
             {
                 endpoints.MapControllers();
             });
+
+            app.Use(async (context, next) =>
+            {
+                var url = context.Request.Path.Value;
+
+                // Redirect to an external URL
+                if (url.Contains("/api/login"))
+                {
+                    String redirect_uri = Environment.GetEnvironmentVariable("CMU_REDIRECT_URL"); 
+                    String client_id = Environment.GetEnvironmentVariable("CMU_CLIENT_ID");
+                    String oauth_scope = Environment.GetEnvironmentVariable("CMU_OAUTH_SCOPE");
+                    String oauth_authorize_url = Environment.GetEnvironmentVariable("CMU_OAUTH_URL"); ;
+                    String oauthUrl = "" + oauth_authorize_url + "?response_type=code&client_id=" + client_id + "&redirect_uri=" + redirect_uri + "&scope=" + oauth_scope;
+                    context.Response.Redirect(oauthUrl);
+                    return;   // short circuit
+                }
+                await next();
+            });
             SetData setData = new SetData(env, evoteContext);
             setData = null;
+
+
         }
     }
 }

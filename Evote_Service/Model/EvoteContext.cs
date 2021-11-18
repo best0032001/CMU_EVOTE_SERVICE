@@ -1,4 +1,5 @@
 ﻿using Evote_Service.Model.Entity;
+using Evote_Service.Model.Entity.Ref;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,9 @@ namespace Evote_Service.Model
         public EvoteContext(DbContextOptions<EvoteContext> options) : base(options) { }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder){}
 
+
         public DbSet<UserEntity> UserEntitys { get; set; }
+        public DbSet<RefUserStage> RefUserStages { get; set; }
         public DbSet<UserAdminEntity> UserAdminEntitys { get; set; }
     }
 }

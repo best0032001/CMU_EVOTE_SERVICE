@@ -29,7 +29,7 @@ namespace Evote_Service.Controllers
         [HttpGet("v1/ip")]
         public async Task<IActionResult> ip()
         {
-          
+
             return Ok(this.getClientIP());
         }
         [HttpGet("v1/User/liff")]
@@ -60,11 +60,11 @@ namespace Evote_Service.Controllers
                 lineId = await getLineUser();
                 if (lineId == "unauthorized") { return Unauthorized(); }
                 dynamic data = JsonConvert.DeserializeObject<dynamic>(body);
-               // if (data.firstName == null || data.lastName == null || data.email == null) { return BadRequest(); }
-                if (data.firstName == null || data.lastName == null ) { return BadRequest(); }
-              //  if (data.firstName == "" || data.lastName == "" || data.email == "") { return BadRequest(); }
-                if (data.firstName == "" || data.lastName == "" ) { return BadRequest(); }
-                String firstName = data.firstName; String lastName = data.lastName; 
+                // if (data.firstName == null || data.lastName == null || data.email == null) { return BadRequest(); }
+                if (data.firstName == null || data.lastName == null) { return BadRequest(); }
+                //  if (data.firstName == "" || data.lastName == "" || data.email == "") { return BadRequest(); }
+                if (data.firstName == "" || data.lastName == "") { return BadRequest(); }
+                String firstName = data.firstName; String lastName = data.lastName;
 
                 UserEntity userEntity = new UserEntity();
                 userEntity.FullName = firstName + " " + lastName;
@@ -104,7 +104,12 @@ namespace Evote_Service.Controllers
                 String email = data.email;
 
                 APIModel aPIModel = new APIModel();
-                if (await _ICheckUserRepository.UserSendEmail(lineId, email) == false)
+                if (await _ICheckUserRepository.checkEmail(email.Trim()) == false)
+                {
+                    aPIModel.message = "Email นี้มีผู้ลงทะเบียนแล้ว";
+                    return StatusCodeITSC("line", lineId, "", "RegisterUserController.UserSendemail", 406, aPIModel);
+                }
+                if (await _ICheckUserRepository.UserSendEmail(lineId, email.Trim()) == false)
                 {
                     aPIModel.message = "ระบบขัดข้องบันทึกข้อมูลไม่สำเร็จ";
                     return StatusCodeITSC("line", lineId, "", "RegisterUserController.UserSendemail", 503, aPIModel);
@@ -135,11 +140,15 @@ namespace Evote_Service.Controllers
                 String tel = data.tel;
 
                 APIModel aPIModel = new APIModel();
-                if (await _ICheckUserRepository.UserSendTel(lineId, tel) == false)
+                if (await _ICheckUserRepository.CheckTel(tel.Trim()) == false)
+                {
+                    aPIModel.message = "เบอร์โทรนี้ นี้มีผู้ลงทะเบียนแล้ว";
+                    return StatusCodeITSC("line", lineId, "", "RegisterUserController.UserSendTel", 406, aPIModel);
+                }
+                if (await _ICheckUserRepository.UserSendTel(lineId, tel.Trim()) == false)
                 {
                     aPIModel.message = "ระบบขัดข้องบันทึกข้อมูลไม่สำเร็จ";
                     return StatusCodeITSC("line", lineId, "", "RegisterUserController.UserSendTel", 503, aPIModel);
-
                 }
                 UserModel userModel = await _ICheckUserRepository.GetLineUserModel(lineId);
                 aPIModel.data = userModel;
@@ -262,7 +271,7 @@ namespace Evote_Service.Controllers
 
                 }
 
-              
+
                 UserModel userModel = await _ICheckUserRepository.GetLineUserModel(lineId);
                 aPIModel.data = userModel;
                 aPIModel.message = "Success";

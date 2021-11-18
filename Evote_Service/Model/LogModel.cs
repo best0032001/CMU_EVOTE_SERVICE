@@ -9,6 +9,7 @@ namespace Evote_Service.Model
     {
      
         public DateTime Timestamp { get; set; }
+        public String ClientIp { get; set; }
         public String UserType { get; set; }
         public String cmuaccount { get; set; }
         public String LineID { get; set; }
