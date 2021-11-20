@@ -16,6 +16,10 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Evote_Service.Model.Repository.Mock;
+using Microsoft.OpenApi.Models;
+using System.Reflection;
+using System.IO;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace Evote_Service
 {
@@ -41,10 +45,11 @@ namespace Evote_Service
                 services.AddDbContext<EvoteContext>(options => options.UseInMemoryDatabase(databaseName: "ApplicationDBContext").ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning)));
                 services.AddScoped<ISMSRepository, SMSRepositoryMock>();
                 services.AddScoped<IEmailRepository, EmailRepositoryMock>();
-     
+
                 origin = "*";
             }
-            else {
+            else
+            {
                 services.AddScoped<ISMSRepository, SMSRepository>();
                 services.AddScoped<IEmailRepository, EmailRepository>();
                 origin = Environment.GetEnvironmentVariable("ORIGIN");
@@ -61,18 +66,55 @@ namespace Evote_Service
                                       builder.WithOrigins(origin)
                                                .AllowAnyMethod()
                                                .AllowAnyHeader();
-                                             
+
                                   });
             });
-            services.AddControllers(options =>
+            services.AddControllers();
+            services.AddSwaggerGen(options =>
             {
-                options.InputFormatters.Insert(0, new ITSCInputFormatter());
-                foreach (var inputFormatter in options.InputFormatters.OfType<ITSCInputFormatter>().Where(_ => _.SupportedMediaTypes.Count == 0))
+                options.SwaggerDoc("v1", new OpenApiInfo
                 {
-                }
+                    Version = "v1",
+                    Title = "E-vote Service",
+                    Description = "E-vote Service of CMU",
+                    TermsOfService = new Uri("https://example.com/terms"),
+                    Contact = new OpenApiContact
+                    {
+                        Name = "Example Contact",
+                        Url = new Uri("https://example.com/contact")
+                    },
+                    License = new OpenApiLicense
+                    {
+                        Name = "Example License",
+                        Url = new Uri("https://example.com/license")
+                    }
+                });
+                var jwtSecurityScheme = new OpenApiSecurityScheme
+                {
+                    Scheme = "bearer",
+                    BearerFormat = "Oauth",
+                    Name = "Oauth Authentication",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.Http,
+                    Description = "Put Bearer xxxxx(your token)",
+
+                    Reference = new OpenApiReference
+                    {
+                        Id = JwtBearerDefaults.AuthenticationScheme,
+                        Type = ReferenceType.SecurityScheme
+                    }
+                };
+
+                options.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
+
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        { jwtSecurityScheme, Array.Empty<string>() }
+    });
+                var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
             });
 
-          
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -82,7 +124,9 @@ namespace Evote_Service
             {
                 app.UseDeveloperExceptionPage();
             }
-            env.IsProduction();
+            app.UseSwagger();
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "E-vote Service v1"));
+
             app.UseRouting();
 
             app.UseAuthorization();
@@ -99,7 +143,7 @@ namespace Evote_Service
                 // Redirect to an external URL
                 if (url.Contains("/api/login"))
                 {
-                    String redirect_uri = Environment.GetEnvironmentVariable("CMU_REDIRECT_URL"); 
+                    String redirect_uri = Environment.GetEnvironmentVariable("CMU_REDIRECT_URL");
                     String client_id = Environment.GetEnvironmentVariable("CMU_CLIENT_ID");
                     String oauth_scope = Environment.GetEnvironmentVariable("CMU_OAUTH_SCOPE");
                     String oauth_authorize_url = Environment.GetEnvironmentVariable("CMU_OAUTH_URL"); ;

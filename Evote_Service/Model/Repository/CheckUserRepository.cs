@@ -1,6 +1,7 @@
 ﻿using Evote_Service.Model.Entity;
 using Evote_Service.Model.Interface;
-using Evote_Service.Model.View;
+using Evote_Service.Model.Util;
+
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -111,13 +112,13 @@ namespace Evote_Service.Model.Repository
         }
         public async Task<bool> checkEmail(string email)
         {
-            UserEntity userEntitys= _evoteContext.UserEntitys.Where(w => w.Email == email).FirstOrDefault();
+            UserEntity userEntitys= _evoteContext.UserEntitys.Where(w => w.Email == email&w.IsConfirmEmail==true).FirstOrDefault();
             if (userEntitys == null) { return true; }
             return false;
         }
         public async Task<bool> CheckTel(string tel)
         {
-            UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.Tel == tel).FirstOrDefault();
+            UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.Tel == tel & w.IsConfirmTel == true).FirstOrDefault();
             if (userEntitys == null) { return true; }
             return false;
         }
@@ -180,6 +181,17 @@ namespace Evote_Service.Model.Repository
             {
                 userEntitys.UserStage = 2;
             }
+        }
+
+        public async Task<bool> RegisCMUUser(UserEntity userEntity)
+        {
+            if (_evoteContext.UserEntitys.Where(w => w.LineId == userEntity.LineId).FirstOrDefault() != null) { return false; }
+            userEntity.UserType = 1;
+            userEntity.CreateTime = DateTime.Now;
+            userEntity.UserStage = 1;
+            _evoteContext.UserEntitys.Add(userEntity);
+            _evoteContext.SaveChanges();
+            return true;
         }
     }
 }

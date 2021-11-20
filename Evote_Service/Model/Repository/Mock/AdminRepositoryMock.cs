@@ -1,6 +1,6 @@
 ﻿using Evote_Service.Model.Entity;
 using Evote_Service.Model.Interface;
-using Evote_Service.Model.View;
+using Evote_Service.Model.Util;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;

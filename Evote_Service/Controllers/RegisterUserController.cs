@@ -1,6 +1,7 @@
 ﻿
 using Evote_Service.Model.Entity;
 using Evote_Service.Model.Interface;
+using Evote_Service.Model.Util;
 using Evote_Service.Model.View;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -11,11 +12,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Evote_Service.Controllers
 {
+    [Produces("application/json")]
     [Route("api/")]
     [ApiController]
     public class RegisterUserController : ITSCController
@@ -32,7 +35,17 @@ namespace Evote_Service.Controllers
 
             return Ok(this.getClientIP());
         }
+
+        /// <summary>
+        /// Test Name API
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>returns</returns>
         [HttpGet("v1/User/liff")]
+        [ProducesResponseType(typeof(UserModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> getUserLiff()
         {
             // เมื่อUser เปิด Line UI  ทำการ GetLink Token แล้วส่งมาcheck Service ว่า  LINE ID นี้ Registerระบบหรือยัง
@@ -52,22 +65,22 @@ namespace Evote_Service.Controllers
         }
 
         [HttpPost("v1/User/RegisLiff")]
-        public async Task<IActionResult> UserRegisLiff([FromBody] string body)
+        [ProducesResponseType(typeof(UserModel), (int)HttpStatusCode.Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(APIModel), (int)HttpStatusCode.ServiceUnavailable)]
+        public async Task<IActionResult> UserRegisLiff([FromBody] UserRegisLiffModelView data)
         {
             String lineId = "";
             try
             {
                 lineId = await getLineUser();
                 if (lineId == "unauthorized") { return Unauthorized(); }
-                dynamic data = JsonConvert.DeserializeObject<dynamic>(body);
-                // if (data.firstName == null || data.lastName == null || data.email == null) { return BadRequest(); }
-                if (data.firstName == null || data.lastName == null) { return BadRequest(); }
-                //  if (data.firstName == "" || data.lastName == "" || data.email == "") { return BadRequest(); }
                 if (data.firstName == "" || data.lastName == "") { return BadRequest(); }
-                String firstName = data.firstName; String lastName = data.lastName;
 
                 UserEntity userEntity = new UserEntity();
-                userEntity.FullName = firstName + " " + lastName;
+                userEntity.FullName = data.firstName + " " + data.lastName;
                 userEntity.Email = "";
                 userEntity.LineId = lineId;
                 APIModel aPIModel = new APIModel();
@@ -91,25 +104,28 @@ namespace Evote_Service.Controllers
 
 
         [HttpPost("v1/User/email")]
-        public async Task<IActionResult> UserSendemail([FromBody] string body)
+        [ProducesResponseType(typeof(UserModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(APIModel), (int)HttpStatusCode.NotAcceptable)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(APIModel), (int)HttpStatusCode.ServiceUnavailable)]
+        public async Task<IActionResult> UserSendemail([FromBody] UserSendModelView data)
         {
             String lineId = "";
             try
             {
                 lineId = await getLineUser();
                 if (lineId == "unauthorized") { return Unauthorized(); }
-                dynamic data = JsonConvert.DeserializeObject<dynamic>(body);
-                if (data.email == null) { return BadRequest(); }
                 if (data.email == "") { return BadRequest(); }
-                String email = data.email;
 
                 APIModel aPIModel = new APIModel();
-                if (await _ICheckUserRepository.checkEmail(email.Trim()) == false)
+                if (await _ICheckUserRepository.checkEmail(data.email.Trim()) == false)
                 {
                     aPIModel.message = "Email นี้มีผู้ลงทะเบียนแล้ว";
                     return StatusCodeITSC("line", lineId, "", "RegisterUserController.UserSendemail", 406, aPIModel);
                 }
-                if (await _ICheckUserRepository.UserSendEmail(lineId, email.Trim()) == false)
+                if (await _ICheckUserRepository.UserSendEmail(lineId, data.email.Trim()) == false)
                 {
                     aPIModel.message = "ระบบขัดข้องบันทึกข้อมูลไม่สำเร็จ";
                     return StatusCodeITSC("line", lineId, "", "RegisterUserController.UserSendemail", 503, aPIModel);
@@ -127,25 +143,28 @@ namespace Evote_Service.Controllers
         }
 
         [HttpPost("v1/User/Tel")]
-        public async Task<IActionResult> UserSendTel([FromBody] string body)
+        [ProducesResponseType(typeof(UserModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(APIModel), (int)HttpStatusCode.NotAcceptable)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(APIModel), (int)HttpStatusCode.ServiceUnavailable)]
+        public async Task<IActionResult> UserSendTel([FromBody] UserSendModelView data)
         {
             String lineId = "";
             try
             {
                 lineId = await getLineUser();
                 if (lineId == "unauthorized") { return Unauthorized(); }
-                dynamic data = JsonConvert.DeserializeObject<dynamic>(body);
-                if (data.tel == null) { return BadRequest(); }
                 if (data.tel == "") { return BadRequest(); }
-                String tel = data.tel;
 
                 APIModel aPIModel = new APIModel();
-                if (await _ICheckUserRepository.CheckTel(tel.Trim()) == false)
+                if (await _ICheckUserRepository.CheckTel(data.tel.Trim()) == false)
                 {
                     aPIModel.message = "เบอร์โทรนี้ นี้มีผู้ลงทะเบียนแล้ว";
                     return StatusCodeITSC("line", lineId, "", "RegisterUserController.UserSendTel", 406, aPIModel);
                 }
-                if (await _ICheckUserRepository.UserSendTel(lineId, tel.Trim()) == false)
+                if (await _ICheckUserRepository.UserSendTel(lineId, data.tel.Trim()) == false)
                 {
                     aPIModel.message = "ระบบขัดข้องบันทึกข้อมูลไม่สำเร็จ";
                     return StatusCodeITSC("line", lineId, "", "RegisterUserController.UserSendTel", 503, aPIModel);
@@ -162,20 +181,21 @@ namespace Evote_Service.Controllers
         }
 
         [HttpPost("v1/User/SMSOTP")]
-        public async Task<IActionResult> UserSendSMSOTP([FromBody] string body)
+        [ProducesResponseType(typeof(UserModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(APIModel), (int)HttpStatusCode.ServiceUnavailable)]
+        public async Task<IActionResult> UserSendSMSOTP([FromBody] UserSendModelView data)
         {
             String lineId = "";
             try
             {
                 lineId = await getLineUser();
                 if (lineId == "unauthorized") { return Unauthorized(); }
-                dynamic data = JsonConvert.DeserializeObject<dynamic>(body);
-                if (data.otp == null) { return BadRequest(); }
                 if (data.otp == "") { return BadRequest(); }
-                String otp = data.otp;
-
                 APIModel aPIModel = new APIModel();
-                if (await _ICheckUserRepository.UserConfirmSMSOTP(lineId, otp) == false)
+                if (await _ICheckUserRepository.UserConfirmSMSOTP(lineId, data.otp) == false)
                 {
                     aPIModel.message = "รหัส OTP ไม่ถูกต้อง";
                     return StatusCodeITSC("line", lineId, "", "RegisterUserController.UserSendSMSOTP", 503, aPIModel);
@@ -219,20 +239,23 @@ namespace Evote_Service.Controllers
         //}
 
         [HttpPost("v1/User/EmailOTP")]
-        public async Task<IActionResult> UserSendEmailOTP([FromBody] string body)
+        [ProducesResponseType(typeof(UserModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(APIModel), (int)HttpStatusCode.ServiceUnavailable)]
+        public async Task<IActionResult> UserSendEmailOTP([FromBody] UserSendModelView data)
         {
             String lineId = "";
             try
             {
                 lineId = await getLineUser();
                 if (lineId == "unauthorized") { return Unauthorized(); }
-                dynamic data = JsonConvert.DeserializeObject<dynamic>(body);
-                if (data.otp == null) { return BadRequest(); }
                 if (data.otp == "") { return BadRequest(); }
                 String otp = data.otp;
 
                 APIModel aPIModel = new APIModel();
-                if (await _ICheckUserRepository.UserConfirmEmailOTP(lineId, otp) == false)
+                if (await _ICheckUserRepository.UserConfirmEmailOTP(lineId, data.otp) == false)
                 {
                     aPIModel.message = "รหัส OTP ไม่ถูกต้อง";
                     return StatusCodeITSC("line", lineId, "", "RegisterUserController.UserSendEmailOTP", 503, aPIModel);
@@ -250,6 +273,11 @@ namespace Evote_Service.Controllers
         }
 
         [HttpPost("v1/User/photoId")]
+        [ProducesResponseType(typeof(UserModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(APIModel), (int)HttpStatusCode.ServiceUnavailable)]
         public async Task<IActionResult> UserPostphotoId([FromBody] string body)
         {
             String lineId = "";
@@ -285,6 +313,11 @@ namespace Evote_Service.Controllers
 
 
         [HttpGet("v1/User/photoId")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+
         public async Task<IActionResult> UserGetphotoId()
         {
             String lineId = "";
@@ -306,6 +339,11 @@ namespace Evote_Service.Controllers
 
 
         [HttpPost("v1/User/kyc")]
+        [ProducesResponseType(typeof(UserModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(APIModel), (int)HttpStatusCode.ServiceUnavailable)]
         public async Task<IActionResult> UserPostKyc([FromBody] string body)
         {
             String lineId = "";
@@ -337,6 +375,11 @@ namespace Evote_Service.Controllers
             }
         }
         [HttpGet("v1/User/kyc")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+
         public async Task<IActionResult> UserGetKyc()
         {
             String lineId = "";

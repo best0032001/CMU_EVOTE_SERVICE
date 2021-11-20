@@ -1,6 +1,6 @@
 ﻿using Evote_Service;
 using Evote_Service.Model.Entity;
-using Evote_Service.Model.View;
+using Evote_Service.Model.Util;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using System;
@@ -35,8 +35,9 @@ namespace ApiTest.Test
 
             //String json = "{ \"firstName\":\"firstNameTest1\" ,\"lastName\":\"lastnameTest1\",\"email\":\"test@test.com\"}";
             String json = "{ \"firstName\":\"firstNameTest1\" ,\"lastName\":\"lastnameTest1\"}";
-
-            response = await _client.PostAsync("api/v1/User/RegisLiff", new StringContent(json));
+            var content = new StringContent(json);
+            content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+            response = await _client.PostAsync("api/v1/User/RegisLiff", content);
             Assert.IsTrue((int)response.StatusCode == 201);
             String responseString = await response.Content.ReadAsStringAsync();
             APIModel dataTemp = JsonConvert.DeserializeObject<APIModel>(responseString);
@@ -49,11 +50,15 @@ namespace ApiTest.Test
             //  กรอกเบอร์โทร
 
             json = "{ \"tel\":\"000000\"}";
-            response = await _client.PostAsync("api/v1/User/Tel", new StringContent(json));
+            content = new StringContent(json);
+            content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+            response = await _client.PostAsync("api/v1/User/Tel", content);
             Assert.IsTrue((int)response.StatusCode == 200);
 
             json = "{ \"otp\":\"1234\"}";
-            response = await _client.PostAsync("api/v1/User/SMSOTP", new StringContent(json));
+            content = new StringContent(json);
+            content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+            response = await _client.PostAsync("api/v1/User/SMSOTP", content);
             Assert.IsTrue((int)response.StatusCode == 200);
              responseString = await response.Content.ReadAsStringAsync();
              dataTemp = JsonConvert.DeserializeObject<APIModel>(responseString);
@@ -64,11 +69,15 @@ namespace ApiTest.Test
             Assert.IsTrue(userModel.ConfirmTelTime != null);
 
             json = "{ \"email\":\"test@test.com\"}";
-            response = await _client.PostAsync("api/v1/User/email", new StringContent(json));
+            content = new StringContent(json);
+            content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+            response = await _client.PostAsync("api/v1/User/email", content);
             Assert.IsTrue((int)response.StatusCode == 200);
 
             json = "{ \"otp\":\"1234\"}";
-            response = await _client.PostAsync("api/v1/User/EmailOTP", new StringContent(json));
+            content = new StringContent(json);
+            content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+            response = await _client.PostAsync("api/v1/User/EmailOTP", content);
             Assert.IsTrue((int)response.StatusCode == 200);
             responseString = await response.Content.ReadAsStringAsync();
             dataTemp = JsonConvert.DeserializeObject<APIModel>(responseString);

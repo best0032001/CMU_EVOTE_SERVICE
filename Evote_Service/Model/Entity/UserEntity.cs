@@ -9,6 +9,8 @@ namespace Evote_Service.Model.Entity
     {
         public int UserEntityId { get; set; }
         public String Email { get; set; }
+        public String Organization_Code { get; set; }
+        public String Organization_Name_TH { get; set; }
         public String FullName { get; set; }
         public String Tel { get; set; }
         public int UserStage { get; set; }   //0  no regis //1 regis 2 confirm 3 approve
@@ -47,5 +49,10 @@ namespace Evote_Service.Model.Entity
         public String CommetNotApproved { get; set; }
         public DateTime? ApprovedTime { get; set; }
         public DateTime? NotApprovedTime { get; set; }
+
+
+        public String Access_token { get; set; }
+        public String Refresh_token { get; set; }
+        public String Expires_in { get; set; }
     }
 }

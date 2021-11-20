@@ -1,6 +1,6 @@
 ﻿using Evote_Service.Model;
 using Evote_Service.Model.Interface;
-using Evote_Service.Model.View;
+using Evote_Service.Model.Util;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -73,7 +73,7 @@ namespace Evote_Service.Controllers
             _logger = logger;
 
         }
-        public String getTokenFormHeader()
+        protected String getTokenFormHeader()
         {
             _accesstoken = Request.Headers["Authorization"];
             _accesstoken = _accesstoken.Split(' ')[1];
@@ -81,7 +81,7 @@ namespace Evote_Service.Controllers
 
         }
 
-        public async Task<String> getLineUser()
+        protected async Task<String> getLineUser()
         {
             if (_accesstoken == "") { getTokenFormHeader(); }
             String _lineId = "";
@@ -95,7 +95,7 @@ namespace Evote_Service.Controllers
             return _lineId;
 
         }
-        public async Task<String> getCmuaccount()
+        protected async Task<String> getCmuaccount()
         {
             if (_accesstoken == "") { getTokenFormHeader(); }
             String _cmuaccount = "";

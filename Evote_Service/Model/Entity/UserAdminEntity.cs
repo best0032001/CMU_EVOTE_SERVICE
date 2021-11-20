@@ -10,7 +10,9 @@ namespace Evote_Service.Model.Entity
         public int UserAdminEntityId { get; set; }
 
         public String Cmuaccount { get; set; }
-       
+
+        public String Tel { get; set; }
+
         public string OrganizationID { get; set; }
         public string OrganizationFullNameTha { get; set; }
     }

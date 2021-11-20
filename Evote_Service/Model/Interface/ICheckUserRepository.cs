@@ -1,5 +1,5 @@
 ﻿using Evote_Service.Model.Entity;
-using Evote_Service.Model.View;
+using Evote_Service.Model.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +14,8 @@ namespace Evote_Service.Model.Interface
 
         Task<UserEntity> GetLineUserEntity(String lineId);
         Task<Boolean> RegisLineUser(UserEntity userEntity);
+
+        Task<Boolean> RegisCMUUser(UserEntity userEntity);
 
         Task<Boolean> CheckTel(String tel);
         Task<Boolean> UserSendTel(String lineId, String tel);

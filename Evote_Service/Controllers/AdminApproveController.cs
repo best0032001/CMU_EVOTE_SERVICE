@@ -1,6 +1,7 @@
 ﻿
 using Evote_Service.Model.Entity;
 using Evote_Service.Model.Interface;
+using Evote_Service.Model.Util;
 using Evote_Service.Model.View;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -11,11 +12,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Evote_Service.Controllers
 {
+    [Produces("application/json")]
     [Route("api/")]
     [ApiController]
     public class AdminApproveController : ITSCController
@@ -28,6 +31,11 @@ namespace Evote_Service.Controllers
         }
 
         [HttpGet("v1/User/Approve")]
+        [ProducesResponseType(typeof(UserEntity), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(APIModel), (int)HttpStatusCode.ServiceUnavailable)]
         public async Task<IActionResult> getUserApprove()
         {
             String Cmuaccount = "";
@@ -49,7 +57,11 @@ namespace Evote_Service.Controllers
         }
 
         [HttpPut("v1/User/Approve")]
-        public async Task<IActionResult> adminApprove([FromBody] string body)
+        [ProducesResponseType(typeof(UserEntity), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> adminApprove([FromBody] AdminApproveModelView data)
         {
             String Cmuaccount = "";
             try
@@ -57,13 +69,11 @@ namespace Evote_Service.Controllers
                
                 Cmuaccount = await getCmuaccount();
                 if (Cmuaccount == "unauthorized") { return Unauthorized(); }
-                dynamic data = JsonConvert.DeserializeObject<dynamic>(body);
-                if (data.userEntityId == null) { return BadRequest(); }
-                if (data.userEntityId == "") { return BadRequest(); }
+                if (data.userEntityId == 0) { return BadRequest(); }
 
-                String userEntityId = data.userEntityId;
+           
 
-                List<UserEntity> userEntities = await _IAdminRepository.adminApprove(Cmuaccount, Convert.ToInt32(userEntityId), getClientIP());
+                List<UserEntity> userEntities = await _IAdminRepository.adminApprove(Cmuaccount, data.userEntityId, getClientIP());
                 if (userEntities == null) { return Unauthorized(); }
                 APIModel aPIModel = new APIModel();
                 aPIModel.data = userEntities;
@@ -76,20 +86,20 @@ namespace Evote_Service.Controllers
             }
         }
         [HttpPut("v1/User/NotApprove")]
-        public async Task<IActionResult> adminNotApprove([FromBody] string body)
+        [ProducesResponseType(typeof(UserEntity), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> adminNotApprove([FromBody] AdminApproveModelView data)
         {
             String Cmuaccount = "";
             try
             {
                 Cmuaccount = await getCmuaccount();
                 if (Cmuaccount == "unauthorized") { return Unauthorized(); }
-                dynamic data = JsonConvert.DeserializeObject<dynamic>(body);
-                if (data.userEntityId == null || data.comment == null) { return BadRequest(); }
-                if (data.userEntityId == "" || data.comment == "") { return BadRequest(); }
+                if (data.userEntityId == 0 || data.comment == "") { return BadRequest(); }
 
-                String userEntityId = data.userEntityId;
-                String Commnet = data.comment;
-                List<UserEntity> userEntities = await _IAdminRepository.adminNotApprove(Cmuaccount, Convert.ToInt32(userEntityId), Commnet, getClientIP());
+                List<UserEntity> userEntities = await _IAdminRepository.adminNotApprove(Cmuaccount, data.userEntityId, data.comment, getClientIP());
                 if (userEntities == null) { return Unauthorized(); }
                 APIModel aPIModel = new APIModel();
                 aPIModel.data = userEntities;

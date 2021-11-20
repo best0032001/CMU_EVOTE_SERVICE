@@ -1,5 +1,6 @@
 ﻿using Evote_Service.Model.Entity;
 using Evote_Service.Model.Entity.Ref;
+using Evote_Service.Model.Util;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using System;
@@ -69,21 +70,25 @@ namespace Evote_Service.Model
                 refUserStage1.RefUserStageID = 1;
                 refUserStage1.UserStageName = "regis";
                 _evoteContext.RefUserStages.Add(refUserStage1);
+                _evoteContext.SaveChanges();
 
                 RefUserStage refUserStage2 = new RefUserStage();
                 refUserStage2.RefUserStageID = 2;
                 refUserStage2.UserStageName = "confirm";
                 _evoteContext.RefUserStages.Add(refUserStage2);
+                _evoteContext.SaveChanges();
 
                 RefUserStage refUserStage3 = new RefUserStage();
                 refUserStage3.RefUserStageID = 3;
                 refUserStage3.UserStageName = "approved";
                 _evoteContext.RefUserStages.Add(refUserStage3);
+                _evoteContext.SaveChanges();
 
                 RefUserStage refUserStage4 = new RefUserStage();
                 refUserStage4.RefUserStageID = 4;
                 refUserStage4.UserStageName = "rejected";
                 _evoteContext.RefUserStages.Add(refUserStage4);
+                _evoteContext.SaveChanges();
             }
         }
     }

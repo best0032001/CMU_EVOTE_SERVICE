@@ -1,5 +1,6 @@
 ﻿using Evote_Service;
 using Evote_Service.Model.Entity;
+using Evote_Service.Model.Util;
 using Evote_Service.Model.View;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
@@ -41,9 +42,13 @@ namespace ApiTest.Test
             List<UserEntity> userEntities = JsonConvert.DeserializeObject<List<UserEntity>>(data);
             Assert.IsTrue(userEntities.Count > 0);
 
-         
-            String json = "{ \"userEntityId\":\"" + userEntities[0].UserEntityId + "\",\"comment\":\"test\"}";
-            response = await _client.PutAsync("api/v1/User/NotApprove", new StringContent(json));
+            AdminApproveModelView adminApproveModelView = new AdminApproveModelView();
+            adminApproveModelView.userEntityId = userEntities[0].UserEntityId;
+            adminApproveModelView.comment = "test";
+            String json = JsonConvert.SerializeObject(adminApproveModelView);
+            var content = new StringContent(json);
+            content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+            response = await _client.PutAsync("api/v1/User/NotApprove", content);
        
             Assert.IsTrue((int)response.StatusCode == 200);
 
