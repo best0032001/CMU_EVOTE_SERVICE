@@ -26,8 +26,10 @@ namespace Evote_Service.Controllers
         private IAdminRepository _IAdminRepository;
         public AdminApproveController(ILogger<ITSCController> logger, IAdminRepository IAdminRepository, IHttpClientFactory clientFactory, IWebHostEnvironment env, IEmailRepository emailRepository)
         {
+        
+            this.loadConfig(logger, clientFactory, env); 
+            _emailRepository = emailRepository;
             _IAdminRepository = IAdminRepository;
-            this.loadConfig(logger, clientFactory, env); _emailRepository = emailRepository;
         }
 
         [HttpGet("v1/User/Approve")]
@@ -39,6 +41,7 @@ namespace Evote_Service.Controllers
         public async Task<IActionResult> getUserApprove()
         {
             String Cmuaccount = "";
+            String action = "AdminApproveController.getUserApprove";
             try
             {
                
@@ -50,10 +53,10 @@ namespace Evote_Service.Controllers
                 APIModel aPIModel = new APIModel();
                 aPIModel.data = userEntities;
                 aPIModel.message = "Success";
-                return StatusCodeITSC("CMU", "", Cmuaccount, "AdminApproveController.getUserApprove", 200, aPIModel);
+                return StatusCodeITSC("CMU", "", Cmuaccount, action, 200, aPIModel);
 
             }
-            catch (Exception ex) { return StatusErrorITSC("CMU", "", Cmuaccount, "AdminApproveController.getUserApprove", ex); }
+            catch (Exception ex) { return StatusErrorITSC("CMU", "", Cmuaccount, action, ex); }
         }
 
         [HttpPut("v1/User/Approve")]
@@ -61,30 +64,32 @@ namespace Evote_Service.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> adminApprove([FromBody] AdminApproveModelView data)
+        public async Task<IActionResult> adminApprove([FromQuery] Int32 userEntityId)
         {
             String Cmuaccount = "";
+            String action = "AdminApproveController.adminApprove";
             try
             {
                
                 Cmuaccount = await getCmuaccount();
                 if (Cmuaccount == "unauthorized") { return Unauthorized(); }
-                if (data.userEntityId == 0) { return BadRequest(); }
+                if (userEntityId == 0) { return BadRequest(); }
 
            
 
-                List<UserEntity> userEntities = await _IAdminRepository.adminApprove(Cmuaccount, data.userEntityId, getClientIP());
+                List<UserEntity> userEntities = await _IAdminRepository.adminApprove(Cmuaccount, userEntityId, getClientIP());
                 if (userEntities == null) { return Unauthorized(); }
                 APIModel aPIModel = new APIModel();
                 aPIModel.data = userEntities;
                 aPIModel.message = "Success";
 
-                return StatusCodeITSC("CMU", "", Cmuaccount, "AdminApproveController.adminApprove", 200, aPIModel);
+                return StatusCodeITSC("CMU", "", Cmuaccount, action, 200, aPIModel);
             }
             catch (Exception ex) {
-                return StatusErrorITSC("CMU", "", Cmuaccount, "AdminApproveController.adminApprove", ex);
+                return StatusErrorITSC("CMU", "", Cmuaccount, action, ex);
             }
         }
+
         [HttpPut("v1/User/NotApprove")]
         [ProducesResponseType(typeof(UserEntity), (int)HttpStatusCode.OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -99,7 +104,7 @@ namespace Evote_Service.Controllers
                 if (Cmuaccount == "unauthorized") { return Unauthorized(); }
                 if (data.userEntityId == 0 || data.comment == "") { return BadRequest(); }
 
-                List<UserEntity> userEntities = await _IAdminRepository.adminNotApprove(Cmuaccount, data.userEntityId, data.comment, getClientIP());
+                List<UserEntity> userEntities = await _IAdminRepository.adminNotApprove(Cmuaccount, data, getClientIP());
                 if (userEntities == null) { return Unauthorized(); }
                 APIModel aPIModel = new APIModel();
                 aPIModel.data = userEntities;

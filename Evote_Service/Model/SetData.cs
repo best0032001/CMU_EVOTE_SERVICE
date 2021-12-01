@@ -58,6 +58,7 @@ namespace Evote_Service.Model
         {
             UserAdminEntity userAdminEntity = new UserAdminEntity();
             userAdminEntity.Cmuaccount = "cheewin.b@cmu.ac.th";
+            userAdminEntity.SuperAdmin = true;
             _evoteContext.UserAdminEntitys.Add(userAdminEntity);
             _evoteContext.SaveChanges();
         }

@@ -14,6 +14,11 @@ namespace Evote_Service.Model.Repository.Mock
             
         }
 
+        public Task SendEmailAsync(string nameSender, string reply, string email_To, string subject, string message, List<IFormFile> Attachment)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<string> SendEmailOTP(string Email, String codeRef)
         {
             return "1234";

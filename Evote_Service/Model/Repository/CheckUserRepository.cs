@@ -31,7 +31,11 @@ namespace Evote_Service.Model.Repository
         public async Task<UserModel> GetLineUserModel(string lineId)
         {
             UserEntity userEntitys= _evoteContext.UserEntitys.Where(w => w.LineId == lineId).FirstOrDefault();
-            if (userEntitys == null){ return null; }
+            if (userEntitys == null) { return null; }
+            if (userEntitys.IsConfirmEmail == false)
+            { userEntitys.Email = ""; }
+            if (userEntitys.IsConfirmTel == false)
+            { userEntitys.Tel = ""; }
             return JsonConvert.DeserializeObject<UserModel>(JsonConvert.SerializeObject(userEntitys)); ;
         }
 
@@ -55,7 +59,9 @@ namespace Evote_Service.Model.Repository
             userEntitys.Tel = tel;
             
             Random _random = new Random();
-            String code = _random.Next(0, 99999999).ToString("D8");
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            String code = new string(Enumerable.Repeat(chars, 4)
+              .Select(s => s[_random.Next(s.Length)]).ToArray());
             //  sent OTP
             userEntitys.SMSOTP = await _sMSRepository.getOTP(code, userEntitys.Tel) ;
             userEntitys.SMSOTPRef = code;
@@ -140,7 +146,7 @@ namespace Evote_Service.Model.Repository
             return true;
         }
 
-        public async Task<bool> UserPostphotoId(string lineId, FileModel fileModel)
+        public async Task<bool> UserPostphotoId(string lineId, FileModel fileModel, String PersonalID)
         {
             UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.LineId == lineId).FirstOrDefault();
             if (userEntitys == null) { return false; }
@@ -149,11 +155,18 @@ namespace Evote_Service.Model.Repository
             userEntitys.fullPathPersonalID = fileModel.fullPath;
             userEntitys.dbPathPersonalID = fileModel.dbPath;
             userEntitys.IsConfirmPersonalID = true;
+            userEntitys.PersonalID = PersonalID;
+            userEntitys.ConfirmPersonalIDTime = DateTime.Now;
             CheckUserStage(userEntitys);
             _evoteContext.SaveChanges();
             return true;
         }
-
+        public async Task<Boolean> CheckPersonalID(String PersonalID)
+        {
+            UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.PersonalID == PersonalID).FirstOrDefault();
+            if (userEntitys == null) { return true; }
+            return false;
+        }
         public async Task<UserEntity> GetLineUserEntity(string lineId)
         {
             UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.LineId == lineId).FirstOrDefault();
@@ -161,15 +174,23 @@ namespace Evote_Service.Model.Repository
             return userEntitys;
         }
 
-        public async Task<bool> UserPostphotoKyc(string lineId, FileModel fileModel)
+        public async Task<bool> UserPostphotoKyc(string lineId, FileModel fileModelKYC, FileModel fileModelFace, String faceData)
         {
             UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.LineId == lineId).FirstOrDefault();
             if (userEntitys == null) { return false; }
             if (userEntitys.UserStage != 1) { return false; }
-            userEntitys.fileNameKYC = fileModel.fileName;
-            userEntitys.fullPathKYC = fileModel.fullPath;
-            userEntitys.dbPathKYC = fileModel.dbPath;
+            userEntitys.fileNameKYC = fileModelKYC.fileName;
+            userEntitys.fullPathKYC = fileModelKYC.fullPath;
+            userEntitys.dbPathKYC = fileModelKYC.dbPath;
+
+            userEntitys.fileNameFace = fileModelFace.fileName;
+            userEntitys.fullPathFace = fileModelFace.fullPath;
+            userEntitys.dbPathFace = fileModelFace.dbPath;
+
+            userEntitys.faceData = faceData;
+
             userEntitys.IsConfirmKYC = true;
+            userEntitys.ConfirmKYCTime = DateTime.Now;
             CheckUserStage(userEntitys);
             _evoteContext.SaveChanges();
             return true;
@@ -180,6 +201,10 @@ namespace Evote_Service.Model.Repository
             if (userEntitys.IsConfirmEmail == true && userEntitys.IsConfirmKYC == true && userEntitys.IsConfirmPersonalID == true && userEntitys.IsConfirmTel == true)
             {
                 userEntitys.UserStage = 2;
+            }
+            if (userEntitys.UserType == 1&& userEntitys.IsConfirmTel == true)
+            {
+                userEntitys.UserStage = 3;
             }
         }
 

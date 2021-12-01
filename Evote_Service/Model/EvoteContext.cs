@@ -14,6 +14,9 @@ namespace Evote_Service.Model
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder){}
 
 
+        public DbSet<AdminLoginLog> AdminLoginLogs { get; set; }
+        public DbSet<EventVoteEntity> EventVoteEntitys { get; set; }
+        public DbSet<ApplicationEntity> ApplicationEntitys { get; set; }
         public DbSet<UserEntity> UserEntitys { get; set; }
         public DbSet<RefUserStage> RefUserStages { get; set; }
         public DbSet<UserAdminEntity> UserAdminEntitys { get; set; }

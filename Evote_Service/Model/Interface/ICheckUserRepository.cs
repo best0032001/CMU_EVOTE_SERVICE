@@ -26,8 +26,10 @@ namespace Evote_Service.Model.Interface
 
         Task<Boolean> UserConfirmEmailOTP(String lineId, String otp);
 
-        Task<Boolean> UserPostphotoId(String lineId, FileModel fileModel);
+        Task<Boolean> UserPostphotoId(String lineId, FileModel fileModel,String PersonalID);
 
-        Task<Boolean> UserPostphotoKyc(String lineId, FileModel fileModel);
+        Task<Boolean> UserPostphotoKyc(String lineId, FileModel fileModelKYC, FileModel fileModelFace, String facedata);
+
+        Task<Boolean> CheckPersonalID(String PersonalID);
     }
 }

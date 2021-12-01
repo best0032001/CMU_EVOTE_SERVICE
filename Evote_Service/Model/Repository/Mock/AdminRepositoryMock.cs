@@ -1,6 +1,7 @@
 ﻿using Evote_Service.Model.Entity;
 using Evote_Service.Model.Interface;
 using Evote_Service.Model.Util;
+using Evote_Service.Model.View;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -27,12 +28,29 @@ namespace Evote_Service.Model.Repository.Mockw
             throw new NotImplementedException();
         }
 
-        public Task<List<UserEntity>> adminNotApprove(string cmuaccount, int userEntityId, string comment, string clientIP)
+     
+
+        public Task<UserAdminEntity> getAdminByEmail(string cmuaccount)
         {
             throw new NotImplementedException();
         }
 
         public async Task<List<UserEntity>> getUserWaitForApprove(String cmuaccount)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<string> sendLoginOTP(String cmuaccount, String _access_token, String _refresh_token)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<UserAdminEntity> getAdminByOTP(AdminLoginOTPModelview adminLoginOTPModelview, String clientIP)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<UserEntity>> adminNotApprove(string cmuaccount, AdminApproveModelView adminApproveModelView, string clientIP)
         {
             throw new NotImplementedException();
         }

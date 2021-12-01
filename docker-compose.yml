@@ -9,6 +9,8 @@ services:
                 volumes:
                         - /home/cnoc/logsEvoteService:/app/logs
                         - /home/cnoc/uploadphotoid:/app/uploadphotoid
+                        - /home/cnoc/uploadkyc:/app/uploadkyc
+                        - /home/cnoc/uploadface:/app/uploadface
                 restart: always
                 env_file:
                         - .env

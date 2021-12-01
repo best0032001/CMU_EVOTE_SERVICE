@@ -12,6 +12,7 @@ namespace Evote_Service.Model.Util
         public String FullName { get; set; }
         public int UserStage { get; set; }
         public int UserType { get; set; }
+        public String PersonalID { get; set; }
 
         public String Tel { get; set; }
         public String EmailOTPRef { get; set; }
@@ -20,6 +21,8 @@ namespace Evote_Service.Model.Util
         public Boolean IsConfirmTel { get; set; }
         public DateTime? ConfirmTelTime { get; set; }
         public Boolean IsConfirmPersonalID { get; set; }
+        public DateTime? ConfirmPersonalIDTime { get; set; }
         public Boolean IsConfirmKYC { get; set; }
+        public DateTime? ConfirmKYCTime { get; set; }
     }
 }

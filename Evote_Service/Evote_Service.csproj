@@ -19,6 +19,7 @@
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
 	</ItemGroup>
 	<ItemGroup>
+	  <Folder Include="uploadface\" />
 	  <Folder Include="uploadkyc\" />
 	  <Folder Include="uploadphotoid\" />
 	</ItemGroup>

@@ -8,6 +8,9 @@ namespace Evote_Service.Model.View
     public class AdminApproveModelView
     {
         public Int32 userEntityId { get; set; }
+
+        public Boolean IsConfirmPersonalID { get; set; }
+        public Boolean IsConfirmKYC { get; set; }
         public String comment { get; set; }
     }
 }

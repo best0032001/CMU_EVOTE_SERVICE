@@ -50,6 +50,7 @@ namespace Evote_Service.Controllers
         {
             // เมื่อUser เปิด Line UI  ทำการ GetLink Token แล้วส่งมาcheck Service ว่า  LINE ID นี้ Registerระบบหรือยัง
             String lineId = "";
+            String action = "RegisterUserController.getUserLiff";
             try
             {
                 lineId = await getLineUser();
@@ -61,7 +62,7 @@ namespace Evote_Service.Controllers
                 aPIModel.message = "Success";
                 return Ok(aPIModel);
             }
-            catch (Exception ex) { return StatusErrorITSC("line", lineId, "", "CheckUserController.getUserLiff", ex); }
+            catch (Exception ex) { return StatusErrorITSC("line", lineId, "", action, ex); }
         }
 
         [HttpPost("v1/User/RegisLiff")]
@@ -73,6 +74,7 @@ namespace Evote_Service.Controllers
         public async Task<IActionResult> UserRegisLiff([FromBody] UserRegisLiffModelView data)
         {
             String lineId = "";
+            String action = "RegisterUserController.UserRegisLiff";
             try
             {
                 lineId = await getLineUser();
@@ -88,17 +90,17 @@ namespace Evote_Service.Controllers
                 if (await _ICheckUserRepository.RegisLineUser(userEntity) == false)
                 {
                     aPIModel.message = "ระบบขัดข้องบันทึกข้อมูลไม่สำเร็จ";
-                    return StatusCodeITSC("line", lineId, "", "RegisterUserController.UserRegisLiff", 503, aPIModel);
+                    return StatusCodeITSC("line", lineId, "", action, 503, aPIModel);
 
                 }
                 UserModel userModel = await _ICheckUserRepository.GetLineUserModel(lineId);
                 aPIModel.data = userModel;
                 aPIModel.message = "Success";
-                return StatusCodeITSC("line", lineId, userModel.Email, "RegisterUserController.UserRegisLiff", 201, aPIModel);
+                return StatusCodeITSC("line", lineId, userModel.Email, action, 201, aPIModel);
             }
             catch (Exception ex)
             {
-                return StatusErrorITSC("line", lineId, "", "RegisterUserController.UserRegisLiff", ex);
+                return StatusErrorITSC("line", lineId, "", action, ex);
             }
         }
 
@@ -110,9 +112,10 @@ namespace Evote_Service.Controllers
         [ProducesResponseType(typeof(APIModel), (int)HttpStatusCode.NotAcceptable)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(typeof(APIModel), (int)HttpStatusCode.ServiceUnavailable)]
-        public async Task<IActionResult> UserSendemail([FromBody] UserSendModelView data)
+        public async Task<IActionResult> UserSendemail([FromBody] EmailModelView data)
         {
             String lineId = "";
+            String action = "RegisterUserController.UserSendemail";
             try
             {
                 lineId = await getLineUser();
@@ -123,22 +126,22 @@ namespace Evote_Service.Controllers
                 if (await _ICheckUserRepository.checkEmail(data.email.Trim()) == false)
                 {
                     aPIModel.message = "Email นี้มีผู้ลงทะเบียนแล้ว";
-                    return StatusCodeITSC("line", lineId, "", "RegisterUserController.UserSendemail", 406, aPIModel);
+                    return StatusCodeITSC("line", lineId, "", action, 406, aPIModel);
                 }
                 if (await _ICheckUserRepository.UserSendEmail(lineId, data.email.Trim()) == false)
                 {
                     aPIModel.message = "ระบบขัดข้องบันทึกข้อมูลไม่สำเร็จ";
-                    return StatusCodeITSC("line", lineId, "", "RegisterUserController.UserSendemail", 503, aPIModel);
+                    return StatusCodeITSC("line", lineId, "", action, 503, aPIModel);
 
                 }
                 UserModel userModel = await _ICheckUserRepository.GetLineUserModel(lineId);
                 aPIModel.data = userModel;
                 aPIModel.message = "Success";
-                return StatusCodeITSC("line", lineId, userModel.Email, "RegisterUserController.UserSendemail", 200, aPIModel);
+                return StatusCodeITSC("line", lineId, userModel.Email, action, 200, aPIModel);
             }
             catch (Exception ex)
             {
-                return StatusErrorITSC("line", lineId, "", "RegisterUserController.UserSendemail", ex);
+                return StatusErrorITSC("line", lineId, "", action, ex);
             }
         }
 
@@ -149,9 +152,10 @@ namespace Evote_Service.Controllers
         [ProducesResponseType(typeof(APIModel), (int)HttpStatusCode.NotAcceptable)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(typeof(APIModel), (int)HttpStatusCode.ServiceUnavailable)]
-        public async Task<IActionResult> UserSendTel([FromBody] UserSendModelView data)
+        public async Task<IActionResult> UserSendTel([FromBody] TelModelView data)
         {
             String lineId = "";
+            String action = "RegisterUserController.UserSendTel";
             try
             {
                 lineId = await getLineUser();
@@ -162,21 +166,21 @@ namespace Evote_Service.Controllers
                 if (await _ICheckUserRepository.CheckTel(data.tel.Trim()) == false)
                 {
                     aPIModel.message = "เบอร์โทรนี้ นี้มีผู้ลงทะเบียนแล้ว";
-                    return StatusCodeITSC("line", lineId, "", "RegisterUserController.UserSendTel", 406, aPIModel);
+                    return StatusCodeITSC("line", lineId, "", action, 406, aPIModel);
                 }
                 if (await _ICheckUserRepository.UserSendTel(lineId, data.tel.Trim()) == false)
                 {
                     aPIModel.message = "ระบบขัดข้องบันทึกข้อมูลไม่สำเร็จ";
-                    return StatusCodeITSC("line", lineId, "", "RegisterUserController.UserSendTel", 503, aPIModel);
+                    return StatusCodeITSC("line", lineId, "", action, 503, aPIModel);
                 }
                 UserModel userModel = await _ICheckUserRepository.GetLineUserModel(lineId);
                 aPIModel.data = userModel;
                 aPIModel.message = "Success";
-                return StatusCodeITSC("line", lineId, userModel.Email, "RegisterUserController.UserSendTel", 200, aPIModel);
+                return StatusCodeITSC("line", lineId, userModel.Email, action, 200, aPIModel);
             }
             catch (Exception ex)
             {
-                return StatusErrorITSC("line", lineId, "", "RegisterUserController.UserSendTel", ex);
+                return StatusErrorITSC("line", lineId, "", action, ex);
             }
         }
 
@@ -186,9 +190,10 @@ namespace Evote_Service.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(typeof(APIModel), (int)HttpStatusCode.ServiceUnavailable)]
-        public async Task<IActionResult> UserSendSMSOTP([FromBody] UserSendModelView data)
+        public async Task<IActionResult> UserSendSMSOTP([FromBody] OTPModelview data)
         {
             String lineId = "";
+            String action = "RegisterUserController.UserSendSMSOTP";
             try
             {
                 lineId = await getLineUser();
@@ -198,17 +203,17 @@ namespace Evote_Service.Controllers
                 if (await _ICheckUserRepository.UserConfirmSMSOTP(lineId, data.otp) == false)
                 {
                     aPIModel.message = "รหัส OTP ไม่ถูกต้อง";
-                    return StatusCodeITSC("line", lineId, "", "RegisterUserController.UserSendSMSOTP", 503, aPIModel);
+                    return StatusCodeITSC("line", lineId, "", action, 503, aPIModel);
 
                 }
                 UserModel userModel = await _ICheckUserRepository.GetLineUserModel(lineId);
                 aPIModel.data = userModel;
                 aPIModel.message = "Success";
-                return StatusCodeITSC("line", lineId, userModel.Email, "RegisterUserController.UserSendSMSOTP", 200, aPIModel);
+                return StatusCodeITSC("line", lineId, userModel.Email, action, 200, aPIModel);
             }
             catch (Exception ex)
             {
-                return StatusErrorITSC("line", lineId, "", "RegisterUserController.UserSendSMSOTP", ex);
+                return StatusErrorITSC("line", lineId, "", action, ex);
             }
         }
 
@@ -244,9 +249,10 @@ namespace Evote_Service.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(typeof(APIModel), (int)HttpStatusCode.ServiceUnavailable)]
-        public async Task<IActionResult> UserSendEmailOTP([FromBody] UserSendModelView data)
+        public async Task<IActionResult> UserSendEmailOTP([FromBody] OTPModelview data)
         {
             String lineId = "";
+            String action = "RegisterUserController.UserSendEmailOTP";
             try
             {
                 lineId = await getLineUser();
@@ -258,19 +264,24 @@ namespace Evote_Service.Controllers
                 if (await _ICheckUserRepository.UserConfirmEmailOTP(lineId, data.otp) == false)
                 {
                     aPIModel.message = "รหัส OTP ไม่ถูกต้อง";
-                    return StatusCodeITSC("line", lineId, "", "RegisterUserController.UserSendEmailOTP", 503, aPIModel);
+                    return StatusCodeITSC("line", lineId, "", action, 503, aPIModel);
 
                 }
                 UserModel userModel = await _ICheckUserRepository.GetLineUserModel(lineId);
                 aPIModel.data = userModel;
                 aPIModel.message = "Success";
-                return StatusCodeITSC("line", lineId, userModel.Email, "RegisterUserController.UserSendEmailOTP", 200, aPIModel);
+                return StatusCodeITSC("line", lineId, userModel.Email, action, 200, aPIModel);
             }
             catch (Exception ex)
             {
-                return StatusErrorITSC("line", lineId, "", "RegisterUserController.UserSendEmailOTP", ex);
+                return StatusErrorITSC("line", lineId, "", action, ex);
             }
         }
+
+
+        /// <summary>
+        /// API สำหรับ Upload รูปบัตรประชาชน
+        /// </summary>
 
         [HttpPost("v1/User/photoId")]
         [ProducesResponseType(typeof(UserModel), (int)HttpStatusCode.OK)]
@@ -278,9 +289,10 @@ namespace Evote_Service.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(typeof(APIModel), (int)HttpStatusCode.ServiceUnavailable)]
-        public async Task<IActionResult> UserPostphotoId([FromBody] string body)
+        public async Task<IActionResult> UserPostphotoId(IFormFile filename, [FromHeader] String personalid)
         {
             String lineId = "";
+            String action = "RegisterUserController.UserPostphotoId";
             try
             {
                 lineId = await getLineUser();
@@ -288,14 +300,20 @@ namespace Evote_Service.Controllers
 
                 int countFiles = Request.Form.Files.Count;
                 if (countFiles != 1) { return BadRequest(); }
-                IFormFile file01 = Request.Form.Files["filename"];
+                //    IFormFile file01 = Request.Form.Files["filename"];
+                IFormFile file01 = filename;
                 var path = Path.Combine(Directory.GetCurrentDirectory(), "uploadphotoid");
                 FileModel fileModel = this.SaveFile(path, file01, 20);
                 APIModel aPIModel = new APIModel();
-                if (await _ICheckUserRepository.UserPostphotoId(lineId, fileModel) == false)
+                if (await _ICheckUserRepository.CheckPersonalID(personalid) == false)
+                {
+                    aPIModel.message = "เลขบัตรนี้มีผู้ใช้งานแล้ว";
+                    return StatusCodeITSC("line", lineId, "", action, 406, aPIModel);
+                }
+                if (await _ICheckUserRepository.UserPostphotoId(lineId, fileModel, personalid) == false)
                 {
                     aPIModel.message = "ระบบขัดข้องบันทึกข้อมูลไม่สำเร็จ";
-                    return StatusCodeITSC("line", lineId, "", "RegisterUserController.UserPostphotoId", 503, aPIModel);
+                    return StatusCodeITSC("line", lineId, "", action, 503, aPIModel);
 
                 }
 
@@ -303,11 +321,11 @@ namespace Evote_Service.Controllers
                 UserModel userModel = await _ICheckUserRepository.GetLineUserModel(lineId);
                 aPIModel.data = userModel;
                 aPIModel.message = "Success";
-                return StatusCodeITSC("line", lineId, userModel.Email, "RegisterUserController.UserPostphotoId", 200, aPIModel);
+                return StatusCodeITSC("line", lineId, userModel.Email, action, 200, aPIModel);
             }
             catch (Exception ex)
             {
-                return StatusErrorITSC("line", lineId, "", "RegisterUserController.UserPostphotoId", ex);
+                return StatusErrorITSC("line", lineId, "", action, ex);
             }
         }
 
@@ -321,6 +339,7 @@ namespace Evote_Service.Controllers
         public async Task<IActionResult> UserGetphotoId()
         {
             String lineId = "";
+            String action = "RegisterUserController.UserGetphotoId";
             try
             {
                 lineId = await getLineUser();
@@ -333,45 +352,54 @@ namespace Evote_Service.Controllers
             }
             catch (Exception ex)
             {
-                return StatusErrorITSC("line", lineId, "", "RegisterUserController.UserGetphotoId", ex);
+                return StatusErrorITSC("line", lineId, "", action, ex);
             }
         }
 
 
+        /// <summary>
+        /// API สำหรับ Upload การทำ KYC
+        /// </summary>
         [HttpPost("v1/User/kyc")]
         [ProducesResponseType(typeof(UserModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(typeof(APIModel), (int)HttpStatusCode.ServiceUnavailable)]
-        public async Task<IActionResult> UserPostKyc([FromBody] string body)
+        public async Task<IActionResult> UserPostKyc(IFormFile filename, IFormFile face, IFormCollection facedata)
         {
             String lineId = "";
+            String action = "RegisterUserController.UserPostKyc";
             try
             {
                 lineId = await getLineUser();
                 if (lineId == "unauthorized") { return Unauthorized(); }
 
                 int countFiles = Request.Form.Files.Count;
-                if (countFiles != 1) { return BadRequest(); }
-                IFormFile file01 = Request.Form.Files["filename"];
-                var path = Path.Combine(Directory.GetCurrentDirectory(), "uploadkyc");
-                FileModel fileModel = this.SaveFile(path, file01, 20);
+                if (countFiles != 2) { return BadRequest(); }
+                IFormFile fileKYC = filename;
+                IFormFile fileFace = face;
+                var pathKYC = Path.Combine(Directory.GetCurrentDirectory(), "uploadkyc");
+                var pathFace = Path.Combine(Directory.GetCurrentDirectory(), "uploadface");
+                FileModel fileModelKYC = this.SaveFile(pathKYC, fileKYC, 20);
+                FileModel fileModelFace = this.SaveFile(pathKYC, fileFace, 20);
+                String _facedata = facedata["facedata"];
+
                 APIModel aPIModel = new APIModel();
-                if (await _ICheckUserRepository.UserPostphotoKyc(lineId, fileModel) == false)
+                if (await _ICheckUserRepository.UserPostphotoKyc(lineId, fileModelKYC, fileModelFace, _facedata) == false)
                 {
                     aPIModel.message = "ระบบขัดข้องบันทึกข้อมูลไม่สำเร็จ";
-                    return StatusCodeITSC("line", lineId, "", "RegisterUserController.UserPostKyc", 503, aPIModel);
+                    return StatusCodeITSC("line", lineId, "", action, 503, aPIModel);
 
                 }
                 UserModel userModel = await _ICheckUserRepository.GetLineUserModel(lineId);
                 aPIModel.data = userModel;
                 aPIModel.message = "Success";
-                return StatusCodeITSC("line", lineId, userModel.Email, "RegisterUserController.UserPostKyc", 200, aPIModel);
+                return StatusCodeITSC("line", lineId, userModel.Email, action, 200, aPIModel);
             }
             catch (Exception ex)
             {
-                return StatusErrorITSC("line", lineId, "", "RegisterUserController.UserPostKyc", ex);
+                return StatusErrorITSC("line", lineId, "", action, ex);
             }
         }
         [HttpGet("v1/User/kyc")]
@@ -383,6 +411,7 @@ namespace Evote_Service.Controllers
         public async Task<IActionResult> UserGetKyc()
         {
             String lineId = "";
+            String action = "RegisterUserController.UserGetphotoId";
             try
             {
                 lineId = await getLineUser();
@@ -395,7 +424,7 @@ namespace Evote_Service.Controllers
             }
             catch (Exception ex)
             {
-                return StatusErrorITSC("line", lineId, "", "RegisterUserController.UserGetphotoId", ex);
+                return StatusErrorITSC("line", lineId, "", action, ex);
             }
         }
 

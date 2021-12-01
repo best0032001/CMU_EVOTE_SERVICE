@@ -21,7 +21,7 @@ namespace Evote_Service.Model.Repository
         public async Task<string> getOTP(String RefCode, String tel)
         {
             Random _random = new Random();
-            String Code = _random.Next(0, 9999).ToString("D4");
+            String Code = _random.Next(0, 999999).ToString("D6");
 
             String SMS_API = Environment.GetEnvironmentVariable("SMS_API");
             String SMS_SENDER = Environment.GetEnvironmentVariable("SMS_SENDER");
@@ -38,7 +38,7 @@ namespace Evote_Service.Model.Repository
             SMSMessages sMSMessages = new SMSMessages();
             sMSMessages.from = SMS_SENDER;
             sMSMessages.destinations = new List<SMSdestinations>();
-            sMSMessages.text = "รหัส OTP ของคุณคือ " + Code + "Ref code " + RefCode;
+            sMSMessages.text = "CMU E-vote: The SMS-OTP is " + Code + " ( Ref Code " + RefCode + ")";
 
             SMSdestinations sMSdestinations = new SMSdestinations();
             sMSdestinations.to = tel;

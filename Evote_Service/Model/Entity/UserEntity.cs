@@ -12,6 +12,7 @@ namespace Evote_Service.Model.Entity
         public String Organization_Code { get; set; }
         public String Organization_Name_TH { get; set; }
         public String FullName { get; set; }
+        public String PersonalID { get; set; }
         public String Tel { get; set; }
         public int UserStage { get; set; }   //0  no regis //1 regis 2 confirm 3 approve
         public int UserType { get; set; } // 1 CMU 2 non CMU
@@ -29,18 +30,25 @@ namespace Evote_Service.Model.Entity
         public Boolean IsConfirmTel { get; set; }
         public DateTime? ConfirmTelTime { get; set; }
 
-
+    
         public Boolean IsConfirmPersonalID { get; set; }
+        public DateTime? ConfirmPersonalIDTime { get; set; }
         public String fileNamePersonalID { get; set; }
         public String fullPathPersonalID { get; set; }
         public String dbPathPersonalID { get; set; }
-
+     
 
         public Boolean IsConfirmKYC { get; set; }
-
+        public DateTime? ConfirmKYCTime { get; set; }
         public String fileNameKYC { get; set; }
         public String fullPathKYC { get; set; }
         public String dbPathKYC { get; set; }
+
+        public String fileNameFace { get; set; }
+        public String fullPathFace { get; set; }
+        public String dbPathFace { get; set; }
+
+        public String faceData { get; set; }
 
         public String AdminApproved { get; set; }
         public String AdminApprovedIP { get; set; }

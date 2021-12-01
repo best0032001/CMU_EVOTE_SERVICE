@@ -27,6 +27,7 @@ namespace Evote_Service
     {
         private IWebHostEnvironment webHostEnvironment;
         private readonly string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+        private readonly string swaggerBasePath = "api/app";
         public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
@@ -124,6 +125,7 @@ namespace Evote_Service
             {
                 app.UseDeveloperExceptionPage();
             }
+
             app.UseSwagger();
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "E-vote Service v1"));
 
@@ -144,6 +146,16 @@ namespace Evote_Service
                 if (url.Contains("/api/login"))
                 {
                     String redirect_uri = Environment.GetEnvironmentVariable("CMU_REDIRECT_URL");
+                    String client_id = Environment.GetEnvironmentVariable("CMU_CLIENT_ID");
+                    String oauth_scope = Environment.GetEnvironmentVariable("CMU_OAUTH_SCOPE");
+                    String oauth_authorize_url = Environment.GetEnvironmentVariable("CMU_OAUTH_URL"); ;
+                    String oauthUrl = "" + oauth_authorize_url + "?response_type=code&client_id=" + client_id + "&redirect_uri=" + redirect_uri + "&scope=" + oauth_scope;
+                    context.Response.Redirect(oauthUrl);
+                    return;   // short circuit
+                }
+                if (url.Contains("/api/loginadmin"))
+                {
+                    String redirect_uri = Environment.GetEnvironmentVariable("CMU_REDIRECT_ADMINURL");
                     String client_id = Environment.GetEnvironmentVariable("CMU_CLIENT_ID");
                     String oauth_scope = Environment.GetEnvironmentVariable("CMU_OAUTH_SCOPE");
                     String oauth_authorize_url = Environment.GetEnvironmentVariable("CMU_OAUTH_URL"); ;
