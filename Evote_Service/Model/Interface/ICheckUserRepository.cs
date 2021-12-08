@@ -28,7 +28,7 @@ namespace Evote_Service.Model.Interface
 
         Task<Boolean> UserPostphotoId(String lineId, FileModel fileModel,String PersonalID);
 
-        Task<Boolean> UserPostphotoKyc(String lineId, FileModel fileModelKYC, FileModel fileModelFace, String facedata);
+        Task<Boolean> UserPostphotoKyc(String lineId, FileModel fileModelFace, String facedata);
 
         Task<Boolean> CheckPersonalID(String PersonalID);
     }

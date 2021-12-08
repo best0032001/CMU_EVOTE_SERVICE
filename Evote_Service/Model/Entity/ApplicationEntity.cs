@@ -11,8 +11,12 @@ namespace Evote_Service.Model.Entity
 
         public String ApplicationName { get; set; }
 
+        public String ClientId { get; set; }
+
+        public Boolean LineAuth { get; set; }
+        public Boolean CMUAuth { get; set; }
         public String ServerProductionIP { get; set; }
-        public String ServerDevIP { get; set; }
+
         public List<EventVoteEntity> EventVoteEntitys { get; set; }
     }
 }

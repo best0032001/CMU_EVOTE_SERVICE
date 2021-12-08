@@ -15,63 +15,59 @@ using System.Threading.Tasks;
 namespace ApiTest.Test
 {
     [TestClass]
-    public class AdminApproveTest
+    public class EventTest
     {
         private HttpClient _client;
         private CustomWebApplicationFactory<Startup> app;
 
-        public AdminApproveTest()
+        public EventTest()
         {
             app = new CustomWebApplicationFactory<Startup>();
             _client = app.CreateClient();
         }
 
         [TestMethod]
-        public async Task TestAdminApprove()
+        public async Task TestEvent()
         {
             _client = app.CreateClient();
             _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             _client.DefaultRequestHeaders.Add("Authorization", "Bearer a01");
 
-            var response = await _client.GetAsync("api/v1/Admin/Approve");
+            var response = await _client.GetAsync("api/v1/Event?ApplicationEntityId=" + 1);
             Assert.IsTrue((int)response.StatusCode == 200);
             String responseString = await response.Content.ReadAsStringAsync();
             APIModel dataTemp = JsonConvert.DeserializeObject<APIModel>(responseString);
             Assert.IsTrue(dataTemp.message == "Success");
             String data = JsonConvert.SerializeObject(dataTemp.data);
-            List<UserEntity> userEntities = JsonConvert.DeserializeObject<List<UserEntity>>(data);
-            Assert.IsTrue(userEntities.Count > 0);
+            List<EventVoteEntity> eventVoteEntities = JsonConvert.DeserializeObject<List<EventVoteEntity>>(data);
+            Assert.IsTrue(eventVoteEntities.Count == 0);
 
-            AdminApproveModelView adminApproveModelView = new AdminApproveModelView();
-            adminApproveModelView.userEntityId = userEntities[0].UserEntityId;
-            adminApproveModelView.comment = "test";
-            String json = JsonConvert.SerializeObject(adminApproveModelView);
+            EventModelview eventModelview = new EventModelview();
+            eventModelview.EventTitle = "Test";
+            eventModelview.EventDetail = "Test";
+            eventModelview.Organization_Code = "00";
+            eventModelview.OrganizationFullNameTha = "00";
+            eventModelview.EventRegisterStart = DateTime.Now;
+            eventModelview.EventRegisterEnd = DateTime.Now;
+            eventModelview.EventVotingStart = DateTime.Now;
+            eventModelview.EventVotingEnd = DateTime.Now;
+
+
+            String json = JsonConvert.SerializeObject(eventModelview);
             var content = new StringContent(json);
             content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
-            response = await _client.PutAsync("api/v1/Admin/NotApprove", content);
-       
+            response = await _client.PostAsync("api/v1/Event?ApplicationEntityId=" + 1, content);
             Assert.IsTrue((int)response.StatusCode == 200);
 
             responseString = await response.Content.ReadAsStringAsync();
             dataTemp = JsonConvert.DeserializeObject<APIModel>(responseString);
             Assert.IsTrue(dataTemp.message == "Success");
             data = JsonConvert.SerializeObject(dataTemp.data);
-            userEntities = JsonConvert.DeserializeObject<List<UserEntity>>(data);
-            Assert.IsTrue(userEntities.Count == 0);
+            EventConfirmModelview eventConfirmModelview = JsonConvert.DeserializeObject<EventConfirmModelview>(data);
 
-
-
-            //json = "{ \"userEntityId\":\"" + userEntities[0].UserEntityId + "\"}";
-            //response = await _client.PutAsync("api/v1/User/Approve", new StringContent(json));
-            //Assert.IsTrue((int)response.StatusCode == 200);
-
-            //responseString = await response.Content.ReadAsStringAsync();
-            //dataTemp = JsonConvert.DeserializeObject<APIModel>(responseString);
-            //Assert.IsTrue(dataTemp.message == "Success");
-            //data = JsonConvert.SerializeObject(dataTemp.data);
-            //userEntities = JsonConvert.DeserializeObject<List<UserEntity>>(data);
-            //Assert.IsTrue(userEntities.Count == 0);
-
+            Assert.IsTrue(eventConfirmModelview.SecretKey.Count() > 0);
         }
+
+
     }
 }

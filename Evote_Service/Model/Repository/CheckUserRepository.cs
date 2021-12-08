@@ -174,14 +174,14 @@ namespace Evote_Service.Model.Repository
             return userEntitys;
         }
 
-        public async Task<bool> UserPostphotoKyc(string lineId, FileModel fileModelKYC, FileModel fileModelFace, String faceData)
+        public async Task<bool> UserPostphotoKyc(string lineId, FileModel fileModelFace, String faceData)
         {
             UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.LineId == lineId).FirstOrDefault();
             if (userEntitys == null) { return false; }
             if (userEntitys.UserStage != 1) { return false; }
-            userEntitys.fileNameKYC = fileModelKYC.fileName;
-            userEntitys.fullPathKYC = fileModelKYC.fullPath;
-            userEntitys.dbPathKYC = fileModelKYC.dbPath;
+            //userEntitys.fileNameKYC = fileModelKYC.fileName;
+            //userEntitys.fullPathKYC = fileModelKYC.fullPath;
+            //userEntitys.dbPathKYC = fileModelKYC.dbPath;
 
             userEntitys.fileNameFace = fileModelFace.fileName;
             userEntitys.fullPathFace = fileModelFace.fullPath;
@@ -216,6 +216,18 @@ namespace Evote_Service.Model.Repository
             userEntity.UserStage = 1;
             _evoteContext.UserEntitys.Add(userEntity);
             _evoteContext.SaveChanges();
+
+            List<VoterEntity> voterEntitys= _evoteContext.VoterEntitys.Where(w => w.Email == userEntity.Email).ToList();
+            foreach (VoterEntity voterEntity in voterEntitys)
+            {
+                EventVoteEntity eventVoteEntity= _evoteContext.EventVoteEntitys.Where(w => w.EventVoteEntityId == voterEntity.EventVoteEntityId).FirstOrDefault();
+                if (eventVoteEntity != null)
+                {
+                    userEntity.eventVoteEntities.Add(eventVoteEntity);
+                }
+            }
+            _evoteContext.SaveChanges();
+
             return true;
         }
     }

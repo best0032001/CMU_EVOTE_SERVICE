@@ -53,14 +53,21 @@ namespace Evote_Service.Model
         {
             setDefaultAdmin();
             setRefUserStage();
+            setApplicationTest();
         }
         private void setDefaultAdmin()
         {
-            UserAdminEntity userAdminEntity = new UserAdminEntity();
-            userAdminEntity.Cmuaccount = "cheewin.b@cmu.ac.th";
-            userAdminEntity.SuperAdmin = true;
-            _evoteContext.UserAdminEntitys.Add(userAdminEntity);
-            _evoteContext.SaveChanges();
+
+            UserAdminEntity model= _evoteContext.UserAdminEntitys.Where(w => w.Cmuaccount == "cheewin.b@cmu.ac.th").FirstOrDefault();
+            if (model == null)
+            {
+                UserAdminEntity userAdminEntity = new UserAdminEntity();
+                userAdminEntity.Cmuaccount = "cheewin.b@cmu.ac.th";
+                userAdminEntity.SuperAdmin = true;
+                _evoteContext.UserAdminEntitys.Add(userAdminEntity);
+                _evoteContext.SaveChanges();
+            }
+    
         }
         private void setRefUserStage()
         {
@@ -91,6 +98,25 @@ namespace Evote_Service.Model
                 _evoteContext.RefUserStages.Add(refUserStage4);
                 _evoteContext.SaveChanges();
             }
+        }
+
+        private void setApplicationTest()
+        {
+            List<ApplicationEntity> list = _evoteContext.ApplicationEntitys.ToList();
+            if (list.Count == 0)
+            {
+                ApplicationEntity applicationEntity = new ApplicationEntity();
+                applicationEntity.ApplicationName = "ApplicationNametest";
+                applicationEntity.ClientId = "ClientIdtest";
+                applicationEntity.LineAuth = true;
+                applicationEntity.CMUAuth = false;
+                applicationEntity.ServerProductionIP = "10.10.10.prod";
+                applicationEntity.EventVoteEntitys = new List<EventVoteEntity>();
+                _evoteContext.ApplicationEntitys.Add(applicationEntity);
+                _evoteContext.SaveChanges();
+            }
+              
+
         }
     }
 }

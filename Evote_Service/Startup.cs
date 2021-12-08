@@ -58,7 +58,8 @@ namespace Evote_Service
             services.AddDbContext<EvoteContext>(options => options.UseInMemoryDatabase(databaseName: "ApplicationDBContext").ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning)));
             services.AddScoped<ICheckUserRepository, CheckUserRepository>();
             services.AddScoped<IAdminRepository, AdminRepository>();
-
+            services.AddScoped<IUserRepository,UserRepository>();
+            services.AddScoped<IEventRepository, EventRepository>();
             services.AddCors(options =>
             {
                 options.AddPolicy(name: MyAllowSpecificOrigins,

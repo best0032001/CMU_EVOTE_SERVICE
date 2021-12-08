@@ -62,5 +62,7 @@ namespace Evote_Service.Model.Entity
         public String Access_token { get; set; }
         public String Refresh_token { get; set; }
         public String Expires_in { get; set; }
+
+        public List<EventVoteEntity> eventVoteEntities { get; set; }
     }
 }

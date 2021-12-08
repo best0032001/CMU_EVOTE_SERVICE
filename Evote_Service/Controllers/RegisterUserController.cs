@@ -82,6 +82,7 @@ namespace Evote_Service.Controllers
                 if (data.firstName == "" || data.lastName == "") { return BadRequest(); }
 
                 UserEntity userEntity = new UserEntity();
+                userEntity.eventVoteEntities = new List<EventVoteEntity>();
                 userEntity.FullName = data.firstName + " " + data.lastName;
                 userEntity.Email = "";
                 userEntity.LineId = lineId;
@@ -366,7 +367,7 @@ namespace Evote_Service.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(typeof(APIModel), (int)HttpStatusCode.ServiceUnavailable)]
-        public async Task<IActionResult> UserPostKyc(IFormFile filename, IFormFile face, IFormCollection facedata)
+        public async Task<IActionResult> UserPostKyc(IFormFile face, IFormCollection facedata)
         {
             String lineId = "";
             String action = "RegisterUserController.UserPostKyc";
@@ -377,16 +378,16 @@ namespace Evote_Service.Controllers
 
                 int countFiles = Request.Form.Files.Count;
                 if (countFiles != 2) { return BadRequest(); }
-                IFormFile fileKYC = filename;
+               // IFormFile fileKYC = filename;
                 IFormFile fileFace = face;
-                var pathKYC = Path.Combine(Directory.GetCurrentDirectory(), "uploadkyc");
+              //  var pathKYC = Path.Combine(Directory.GetCurrentDirectory(), "uploadkyc");
                 var pathFace = Path.Combine(Directory.GetCurrentDirectory(), "uploadface");
-                FileModel fileModelKYC = this.SaveFile(pathKYC, fileKYC, 20);
-                FileModel fileModelFace = this.SaveFile(pathKYC, fileFace, 20);
+               // FileModel fileModelKYC = this.SaveFile(pathKYC, fileKYC, 20);
+                FileModel fileModelFace = this.SaveFile(pathFace, fileFace, 20);
                 String _facedata = facedata["facedata"];
 
                 APIModel aPIModel = new APIModel();
-                if (await _ICheckUserRepository.UserPostphotoKyc(lineId, fileModelKYC, fileModelFace, _facedata) == false)
+                if (await _ICheckUserRepository.UserPostphotoKyc(lineId, fileModelFace, _facedata) == false)
                 {
                     aPIModel.message = "ระบบขัดข้องบันทึกข้อมูลไม่สำเร็จ";
                     return StatusCodeITSC("line", lineId, "", action, 503, aPIModel);

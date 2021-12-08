@@ -32,7 +32,7 @@ namespace Evote_Service.Controllers
             _IAdminRepository = IAdminRepository;
         }
 
-        [HttpGet("v1/User/Approve")]
+        [HttpGet("v1/Admin/Approve")]
         [ProducesResponseType(typeof(UserEntity), (int)HttpStatusCode.OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -59,7 +59,7 @@ namespace Evote_Service.Controllers
             catch (Exception ex) { return StatusErrorITSC("CMU", "", Cmuaccount, action, ex); }
         }
 
-        [HttpPut("v1/User/Approve")]
+        [HttpPut("v1/Admin/Approve")]
         [ProducesResponseType(typeof(UserEntity), (int)HttpStatusCode.OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -90,7 +90,7 @@ namespace Evote_Service.Controllers
             }
         }
 
-        [HttpPut("v1/User/NotApprove")]
+        [HttpPut("v1/Admin/NotApprove")]
         [ProducesResponseType(typeof(UserEntity), (int)HttpStatusCode.OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

@@ -114,6 +114,7 @@ namespace Evote_Service.Controllers
                     return StatusCodeITSC("line", lineId, "", "LoginController.callback", 406, aPIModel);
                 }
                 userEntity = new UserEntity();
+                userEntity.eventVoteEntities = new List<EventVoteEntity>();
                 userEntity.Email = responseprofile.cmuitaccount;
                 userEntity.IsConfirmEmail = true;
                 userEntity.Organization_Code = responseprofile.organization_code;
