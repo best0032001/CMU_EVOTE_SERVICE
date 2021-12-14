@@ -106,7 +106,13 @@ namespace Evote_Service.Controllers
             }
             else
             {
-                cmuaccount= DataCache.AdminMocks.Where(w => w.token == token).First().Cmuaccount;
+                try {
+                    cmuaccount = DataCache.AdminMocks.Where(w => w.token == token).First().Cmuaccount;
+                }
+                catch {
+                    cmuaccount = DataCache.UserMocks.Where(w => w.token == token).First().email;
+                }
+                
             }
 
             return cmuaccount;

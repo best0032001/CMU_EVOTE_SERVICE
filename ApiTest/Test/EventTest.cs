@@ -37,10 +37,10 @@ namespace ApiTest.Test
             Assert.IsTrue((int)response.StatusCode == 200);
             String responseString = await response.Content.ReadAsStringAsync();
             APIModel dataTemp = JsonConvert.DeserializeObject<APIModel>(responseString);
-            Assert.IsTrue(dataTemp.message == "Success");
+            Assert.IsTrue(dataTemp.title == "Success");
             String data = JsonConvert.SerializeObject(dataTemp.data);
             List<EventVoteEntity> eventVoteEntities = JsonConvert.DeserializeObject<List<EventVoteEntity>>(data);
-            Assert.IsTrue(eventVoteEntities.Count == 0);
+            Assert.IsTrue(eventVoteEntities.Count == 1);
 
             EventModelview eventModelview = new EventModelview();
             eventModelview.EventTitle = "Test";
@@ -51,7 +51,10 @@ namespace ApiTest.Test
             eventModelview.EventRegisterEnd = DateTime.Now;
             eventModelview.EventVotingStart = DateTime.Now;
             eventModelview.EventVotingEnd = DateTime.Now;
-
+            EventInformation eventInformation = new EventInformation();
+            eventInformation.TestData1 = "TestData1";
+            eventInformation.TestData2 = "TestData2";
+            eventModelview.EventInformation = JsonConvert.SerializeObject(eventInformation);
 
             String json = JsonConvert.SerializeObject(eventModelview);
             var content = new StringContent(json);
@@ -61,7 +64,7 @@ namespace ApiTest.Test
 
             responseString = await response.Content.ReadAsStringAsync();
             dataTemp = JsonConvert.DeserializeObject<APIModel>(responseString);
-            Assert.IsTrue(dataTemp.message == "Success");
+            Assert.IsTrue(dataTemp.title == "Success");
             data = JsonConvert.SerializeObject(dataTemp.data);
             EventConfirmModelview eventConfirmModelview = JsonConvert.DeserializeObject<EventConfirmModelview>(data);
 
@@ -69,5 +72,10 @@ namespace ApiTest.Test
         }
 
 
+        class EventInformation
+        {
+            public String TestData1 { get; set; }
+            public String TestData2 { get; set; }
+        }
     }
 }

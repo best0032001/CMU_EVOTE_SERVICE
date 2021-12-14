@@ -49,6 +49,16 @@ namespace Evote_Service.Model.Repository
             userEntity.AdminApprovedIP = clientIP;
             userEntity.AdminApproved = cmuaccount;
             userEntity.ApprovedTime = DateTime.Now;
+
+            List<VoterEntity> voterEntitys = _evoteContext.VoterEntitys.Where(w => w.Email == userEntity.Email).ToList();
+            foreach (VoterEntity voterEntity in voterEntitys)
+            {
+                EventVoteEntity eventVoteEntity = _evoteContext.EventVoteEntitys.Where(w => w.EventVoteEntityId == voterEntity.EventVoteEntityId).FirstOrDefault();
+                if (eventVoteEntity != null)
+                {
+                    userEntity.eventVoteEntities.Add(eventVoteEntity);
+                }
+            }
             _evoteContext.SaveChanges();
 
             await _emailRepository.SendEmailAsync("CMU Evote service", userEntity.Email, "การยืนยันตัวของท่านได้รับการตรวจสอบแล้ว", "  ", null);

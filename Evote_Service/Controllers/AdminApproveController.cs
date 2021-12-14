@@ -52,7 +52,7 @@ namespace Evote_Service.Controllers
                 if (userEntities == null) { return Unauthorized(); }
                 APIModel aPIModel = new APIModel();
                 aPIModel.data = userEntities;
-                aPIModel.message = "Success";
+                aPIModel.title = "Success";
                 return StatusCodeITSC("CMU", "", Cmuaccount, action, 200, aPIModel);
 
             }
@@ -81,7 +81,7 @@ namespace Evote_Service.Controllers
                 if (userEntities == null) { return Unauthorized(); }
                 APIModel aPIModel = new APIModel();
                 aPIModel.data = userEntities;
-                aPIModel.message = "Success";
+                aPIModel.title = "Success";
 
                 return StatusCodeITSC("CMU", "", Cmuaccount, action, 200, aPIModel);
             }
@@ -108,7 +108,7 @@ namespace Evote_Service.Controllers
                 if (userEntities == null) { return Unauthorized(); }
                 APIModel aPIModel = new APIModel();
                 aPIModel.data = userEntities;
-                aPIModel.message = "Success";
+                aPIModel.title = "Success";
                 return StatusCodeITSC("CMU", "", Cmuaccount, "AdminApproveController.adminNotApprove", 200, aPIModel);
             }
             catch (Exception ex) { return StatusErrorITSC("CMU", "", Cmuaccount, "AdminApproveController.adminNotApprove", ex); }

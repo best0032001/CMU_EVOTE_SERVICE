@@ -27,10 +27,10 @@ namespace Evote_Service.Model.Repository
             _clientFactory = clientFactory;
 
         }
-        public async Task<UserEntity> getEvent(string lineId, int EventStatusId)
+        public async Task<UserEntity> getEvent(string lineId)
         {
 
-            UserEntity userEntity = _evoteContext.UserEntitys.Where(w => w.LineId == lineId).Include(i => i.eventVoteEntities.Where(e => e.EventStatusId == EventStatusId)).First();
+            UserEntity userEntity = _evoteContext.UserEntitys.Where(w => w.LineId == lineId).Include(i => i.eventVoteEntities).First();
 
             return userEntity;
         }

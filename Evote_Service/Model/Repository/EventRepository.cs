@@ -19,6 +19,7 @@ namespace Evote_Service.Model.Repository
     public class EventRepository : IEventRepository
     {
         private EvoteContext _evoteContext;
+
         private readonly IHttpClientFactory _clientFactory;
         public EventRepository(EvoteContext evoteContext, IHttpClientFactory clientFactory, ISMSRepository sMSRepository, IEmailRepository emailRepository)
         {
@@ -33,10 +34,10 @@ namespace Evote_Service.Model.Repository
 
         public async Task<ApplicationEntity> getApplicationEntity(int ApplicationEntityId)
         {
-            return _evoteContext.ApplicationEntitys.Where(w => w.ApplicationEntityId == ApplicationEntityId).Include(i=>i.EventVoteEntitys).FirstOrDefault();
+            return _evoteContext.ApplicationEntitys.Where(w => w.ApplicationEntityId == ApplicationEntityId).Include(i => i.EventVoteEntitys).FirstOrDefault();
         }
 
-        public async Task<EventConfirmModelview> addEvent(int ApplicationEntityId,EventModelview eventModelview, String cmuaccount)
+        public async Task<EventConfirmModelview> addEvent(int ApplicationEntityId, EventModelview eventModelview, String cmuaccount)
         {
             EventConfirmModelview eventConfirmModelview = new EventConfirmModelview();
 
@@ -44,7 +45,7 @@ namespace Evote_Service.Model.Repository
             const string chars = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789";
             String code = new string(Enumerable.Repeat(chars, 28)
               .Select(s => s[_random.Next(s.Length)]).ToArray());
-           
+
             EventVoteEntity eventVoteEntity = new EventVoteEntity();
             eventVoteEntity.EventStatusId = 2;
             eventVoteEntity.ApplicationEntityId = ApplicationEntityId;
@@ -52,6 +53,7 @@ namespace Evote_Service.Model.Repository
             eventVoteEntity.SecretKey = code;
             eventVoteEntity.SecurityAlgorithm = SecurityAlgorithms.HmacSha256Signature;
             eventVoteEntity.EventTitle = eventModelview.EventTitle;
+            eventVoteEntity.EventInformation = eventModelview.EventInformation;
             eventVoteEntity.EventDetail = eventModelview.EventDetail;
             eventVoteEntity.CreateUser = cmuaccount;
             eventVoteEntity.UpdateUser = cmuaccount;
@@ -81,6 +83,41 @@ namespace Evote_Service.Model.Repository
             eventConfirmModelview.EventVotingEnd = eventVoteEntity.EventVotingEnd;
 
             return eventConfirmModelview;
+        }
+
+        public async Task<bool> addVote(VoterModelview voterModelview, string cmuaccount)
+        {
+            Boolean check = false;
+            List<UserEntity> userEntitys= _evoteContext.UserEntitys.Where(w=>w.UserStage==3).Include(i=>i.eventVoteEntities).ToList();
+            EventVoteEntity eventVoteEntity= _evoteContext.EventVoteEntitys.Where(w => w.EventVoteEntityId == voterModelview.EventVoteEntityId).Include(i=>i.voterEntities).First();
+            foreach (PeopleModelview peopleModelview in voterModelview.peopleModelviews)
+            {
+                if (eventVoteEntity.voterEntities.Where(w => w.Email == peopleModelview.Email).FirstOrDefault() == null)
+                {
+                    VoterEntity voterEntity = new VoterEntity();
+                    voterEntity.Email = peopleModelview.Email;
+                    voterEntity.CreateUser = cmuaccount;
+                    voterEntity.VoterCreate = DateTime.Now;
+                    voterEntity.EventVoteEntityId = voterModelview.EventVoteEntityId;
+                    voterEntity.Organization_Code = peopleModelview.Organization_Code;
+                    _evoteContext.VoterEntitys.Add(voterEntity);
+                    UserEntity userEntity= userEntitys.Where(w => w.Email == voterEntity.Email).FirstOrDefault();
+                    if (userEntity != null)
+                    {
+                         EventVoteEntity eventVoteEntityCheck= userEntity.eventVoteEntities.Where(w => w.EventVoteEntityId == voterModelview.EventVoteEntityId).FirstOrDefault();
+                        if (eventVoteEntityCheck == null)
+                        {
+                            userEntity.eventVoteEntities.Add(eventVoteEntity);
+                        }
+                    }
+
+                }
+              
+            }
+            _evoteContext.SaveChanges();
+            check = true;
+            return check;
+
         }
     }
 }

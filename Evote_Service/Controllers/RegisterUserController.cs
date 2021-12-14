@@ -48,6 +48,7 @@ namespace Evote_Service.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> getUserLiff()
         {
+            APIModel aPIModel = new APIModel();
             // เมื่อUser เปิด Line UI  ทำการ GetLink Token แล้วส่งมาcheck Service ว่า  LINE ID นี้ Registerระบบหรือยัง
             String lineId = "";
             String action = "RegisterUserController.getUserLiff";
@@ -55,11 +56,11 @@ namespace Evote_Service.Controllers
             {
                 lineId = await getLineUser();
                 if (lineId == "unauthorized") { return Unauthorized(); }
-                APIModel aPIModel = new APIModel();
+             
                 UserModel userModel = await _ICheckUserRepository.GetLineUserModel(lineId);
                 if (userModel == null) { return StatusCode(204); }
                 aPIModel.data = userModel;
-                aPIModel.message = "Success";
+                aPIModel.title = "Success";
                 return Ok(aPIModel);
             }
             catch (Exception ex) { return StatusErrorITSC("line", lineId, "", action, ex); }
@@ -90,13 +91,13 @@ namespace Evote_Service.Controllers
 
                 if (await _ICheckUserRepository.RegisLineUser(userEntity) == false)
                 {
-                    aPIModel.message = "ระบบขัดข้องบันทึกข้อมูลไม่สำเร็จ";
+                    aPIModel.title = "ระบบขัดข้องบันทึกข้อมูลไม่สำเร็จ";
                     return StatusCodeITSC("line", lineId, "", action, 503, aPIModel);
 
                 }
                 UserModel userModel = await _ICheckUserRepository.GetLineUserModel(lineId);
                 aPIModel.data = userModel;
-                aPIModel.message = "Success";
+                aPIModel.title = "Success";
                 return StatusCodeITSC("line", lineId, userModel.Email, action, 201, aPIModel);
             }
             catch (Exception ex)
@@ -126,18 +127,18 @@ namespace Evote_Service.Controllers
                 APIModel aPIModel = new APIModel();
                 if (await _ICheckUserRepository.checkEmail(data.email.Trim()) == false)
                 {
-                    aPIModel.message = "Email นี้มีผู้ลงทะเบียนแล้ว";
+                    aPIModel.title = "Email นี้มีผู้ลงทะเบียนแล้ว";
                     return StatusCodeITSC("line", lineId, "", action, 406, aPIModel);
                 }
                 if (await _ICheckUserRepository.UserSendEmail(lineId, data.email.Trim()) == false)
                 {
-                    aPIModel.message = "ระบบขัดข้องบันทึกข้อมูลไม่สำเร็จ";
+                    aPIModel.title = "ระบบขัดข้องบันทึกข้อมูลไม่สำเร็จ";
                     return StatusCodeITSC("line", lineId, "", action, 503, aPIModel);
 
                 }
                 UserModel userModel = await _ICheckUserRepository.GetLineUserModel(lineId);
                 aPIModel.data = userModel;
-                aPIModel.message = "Success";
+                aPIModel.title = "Success";
                 return StatusCodeITSC("line", lineId, userModel.Email, action, 200, aPIModel);
             }
             catch (Exception ex)
@@ -166,17 +167,17 @@ namespace Evote_Service.Controllers
                 APIModel aPIModel = new APIModel();
                 if (await _ICheckUserRepository.CheckTel(data.tel.Trim()) == false)
                 {
-                    aPIModel.message = "เบอร์โทรนี้ นี้มีผู้ลงทะเบียนแล้ว";
+                    aPIModel.title = "เบอร์โทรนี้ นี้มีผู้ลงทะเบียนแล้ว";
                     return StatusCodeITSC("line", lineId, "", action, 406, aPIModel);
                 }
                 if (await _ICheckUserRepository.UserSendTel(lineId, data.tel.Trim()) == false)
                 {
-                    aPIModel.message = "ระบบขัดข้องบันทึกข้อมูลไม่สำเร็จ";
+                    aPIModel.title = "ระบบขัดข้องบันทึกข้อมูลไม่สำเร็จ";
                     return StatusCodeITSC("line", lineId, "", action, 503, aPIModel);
                 }
                 UserModel userModel = await _ICheckUserRepository.GetLineUserModel(lineId);
                 aPIModel.data = userModel;
-                aPIModel.message = "Success";
+                aPIModel.title = "Success";
                 return StatusCodeITSC("line", lineId, userModel.Email, action, 200, aPIModel);
             }
             catch (Exception ex)
@@ -203,13 +204,13 @@ namespace Evote_Service.Controllers
                 APIModel aPIModel = new APIModel();
                 if (await _ICheckUserRepository.UserConfirmSMSOTP(lineId, data.otp) == false)
                 {
-                    aPIModel.message = "รหัส OTP ไม่ถูกต้อง";
+                    aPIModel.title = "รหัส OTP ไม่ถูกต้อง";
                     return StatusCodeITSC("line", lineId, "", action, 503, aPIModel);
 
                 }
                 UserModel userModel = await _ICheckUserRepository.GetLineUserModel(lineId);
                 aPIModel.data = userModel;
-                aPIModel.message = "Success";
+                aPIModel.title = "Success";
                 return StatusCodeITSC("line", lineId, userModel.Email, action, 200, aPIModel);
             }
             catch (Exception ex)
@@ -264,13 +265,13 @@ namespace Evote_Service.Controllers
                 APIModel aPIModel = new APIModel();
                 if (await _ICheckUserRepository.UserConfirmEmailOTP(lineId, data.otp) == false)
                 {
-                    aPIModel.message = "รหัส OTP ไม่ถูกต้อง";
+                    aPIModel.title = "รหัส OTP ไม่ถูกต้อง";
                     return StatusCodeITSC("line", lineId, "", action, 503, aPIModel);
 
                 }
                 UserModel userModel = await _ICheckUserRepository.GetLineUserModel(lineId);
                 aPIModel.data = userModel;
-                aPIModel.message = "Success";
+                aPIModel.title = "Success";
                 return StatusCodeITSC("line", lineId, userModel.Email, action, 200, aPIModel);
             }
             catch (Exception ex)
@@ -308,12 +309,12 @@ namespace Evote_Service.Controllers
                 APIModel aPIModel = new APIModel();
                 if (await _ICheckUserRepository.CheckPersonalID(personalid) == false)
                 {
-                    aPIModel.message = "เลขบัตรนี้มีผู้ใช้งานแล้ว";
+                    aPIModel.title = "เลขบัตรนี้มีผู้ใช้งานแล้ว";
                     return StatusCodeITSC("line", lineId, "", action, 406, aPIModel);
                 }
                 if (await _ICheckUserRepository.UserPostphotoId(lineId, fileModel, personalid) == false)
                 {
-                    aPIModel.message = "ระบบขัดข้องบันทึกข้อมูลไม่สำเร็จ";
+                    aPIModel.title = "ระบบขัดข้องบันทึกข้อมูลไม่สำเร็จ";
                     return StatusCodeITSC("line", lineId, "", action, 503, aPIModel);
 
                 }
@@ -321,7 +322,7 @@ namespace Evote_Service.Controllers
 
                 UserModel userModel = await _ICheckUserRepository.GetLineUserModel(lineId);
                 aPIModel.data = userModel;
-                aPIModel.message = "Success";
+                aPIModel.title = "Success";
                 return StatusCodeITSC("line", lineId, userModel.Email, action, 200, aPIModel);
             }
             catch (Exception ex)
@@ -389,13 +390,13 @@ namespace Evote_Service.Controllers
                 APIModel aPIModel = new APIModel();
                 if (await _ICheckUserRepository.UserPostphotoKyc(lineId, fileModelFace, _facedata) == false)
                 {
-                    aPIModel.message = "ระบบขัดข้องบันทึกข้อมูลไม่สำเร็จ";
+                    aPIModel.title = "ระบบขัดข้องบันทึกข้อมูลไม่สำเร็จ";
                     return StatusCodeITSC("line", lineId, "", action, 503, aPIModel);
 
                 }
                 UserModel userModel = await _ICheckUserRepository.GetLineUserModel(lineId);
                 aPIModel.data = userModel;
-                aPIModel.message = "Success";
+                aPIModel.title = "Success";
                 return StatusCodeITSC("line", lineId, userModel.Email, action, 200, aPIModel);
             }
             catch (Exception ex)

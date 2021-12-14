@@ -12,5 +12,7 @@ namespace Evote_Service.Model.Interface
         Task<ApplicationEntity> getApplicationEntity(int ApplicationEntityId);
 
         Task<EventConfirmModelview> addEvent(int ApplicationEntityId,EventModelview eventModelview,String cmuaccount);
+
+        Task<Boolean> addVote( VoterModelview voterModelview, String cmuaccount);
     }
 }

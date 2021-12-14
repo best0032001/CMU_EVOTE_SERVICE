@@ -37,7 +37,7 @@ namespace ApiTest.Test
             Assert.IsTrue((int)response.StatusCode == 200);
             String responseString = await response.Content.ReadAsStringAsync();
             APIModel dataTemp = JsonConvert.DeserializeObject<APIModel>(responseString);
-            Assert.IsTrue(dataTemp.message == "Success");
+            Assert.IsTrue(dataTemp.title == "Success");
             String data = JsonConvert.SerializeObject(dataTemp.data);
             List<UserEntity> userEntities = JsonConvert.DeserializeObject<List<UserEntity>>(data);
             Assert.IsTrue(userEntities.Count > 0);
@@ -54,7 +54,7 @@ namespace ApiTest.Test
 
             responseString = await response.Content.ReadAsStringAsync();
             dataTemp = JsonConvert.DeserializeObject<APIModel>(responseString);
-            Assert.IsTrue(dataTemp.message == "Success");
+            Assert.IsTrue(dataTemp.title == "Success");
             data = JsonConvert.SerializeObject(dataTemp.data);
             userEntities = JsonConvert.DeserializeObject<List<UserEntity>>(data);
             Assert.IsTrue(userEntities.Count == 0);

@@ -48,7 +48,7 @@ namespace Evote_Service.Controllers
                 if (Cmuaccount == "") { return Unauthorized(); }
                 APIModel aPIModel = new APIModel();
                 aPIModel.data = applicationEntity.EventVoteEntitys.OrderBy(o => o.ApplicationEntityId).ToList();
-                aPIModel.message = "Success";
+                aPIModel.title = "Success";
                 return StatusCodeITSC("CMU", "", Cmuaccount, action, 200, aPIModel);
             }
             catch (Exception ex) { return StatusErrorITSC("CMU", "", Cmuaccount, action, ex); }
@@ -75,7 +75,34 @@ namespace Evote_Service.Controllers
 
                 APIModel aPIModel = new APIModel();
                 aPIModel.data = eventConfirmModelview;
-                aPIModel.message = "Success";
+                aPIModel.title = "Success";
+                return StatusCodeITSC("CMU", "", Cmuaccount, action, 200, aPIModel);
+            }
+            catch (Exception ex) { return StatusErrorITSC("CMU", "", Cmuaccount, action, ex); }
+        }
+
+        [HttpPost("v1/Voter")]
+        [ProducesResponseType(typeof(APIModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> addVoter([FromBody] VoterModelview data, [FromQuery] int ApplicationEntityId)
+        {
+            String Cmuaccount = "";
+            String action = "EventController.addVoter";
+            try
+            {
+                ApplicationEntity applicationEntity = await _eventRepository.getApplicationEntity(ApplicationEntityId);
+                if (applicationEntity == null) { return BadRequest(); }
+                if (this.checkAppIP(applicationEntity.ServerProductionIP) == false) { return Unauthorized(); }
+                Cmuaccount = await this.checkAppID(applicationEntity.ClientId);
+                if (Cmuaccount == "") { return Unauthorized(); }
+                EventVoteEntity eventVoteEntity= applicationEntity.EventVoteEntitys.Where(w => w.EventVoteEntityId == data.EventVoteEntityId).FirstOrDefault();
+                if (eventVoteEntity == null) { return BadRequest(); }
+                Boolean check = await _eventRepository.addVote(data, Cmuaccount);
+
+                APIModel aPIModel = new APIModel();
+                aPIModel.data = null;
+                aPIModel.title = "Success";
                 return StatusCodeITSC("CMU", "", Cmuaccount, action, 200, aPIModel);
             }
             catch (Exception ex) { return StatusErrorITSC("CMU", "", Cmuaccount, action, ex); }

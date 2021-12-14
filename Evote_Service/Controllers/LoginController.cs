@@ -92,13 +92,13 @@ namespace Evote_Service.Controllers
                 UserCMUAccountModel responseprofile = JsonConvert.DeserializeObject<UserCMUAccountModel>(responseString);
                 if (responseprofile.itaccounttype_EN != "MIS Employee")
                 {
-                    aPIModel.message = "ผู้ลงทะเบียนต้อง บุคคลกร";
+                    aPIModel.title = "ผู้ลงทะเบียนต้อง บุคคลกร";
                     return StatusCodeITSC("line", lineId, "", "LoginController.callback", 403, aPIModel);
                 }
                 UserEntity userEntity = await _ICheckUserRepository.GetLineUserEntity(lineId);
                 if (userEntity != null)
                 {
-                    aPIModel.message = "LineID นี้ได้ลงทะเบียนในระบบแล้ว";
+                    aPIModel.title = "LineID นี้ได้ลงทะเบียนในระบบแล้ว";
                     return StatusCodeITSC("line", lineId, "", "LoginController.callback", 403, aPIModel);
                 }
                 response = await httpClient.GetAsync(urlpersonalID);
@@ -110,7 +110,7 @@ namespace Evote_Service.Controllers
                 String personalid = dataTemp.personal_id;
                 if (await _ICheckUserRepository.CheckPersonalID(personalid) == false)
                 {
-                    aPIModel.message = "เลขบัตรนี้มีผู้ใช้งานแล้ว";
+                    aPIModel.title = "เลขบัตรนี้มีผู้ใช้งานแล้ว";
                     return StatusCodeITSC("line", lineId, "", "LoginController.callback", 406, aPIModel);
                 }
                 userEntity = new UserEntity();
@@ -127,11 +127,11 @@ namespace Evote_Service.Controllers
                 userEntity.Expires_in = _expires_in;
                 if (await _ICheckUserRepository.RegisCMUUser(userEntity) == false)
                 {
-                    aPIModel.message = "ระบบขัดข้องบันทึกข้อมูลไม่สำเร็จ";
+                    aPIModel.title = "ระบบขัดข้องบันทึกข้อมูลไม่สำเร็จ";
                     return StatusCodeITSC("line", lineId, "", "LoginController.callback", 503, aPIModel);
                 }
                 aPIModel.data = responseprofile;
-                aPIModel.message = "ลงทะเบียนสำเร็จ";
+                aPIModel.title = "ลงทะเบียนสำเร็จ";
                 return StatusCodeITSC("CMU", lineId, responseprofile.cmuitaccount, "LoginController.callback", 200, aPIModel);
             }
             catch (Exception ex)
@@ -198,7 +198,7 @@ namespace Evote_Service.Controllers
                 if (userAdminEntity == null) { return Unauthorized(); }
                 String RefCode = await _IAdminRepository.sendLoginOTP(responseprofile.cmuitaccount, _access_token, _refresh_token);
                 aPIModel.data = RefCode;
-                aPIModel.message = "Success";
+                aPIModel.title = "Success";
                 return StatusCodeITSC("CMU", "", responseprofile.cmuitaccount, "LoginController.admincallback", 200, aPIModel);
             }
             catch (Exception ex)
@@ -210,7 +210,7 @@ namespace Evote_Service.Controllers
 
 
         [HttpPost("v1/admin/loginotp")]
-        [ProducesResponseType(typeof(UserAdminEntity), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(UserAdminModelView), (int)HttpStatusCode.OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> AdminloginOTP([FromBody] AdminLoginOTPModelview data)
@@ -221,9 +221,11 @@ namespace Evote_Service.Controllers
             if (userAdminEntity == null) { return Unauthorized(); }
             userAdminEntity.Tel = "";
             userAdminEntity.Refresh_token = "";
+            String json = JsonConvert.SerializeObject(userAdminEntity);
+            UserAdminModelView userAdminModelView = JsonConvert.DeserializeObject<UserAdminModelView>(json);
             APIModel aPIModel = new APIModel();
             aPIModel.data = userAdminEntity;
-            aPIModel.message = "Success";
+            aPIModel.title = "Success";
             return StatusCodeITSC("CMU", "", userAdminEntity.Cmuaccount, "LoginController.AdminloginOTP", 200, aPIModel);
 
         }

@@ -33,10 +33,10 @@ namespace Evote_Service.Controllers
         }
 
         [HttpGet("v1/Portal")]
-        [ProducesResponseType(typeof(List<EventVoteEntity>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(UserPortalModelView), (int)HttpStatusCode.OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> getPortal([FromQuery] int EventStatusId)
+        public async Task<IActionResult> getPortal()
         {
             String lineId = "";
             String action = "UserPortalController.getPortal";
@@ -45,12 +45,43 @@ namespace Evote_Service.Controllers
                 lineId = await getLineUser();
                 if (lineId == "unauthorized") { return Unauthorized(); }
                 APIModel aPIModel = new APIModel();
-                UserEntity userModel = await _userRepository.getEvent(lineId, EventStatusId);
-                aPIModel.data = userModel.eventVoteEntities.ToList();
-                aPIModel.message = "Success";
+                UserEntity userModel = await _userRepository.getEvent(lineId);
+                UserPortalModelView userPortalModelView = new UserPortalModelView();
+                userPortalModelView.eventModelviewsNow = new List<EventModelview>();
+                userPortalModelView.eventModelviewsPassed = new List<EventModelview>();
+                userPortalModelView.eventModelviewsIncomming = new List<EventModelview>();
+
+                foreach (EventVoteEntity eventVoteEntity in userModel.eventVoteEntities)
+                {
+                    String json = JsonConvert.SerializeObject(eventVoteEntity);
+                    EventModelview eventModelview = JsonConvert.DeserializeObject<EventModelview>(json);
+                    int res = DateTime.Compare(DateTime.Now, eventVoteEntity.EventVotingStart);
+                    if (res < 0)
+                    {
+
+                        userPortalModelView.eventModelviewsIncomming.Add(eventModelview);
+                    }
+                    else
+                    {
+                        res = DateTime.Compare(DateTime.Now, eventVoteEntity.EventVotingEnd);
+                        if (res > 0)
+                        {
+                            userPortalModelView.eventModelviewsPassed.Add(eventModelview);
+                        }
+                        else
+                        {
+                            userPortalModelView.eventModelviewsNow.Add(eventModelview);
+                        }
+                    }
+                }
+                aPIModel.data = userPortalModelView;
+                aPIModel.title = "Success";
                 return StatusCodeITSC("line", lineId, userModel.Email, action, 200, aPIModel);
             }
-            catch (Exception ex) { return StatusErrorITSC("line", lineId, "", action, ex); }
+            catch (Exception ex)
+            {
+                return StatusErrorITSC("line", lineId, "", action, ex);
+            }
         }
     }
 }

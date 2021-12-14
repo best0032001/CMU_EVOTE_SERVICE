@@ -17,6 +17,7 @@ namespace Evote_Service.Model.Util
     {
         public string token { get; set; }
         public string lineId { get; set; }
+        public string email { get; set; }
     }
     public class AdminMock
     {

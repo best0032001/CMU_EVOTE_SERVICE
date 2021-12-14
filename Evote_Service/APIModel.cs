@@ -8,6 +8,6 @@ namespace Evote_Service
     public class APIModel
     {
         public dynamic data { get; set; }
-        public string message { get; set; }
+        public string title { get; set; }
     }
 }

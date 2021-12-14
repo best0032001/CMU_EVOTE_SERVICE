@@ -10,7 +10,7 @@ namespace Evote_Service.Model.View
         public int EventTypeId { get; set; }
         public string EventTitle { get; set; }
         public string EventDetail { get; set; }
-   
+
 
         public string Organization_Code { get; set; }
         public string OrganizationFullNameTha { get; set; }
@@ -19,6 +19,10 @@ namespace Evote_Service.Model.View
         public DateTime EventRegisterEnd { get; set; }
         public DateTime EventVotingStart { get; set; }
         public DateTime EventVotingEnd { get; set; }
+        public string EventInformation { get; set; }
+
+        public string AppLink { get; set; }
+
     }
     public class EventConfirmModelview
     {
@@ -37,5 +41,16 @@ namespace Evote_Service.Model.View
         public DateTime EventVotingStart { get; set; }
         public DateTime EventVotingEnd { get; set; }
         public string CreateUser { get; set; }
+    }
+    public class VoterModelview
+    {
+        public int EventVoteEntityId { get; set; }
+        public List<PeopleModelview> peopleModelviews { get; set; }
+      
+    }
+    public class PeopleModelview
+    {
+        public String Email { get; set; }
+        public String Organization_Code { get; set; }
     }
 }

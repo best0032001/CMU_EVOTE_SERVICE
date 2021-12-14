@@ -11,6 +11,8 @@ namespace Evote_Service.Model.Entity
         public int EventStatusId { get; set; } // 1 now 2 incoming 3 passed
         public int ApplicationEntityId { get; set; }
         public int EventTypeId { get; set; }
+
+        public string EventInformation { get; set; }
         public string SecretKey { get; set; }
         public string SecurityAlgorithm { get; set; }
         public string EventTitle { get; set; }

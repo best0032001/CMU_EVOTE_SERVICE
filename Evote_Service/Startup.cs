@@ -60,6 +60,7 @@ namespace Evote_Service
             services.AddScoped<IAdminRepository, AdminRepository>();
             services.AddScoped<IUserRepository,UserRepository>();
             services.AddScoped<IEventRepository, EventRepository>();
+            services.AddScoped<IVoteRepository, VoteRepository>();
             services.AddCors(options =>
             {
                 options.AddPolicy(name: MyAllowSpecificOrigins,
@@ -120,7 +121,7 @@ namespace Evote_Service
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, EvoteContext evoteContext)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, EvoteContext evoteContext , IEventRepository eventRepository)
         {
             if (env.IsDevelopment())
             {
@@ -166,7 +167,7 @@ namespace Evote_Service
                 }
                 await next();
             });
-            SetData setData = new SetData(env, evoteContext);
+            SetData setData = new SetData(env, evoteContext, eventRepository);
             setData = null;
 
 
