@@ -66,7 +66,19 @@ namespace Evote_Service.Controllers
             }
             return _forwardIPTemp;
         }
+        public JsonSerializerSettings jsonSetting
+        {
+            get
+            {
+                JsonSerializerSettings settings = new JsonSerializerSettings
+                {
+                    NullValueHandling = NullValueHandling.Ignore,
+                    MissingMemberHandling = MissingMemberHandling.Ignore
+                };
 
+                return settings;
+            }
+        }
         protected async Task<String> checkAppID(String appID)
         {
             String cmuaccount = "";

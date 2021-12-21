@@ -8,12 +8,15 @@ using System.Threading.Tasks;
 
 namespace Evote_Service.Model
 {
+
     public class EvoteContext : DbContext
     {
         public EvoteContext(DbContextOptions<EvoteContext> options) : base(options) { }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) { }
 
-
+        public DbSet<ConfirmVoter> confirmVoters { get; set; }
+        public DbSet<VoteEntity> voteEntities { get; set; }
+        public DbSet<VoteRoundEntity> voteRoundEntities { get; set; }
         public DbSet<VoterEntity> VoterEntitys { get; set; }
         public DbSet<AdminLoginLog> AdminLoginLogs { get; set; }
         public DbSet<EventVoteEntity> EventVoteEntitys { get; set; }

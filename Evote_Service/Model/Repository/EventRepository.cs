@@ -47,6 +47,8 @@ namespace Evote_Service.Model.Repository
               .Select(s => s[_random.Next(s.Length)]).ToArray());
 
             EventVoteEntity eventVoteEntity = new EventVoteEntity();
+            eventVoteEntity.voteRoundEntities = new List<VoteRoundEntity>();
+         
             eventVoteEntity.EventStatusId = 2;
             eventVoteEntity.ApplicationEntityId = ApplicationEntityId;
             eventVoteEntity.EventTypeId = 0;
@@ -57,6 +59,7 @@ namespace Evote_Service.Model.Repository
             eventVoteEntity.EventDetail = eventModelview.EventDetail;
             eventVoteEntity.CreateUser = cmuaccount;
             eventVoteEntity.UpdateUser = cmuaccount;
+            eventVoteEntity.PresidentEmail = eventModelview.PresidentEmail;
             eventVoteEntity.Organization_Code = eventModelview.Organization_Code;
             eventVoteEntity.OrganizationFullNameTha = eventModelview.OrganizationFullNameTha;
             eventVoteEntity.EventCreate = DateTime.Now;
@@ -68,6 +71,15 @@ namespace Evote_Service.Model.Repository
             eventVoteEntity.IsEnd = false;
             _evoteContext.EventVoteEntitys.Add(eventVoteEntity);
             _evoteContext.SaveChanges();
+
+            VoteRoundEntity voteRoundEntity = new VoteRoundEntity();
+            voteRoundEntity.EventVoteEntityId = eventVoteEntity.EventVoteEntityId;
+            voteRoundEntity.RoundNumber = 1;
+            voteRoundEntity.confirmVoters = new List<ConfirmVoter>();
+            voteRoundEntity.voteEntities = new List<VoteEntity>();
+            _evoteContext.voteRoundEntities.Add(voteRoundEntity);
+            _evoteContext.SaveChanges();
+
 
             eventConfirmModelview.EventVoteEntityId = eventVoteEntity.EventVoteEntityId;
             eventConfirmModelview.SecretKey = eventVoteEntity.SecretKey;

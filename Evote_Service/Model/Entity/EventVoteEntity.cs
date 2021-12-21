@@ -17,8 +17,10 @@ namespace Evote_Service.Model.Entity
         public string SecurityAlgorithm { get; set; }
         public string EventTitle { get; set; }
         public string EventDetail { get; set; }
-       
+
         public string CreateUser { get; set; }
+
+        public string PresidentEmail { get; set; }
         public string UpdateUser { get; set; }
         public string Organization_Code { get; set; }
         public string OrganizationFullNameTha { get; set; }
@@ -32,7 +34,7 @@ namespace Evote_Service.Model.Entity
         public Boolean IsEnd { get; set; }
 
         public Boolean IsDev { get; set; }
-
-        public List<VoterEntity>  voterEntities { get; set; }
+        public List<VoteRoundEntity> voteRoundEntities { get; set; }//จำนวนครั้งการลงคะแนน  ของEvent นี้
+        public List<VoterEntity>  voterEntities { get; set; }  //ผู้มี สิทธิ์ Vote
     }
 }

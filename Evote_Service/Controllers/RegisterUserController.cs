@@ -378,7 +378,7 @@ namespace Evote_Service.Controllers
                 if (lineId == "unauthorized") { return Unauthorized(); }
 
                 int countFiles = Request.Form.Files.Count;
-                if (countFiles != 2) { return BadRequest(); }
+                if (countFiles != 1) { return BadRequest(); }
                // IFormFile fileKYC = filename;
                 IFormFile fileFace = face;
               //  var pathKYC = Path.Combine(Directory.GetCurrentDirectory(), "uploadkyc");

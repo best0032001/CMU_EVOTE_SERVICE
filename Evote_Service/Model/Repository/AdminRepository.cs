@@ -110,10 +110,10 @@ namespace Evote_Service.Model.Repository
             return code;
         }
 
-        public async Task<UserAdminEntity> getAdminByOTP(AdminLoginOTPModelview adminLoginOTPModelview,String clientIP)
+        public async Task<UserAdminEntity> getAdminByOTP(AdminLoginOTPModelview adminLoginOTPModelview, String clientIP)
         {
 
-            UserAdminEntity userAdminEntity= _evoteContext.UserAdminEntitys.Where(w => w.SMSOTP == adminLoginOTPModelview.otp && w.SMSOTPRef == adminLoginOTPModelview.RefCode).FirstOrDefault();
+            UserAdminEntity userAdminEntity = _evoteContext.UserAdminEntitys.Where(w => w.SMSOTP == adminLoginOTPModelview.otp && w.SMSOTPRef == adminLoginOTPModelview.RefCode).FirstOrDefault();
             if (userAdminEntity == null) { return null; }
             userAdminEntity.SMSOTP = "";
             userAdminEntity.SMSOTPRef = "";
@@ -125,6 +125,31 @@ namespace Evote_Service.Model.Repository
 
 
             return userAdminEntity;
+        }
+
+        public async Task<UserEntity> getUserEntity(string cmuaccount, int userEntityId, string clientIP)
+        {
+            UserAdminEntity userAdminEntity = _evoteContext.UserAdminEntitys.Where(w => w.Cmuaccount == cmuaccount).FirstOrDefault();
+            if (userAdminEntity == null) { return null; }
+            UserEntity userEntity = new UserEntity();
+            userEntity = _evoteContext.UserEntitys.Where(w =>  w.UserEntityId == userEntityId).FirstOrDefault();
+            return userEntity;
+        }
+
+        public async Task<List<UserEntity>> searchUser(AdminSearchModelView adminSearchModelView, string cmuaccount)
+        {
+            List<UserEntity> userEntities = new List<UserEntity>();
+            UserAdminEntity userAdminEntity = _evoteContext.UserAdminEntitys.Where(w => w.Cmuaccount == cmuaccount).FirstOrDefault();
+            if (userAdminEntity == null) { return null; }
+            userEntities = _evoteContext.UserEntitys.Where(w => w.UserStage >= 2)
+                .WhereIf(adminSearchModelView.FullName != "", w => w.FullName.Contains(adminSearchModelView.FullName))
+                .WhereIf(adminSearchModelView.Email != "", w => w.Email.Contains(adminSearchModelView.Email))
+                .WhereIf(adminSearchModelView.Organization_Name_TH != "", w => w.Organization_Name_TH.Contains(adminSearchModelView.Organization_Name_TH))
+                .WhereIf(adminSearchModelView.PersonalID != "", w => w.PersonalID.Contains(adminSearchModelView.PersonalID))
+                .WhereIf(adminSearchModelView.Tel != "", w => w.Tel.Contains(adminSearchModelView.Tel))
+                .WhereIf(adminSearchModelView.UserStage != 0, w => w.UserStage == adminSearchModelView.UserStage)
+                .ToList();
+            return userEntities;
         }
     }
 }

@@ -145,7 +145,7 @@ namespace Evote_Service.Controllers
 
 
         [HttpGet("v1/admin/callback")]
-        [ProducesResponseType(typeof(UserCMUAccountModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(String), (int)HttpStatusCode.OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> admincallback([FromQuery] string code)
@@ -216,14 +216,19 @@ namespace Evote_Service.Controllers
         public async Task<ActionResult> AdminloginOTP([FromBody] AdminLoginOTPModelview data)
         {
 
-
+            APIModel aPIModel = new APIModel();
             UserAdminEntity userAdminEntity = await _IAdminRepository.getAdminByOTP(data, getClientIP());
-            if (userAdminEntity == null) { return Unauthorized(); }
+            if (userAdminEntity == null)
+            {
+                aPIModel.title = "รหัส OTP ไม่ถูกต้อง";
+                return StatusCodeITSC("CMU", "", "", "LoginController.AdminloginOTP", 503, aPIModel);
+            }
+             
             userAdminEntity.Tel = "";
             userAdminEntity.Refresh_token = "";
             String json = JsonConvert.SerializeObject(userAdminEntity);
             UserAdminModelView userAdminModelView = JsonConvert.DeserializeObject<UserAdminModelView>(json);
-            APIModel aPIModel = new APIModel();
+         
             aPIModel.data = userAdminEntity;
             aPIModel.title = "Success";
             return StatusCodeITSC("CMU", "", userAdminEntity.Cmuaccount, "LoginController.AdminloginOTP", 200, aPIModel);

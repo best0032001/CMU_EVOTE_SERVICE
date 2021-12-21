@@ -20,7 +20,7 @@ namespace Evote_Service.Model.View
         public DateTime EventVotingStart { get; set; }
         public DateTime EventVotingEnd { get; set; }
         public string EventInformation { get; set; }
-
+        public string PresidentEmail { get; set; }
         public string AppLink { get; set; }
 
     }

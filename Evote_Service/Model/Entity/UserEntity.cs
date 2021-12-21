@@ -14,7 +14,7 @@ namespace Evote_Service.Model.Entity
         public String FullName { get; set; }
         public String PersonalID { get; set; }
         public String Tel { get; set; }
-        public int UserStage { get; set; }   //0  no regis //1 regis 2 confirm 3 approve
+        public int UserStage { get; set; }   //0  no regis //1 regis 2 confirm 3 approve  4 rejected
         public int UserType { get; set; } // 1 CMU 2 non CMU
         public String LineId { get; set; }
         public DateTime CreateTime { get; set; }

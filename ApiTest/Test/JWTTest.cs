@@ -1,4 +1,5 @@
-﻿using Evote_Service;
+﻿using ApiTest.model;
+using Evote_Service;
 using Evote_Service.Model.Entity;
 using Evote_Service.Model.Util;
 using Evote_Service.Model.View;
@@ -93,12 +94,7 @@ namespace ApiTest.Test
                 IssuerSigningKey = GetSymmetricSecurityKey(SecretKey)
             };
         }
-        class VoteModel
-        {
-            public String data1 { get; set; }
-            public String data2 { get; set; }
-            public String data3 { get; set; }
-        }
+      
     }
 
 

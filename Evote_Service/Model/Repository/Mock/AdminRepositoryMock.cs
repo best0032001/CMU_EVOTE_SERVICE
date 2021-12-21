@@ -54,5 +54,15 @@ namespace Evote_Service.Model.Repository.Mockw
         {
             throw new NotImplementedException();
         }
+
+        public Task<List<UserEntity>> searchUser(AdminSearchModelView adminSearchModelView, string cmuaccount)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<UserEntity> getUserEntity(string cmuaccount, int userEntityId, string clientIP)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

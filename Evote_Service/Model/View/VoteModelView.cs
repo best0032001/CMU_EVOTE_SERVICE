@@ -12,6 +12,9 @@ namespace Evote_Service.Model.View
         public int ApplicationEntityId { get; set; }
         public int EventTypeId { get; set; }
 
+        public int VoteRound { get; set; }
+
+
         public String TokenData { get; set; }
         public String OTP { get; set; }
         public String RefOTP { get; set; }
@@ -23,6 +26,9 @@ namespace Evote_Service.Model.View
         public int EventVoteEntityId { get; set; }
         public int ApplicationEntityId { get; set; }
         public int EventTypeId { get; set; }
+
+        public int VoteRound { get; set; }
+
     }
     public class VoteDataModel
     {

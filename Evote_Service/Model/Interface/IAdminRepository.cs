@@ -11,6 +11,8 @@ namespace Evote_Service.Model.Interface
     {
         Task<List<UserEntity>> getUserWaitForApprove(String cmuaccount);
 
+        Task<List<UserEntity>> searchUser(AdminSearchModelView adminSearchModelView, String cmuaccount);
+
         Task<List<UserEntity>> adminApprove(String cmuaccount,Int32 userEntityId,String clientIP);
 
         Task<List<UserEntity>> adminNotApprove(string cmuaccount, AdminApproveModelView adminApproveModelView, String clientIP);
@@ -20,6 +22,8 @@ namespace Evote_Service.Model.Interface
         Task<UserAdminEntity> getAdminByOTP(AdminLoginOTPModelview adminLoginOTPModelview,String clientIP);
 
         Task<String> sendLoginOTP(String cmuaccount,String _access_token,String _refresh_token);
+
+        Task<UserEntity> getUserEntity(String cmuaccount, Int32 userEntityId, String clientIP);
 
     }
 }

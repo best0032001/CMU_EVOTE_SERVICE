@@ -41,6 +41,7 @@ namespace Evote_Service
         {
             String origin = "";
             services.AddHttpClient();
+            services.AddDbContext<ApplicationDBContext>(options => options.UseInMemoryDatabase(databaseName: "ApplicationDBContext").ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning)));
             if (webHostEnvironment.IsEnvironment("test"))
             {
                 services.AddDbContext<EvoteContext>(options => options.UseInMemoryDatabase(databaseName: "ApplicationDBContext").ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning)));
@@ -155,7 +156,7 @@ namespace Evote_Service
                     context.Response.Redirect(oauthUrl);
                     return;   // short circuit
                 }
-                if (url.Contains("/api/loginadmin"))
+                if (url.Contains("/api/adminlogin"))
                 {
                     String redirect_uri = Environment.GetEnvironmentVariable("CMU_REDIRECT_ADMINURL");
                     String client_id = Environment.GetEnvironmentVariable("CMU_CLIENT_ID");

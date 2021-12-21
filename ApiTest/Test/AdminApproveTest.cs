@@ -42,14 +42,36 @@ namespace ApiTest.Test
             List<UserEntity> userEntities = JsonConvert.DeserializeObject<List<UserEntity>>(data);
             Assert.IsTrue(userEntities.Count > 0);
 
-            AdminApproveModelView adminApproveModelView = new AdminApproveModelView();
-            adminApproveModelView.userEntityId = userEntities[0].UserEntityId;
-            adminApproveModelView.comment = "test";
-            String json = JsonConvert.SerializeObject(adminApproveModelView);
+            AdminSearchModelView adminSearchModelView = new AdminSearchModelView();
+            adminSearchModelView.Email = "";
+            adminSearchModelView.FullName = "";
+            adminSearchModelView.Organization_Code = "";
+            adminSearchModelView.Organization_Name_TH = "";
+            adminSearchModelView.PersonalID = "";
+            adminSearchModelView.Tel = "";
+          
+
+            String json = JsonConvert.SerializeObject(adminSearchModelView);
             var content = new StringContent(json);
             content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+            response = await _client.PostAsync("api/v1/Admin/Approve", content);
+            Assert.IsTrue((int)response.StatusCode == 200);
+            responseString = await response.Content.ReadAsStringAsync();
+            dataTemp = JsonConvert.DeserializeObject<APIModel>(responseString);
+            Assert.IsTrue(dataTemp.title == "Success");
+            data = JsonConvert.SerializeObject(dataTemp.data);
+            userEntities = JsonConvert.DeserializeObject<List<UserEntity>>(data);
+            Assert.IsTrue(userEntities.Count > 0);
+
+
+            AdminApproveModelView adminApproveModelView = new AdminApproveModelView();
+            adminApproveModelView.userEntityId = userEntities[1].UserEntityId;
+            adminApproveModelView.comment = "test";
+            json = JsonConvert.SerializeObject(adminApproveModelView);
+            content = new StringContent(json);
+            content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
             response = await _client.PutAsync("api/v1/Admin/NotApprove", content);
-       
+
             Assert.IsTrue((int)response.StatusCode == 200);
 
             responseString = await response.Content.ReadAsStringAsync();

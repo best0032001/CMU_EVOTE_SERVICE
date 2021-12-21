@@ -79,21 +79,25 @@ namespace Evote_Service.Model
         private void setDefaultAdmin()
         {
 
-            UserAdminEntity model= _evoteContext.UserAdminEntitys.Where(w => w.Cmuaccount == "cheewin.b@cmu.ac.th").FirstOrDefault();
+            UserAdminEntity model = _evoteContext.UserAdminEntitys.Where(w => w.Cmuaccount == "cheewin.b@cmu.ac.th").FirstOrDefault();
             if (model == null)
             {
                 UserAdminEntity userAdminEntityFirst = new UserAdminEntity();
                 userAdminEntityFirst.Cmuaccount = "cheewin.b@cmu.ac.th";
                 userAdminEntityFirst.SuperAdmin = true;
+                userAdminEntityFirst.OrganizationFullNameTha = "Test OrganizationFullNameTha";
+                userAdminEntityFirst.Tel = Environment.GetEnvironmentVariable("ADMIN_TEL1");
                 _evoteContext.UserAdminEntitys.Add(userAdminEntityFirst);
 
                 UserAdminEntity userAdminEntitySec = new UserAdminEntity();
                 userAdminEntitySec.Cmuaccount = "jirakit.s@cmu.ac.th";
                 userAdminEntitySec.SuperAdmin = true;
+                userAdminEntitySec.OrganizationFullNameTha = "Test OrganizationFullNameTha";
+                userAdminEntitySec.Tel = Environment.GetEnvironmentVariable("ADMIN_TEL2");
                 _evoteContext.UserAdminEntitys.Add(userAdminEntitySec);
                 _evoteContext.SaveChanges();
             }
-    
+
         }
         private void setRefUserStage()
         {
@@ -144,7 +148,7 @@ namespace Evote_Service.Model
         }
         private void setEventTest()
         {
-            ApplicationEntity applicationEntity= _evoteContext.ApplicationEntitys.Where(w => w.ApplicationEntityId == 1).Include(i => i.EventVoteEntitys).First();
+            ApplicationEntity applicationEntity = _evoteContext.ApplicationEntitys.Where(w => w.ApplicationEntityId == 1).Include(i => i.EventVoteEntitys).First();
             if (applicationEntity.EventVoteEntitys.ToList().Count == 0)
             {
                 EventModelview eventModelview = new EventModelview();
@@ -156,8 +160,8 @@ namespace Evote_Service.Model
                 eventModelview.EventRegisterEnd = DateTime.Now;
                 eventModelview.EventVotingStart = DateTime.Now;
                 eventModelview.EventVotingEnd = DateTime.Now;
-
-              _eventRepository.addEvent(1, eventModelview, "cheewin.b@cmu.ac.th");
+                eventModelview.PresidentEmail = "cheewin.b@cmu.ac.th";
+                _eventRepository.addEvent(1, eventModelview, "cheewin.b@cmu.ac.th");
 
                 VoterModelview voterModelview = new VoterModelview();
                 voterModelview.EventVoteEntityId = 1;
@@ -165,6 +169,7 @@ namespace Evote_Service.Model
                 PeopleModelview peopleModelviewModel1 = new PeopleModelview();
                 PeopleModelview peopleModelviewModel2 = new PeopleModelview();
                 PeopleModelview peopleModelviewModel3 = new PeopleModelview();
+
 
 
                 peopleModelviewModel1.Email = "cheewin.b@cmu.ac.th";

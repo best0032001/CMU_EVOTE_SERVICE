@@ -29,8 +29,9 @@ namespace Evote_Service.Controllers
     {
         private IVoteRepository _voteRepository;
         private EvoteContext _evoteContext;
+        private ApplicationDBContext _applicationDBContext;
         private ISMSRepository _sMSRepository;
-        public VoteController(ISMSRepository sMSRepository, EvoteContext evoteContext, ILogger<ITSCController> logger, IEventRepository eventRepository, IHttpClientFactory clientFactory, IWebHostEnvironment env, IEmailRepository emailRepository, IVoteRepository voteRepository)
+        public VoteController(ApplicationDBContext applicationDBContext, ISMSRepository sMSRepository, EvoteContext evoteContext, ILogger<ITSCController> logger, IEventRepository eventRepository, IHttpClientFactory clientFactory, IWebHostEnvironment env, IEmailRepository emailRepository, IVoteRepository voteRepository)
         {
 
             this.loadConfig(logger, clientFactory, env);
@@ -38,6 +39,7 @@ namespace Evote_Service.Controllers
             _voteRepository = voteRepository;
             _evoteContext = evoteContext;
             _sMSRepository = sMSRepository;
+            _applicationDBContext = applicationDBContext;
 
         }
 
@@ -132,17 +134,165 @@ namespace Evote_Service.Controllers
 
                 }
                 Email = userEntity.Email;
+
+                ConfirmVoter confirmVoter= _applicationDBContext.confirmVoters.Where(w => w.email == Email && w.EventVoteEntityId == applicationEntity.EventVoteEntitys[0].EventVoteEntityId && w.RoundNumber == data.VoteRound).FirstOrDefault();
+                if (confirmVoter != null) { return Unauthorized(); }
                 VoterEntity voterEntity = _evoteContext.VoterEntitys.Where(w => w.Email == Email && w.EventVoteEntityId == applicationEntity.EventVoteEntitys[0].EventVoteEntityId).FirstOrDefault();
                 if (voterEntity == null) { return Unauthorized(); }
                 if (!(voterEntity.SMSOTP == data.OTP && voterEntity.SMSOTPRef == data.RefOTP)) { return Unauthorized(); }
-                int res = DateTime.Compare(DateTime.Now, applicationEntity.EventVoteEntitys[0].EventVotingEnd);
-                if (res >= 0) { return Unauthorized(); }
                 String TokenData = data.TokenData;
-                String SecretKey = applicationEntity.EventVoteEntitys[0].SecretKey;
+                String SecretKey = "";
+                if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != "Development")
+                {
+                    int res = DateTime.Compare(DateTime.Now, applicationEntity.EventVoteEntitys[0].EventVotingEnd);
+                    if (res >= 0) { return Unauthorized(); }
+                    SecretKey = applicationEntity.EventVoteEntitys[0].SecretKey;
+                }
+                else
+                {
+                    //for test
+                    SecretKey = "TW9zaGVFcmV6UHJpdmF0ZUtleQ==";
+                }
+  
+                
+              
                 if (!IsTokenValid(TokenData, SecretKey)) { return Unauthorized(); }
 
                 List<Claim> claims = GetTokenClaims(TokenData, SecretKey).ToList();
                 String dataVote = claims.FirstOrDefault(e => e.Type.Equals(ClaimTypes.UserData)).Value;
+
+                VoteRoundEntity voteRoundEntity = _evoteContext.voteRoundEntities.Where(w => w.EventVoteEntityId == applicationEntity.EventVoteEntitys[0].EventVoteEntityId && w.RoundNumber == data.VoteRound).FirstOrDefault();
+                if (voteRoundEntity == null) { return Unauthorized(); }
+
+
+                VoteEntity voteEntitie = new VoteEntity();
+                voteEntitie.VoteData = dataVote;
+                voteEntitie.RoundNumber = data.VoteRound;
+                voteEntitie.VoteRoundEntityId = voteRoundEntity.VoteRoundEntityId;
+                voteEntitie.ApplicationEntityId = applicationEntity.ApplicationEntityId;
+                voteEntitie.EventVoteEntityId = applicationEntity.EventVoteEntitys[0].EventVoteEntityId;
+
+                _applicationDBContext.voteEntities.Add(voteEntitie);
+
+
+                confirmVoter = new ConfirmVoter();
+                confirmVoter.email = Email;
+                confirmVoter.VoteRoundEntityId = voteRoundEntity.VoteRoundEntityId;
+                confirmVoter.EventVoteEntityId = voteEntitie.EventVoteEntityId;
+                confirmVoter.RoundNumber = data.VoteRound;
+
+
+
+                _applicationDBContext.SaveChanges();
+
+
+
+                aPIModel.title = "Success";
+                return StatusCodeITSC("CMU", "", Cmuaccount, action, 200, aPIModel);
+
+            }
+            catch (Exception ex) { return StatusErrorITSC("CMU", "", Cmuaccount, action, ex); }
+        }
+
+        [HttpPost("v1/Votedata")]
+        [ProducesResponseType(typeof(List<VoteEntity>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> getVotedata(VoteSMSModelView data)
+        {
+            String Cmuaccount = "";
+            UserEntity userEntity = null;
+            String action = "VoteController.getVotedata";
+            try
+            {
+                APIModel aPIModel = new APIModel();
+
+                ApplicationEntity applicationEntity = _evoteContext.ApplicationEntitys.Where(w => w.ApplicationEntityId == data.ApplicationEntityId).Include(i => i.EventVoteEntitys.Where(e => e.EventVoteEntityId == data.EventVoteEntityId)).FirstOrDefault();
+                if (applicationEntity == null) { return Unauthorized(); }
+                if (applicationEntity.EventVoteEntitys.Count == 0) { return Unauthorized(); }
+                Cmuaccount = await this.checkAppID(applicationEntity.ClientId);
+                if (Cmuaccount == "") { return Unauthorized(); }
+            
+                if(applicationEntity.EventVoteEntitys[0].PresidentEmail!= Cmuaccount) { return Unauthorized(); }
+                if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != "Development")
+                {
+                    int res = DateTime.Compare(DateTime.Now, applicationEntity.EventVoteEntitys[0].EventVotingEnd);
+                    if (res <= 0) { return Unauthorized(); }
+                 
+                }
+
+                List<VoteEntity> voteEntities=  _applicationDBContext.voteEntities.Where(w => w.ApplicationEntityId == data.ApplicationEntityId && w.EventVoteEntityId == data.EventVoteEntityId && w.RoundNumber == data.VoteRound).OrderBy(o=>o.VoteData).ToList();
+                aPIModel.data = voteEntities;
+                aPIModel.title = "Success";
+                return StatusCodeITSC("CMU", "", Cmuaccount, action, 200, aPIModel);
+
+            }
+            catch (Exception ex) { return StatusErrorITSC("CMU", "", Cmuaccount, action, ex); }
+        }
+
+        [HttpGet("v1/VoteBatch")]
+        [ProducesResponseType(typeof(List<VoteEntity>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> VoteBatch()
+        {
+            String Cmuaccount = "";
+            String Email = "";
+            UserEntity userEntity = null;
+            String action = "VoteController.VoteBatch";
+            try
+            {
+                if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != "Development")
+                {
+                    String TokenKey = Environment.GetEnvironmentVariable("TOEN_BATCH");
+                    if (TokenKey != this.getTokenFormHeader()) { return Unauthorized(); }
+                }
+                APIModel aPIModel = new APIModel();
+                List<VoteEntity> voteEntities = _applicationDBContext.voteEntities.OrderBy(o => o.VoteData).ToList();
+                foreach (VoteEntity voteEntity in voteEntities)
+                {
+                    String json = JsonConvert.SerializeObject(voteEntity);
+                    VoteEntity model = JsonConvert.DeserializeObject<VoteEntity>(json);
+                    _evoteContext.voteEntities.Add(model);
+                    _applicationDBContext.voteEntities.Remove(voteEntity);
+                }
+                _evoteContext.SaveChanges();
+                _applicationDBContext.SaveChanges();
+                aPIModel.title = "Success";
+                return StatusCodeITSC("CMU", "", Cmuaccount, action, 200, aPIModel);
+
+            }
+            catch (Exception ex) { return StatusErrorITSC("CMU", "", Cmuaccount, action, ex); }
+        }
+        [HttpGet("v1/ConfirmBatch")]
+        [ProducesResponseType(typeof(List<VoteEntity>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> ConfirmBatch()
+        {
+            String Cmuaccount = "";
+            String Email = "";
+            UserEntity userEntity = null;
+            String action = "VoteController.ConfirmBatch";
+            try
+            {
+                if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != "Development")
+                {
+                    String TokenKey = Environment.GetEnvironmentVariable("TOEN_BATCH");
+                    if (TokenKey != this.getTokenFormHeader()) { return Unauthorized(); }
+                }
+                APIModel aPIModel = new APIModel();
+                List<ConfirmVoter> confirmVoters = _applicationDBContext.confirmVoters.OrderBy(o => o.email).ToList();
+                foreach (ConfirmVoter confirmVoter in confirmVoters)
+                {
+                    String json = JsonConvert.SerializeObject(confirmVoter);
+                    ConfirmVoter model = JsonConvert.DeserializeObject<ConfirmVoter>(json);
+                    _evoteContext.confirmVoters.Add(model);
+                    _applicationDBContext.confirmVoters.Remove(confirmVoter);
+                }
+                _evoteContext.SaveChanges();
+                _applicationDBContext.SaveChanges();
+             
                 aPIModel.title = "Success";
                 return StatusCodeITSC("CMU", "", Cmuaccount, action, 200, aPIModel);
 
