@@ -1,0 +1,3 @@
+﻿1.Update-Database -context EvoteContext -Migration 0 //db rollback version becareful!!
+2.Add-Migration Add1 -context EvoteContext // 1.
+3.Update-Database -context EvoteContext  // 2.  database

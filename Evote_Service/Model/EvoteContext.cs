@@ -13,7 +13,7 @@ namespace Evote_Service.Model
     {
         public EvoteContext(DbContextOptions<EvoteContext> options) : base(options) { }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) { }
-
+        public DbSet<EventStatus> EventStatus { get; set; }
         public DbSet<ConfirmVoter> confirmVoters { get; set; }
         public DbSet<VoteEntity> voteEntities { get; set; }
         public DbSet<VoteRoundEntity> voteRoundEntities { get; set; }

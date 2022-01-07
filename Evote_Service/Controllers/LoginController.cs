@@ -220,7 +220,7 @@ namespace Evote_Service.Controllers
             UserAdminEntity userAdminEntity = await _IAdminRepository.getAdminByOTP(data, getClientIP());
             if (userAdminEntity == null)
             {
-                aPIModel.title = "รหัส OTP ไม่ถูกต้อง";
+                aPIModel.title = "รหัส OTP ไม่ถูกต้อง หรือ หมดอายุ";
                 return StatusCodeITSC("CMU", "", "", "LoginController.AdminloginOTP", 503, aPIModel);
             }
              

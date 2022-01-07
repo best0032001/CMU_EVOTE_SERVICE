@@ -46,6 +46,8 @@ namespace ApiTest.Test
             eventModelview.EventTitle = "Test";
             eventModelview.EventDetail = "Test";
             eventModelview.Organization_Code = "00";
+            eventModelview.PresidentEmail = "cheewin.b@cmu.ac.th";
+
             eventModelview.OrganizationFullNameTha = "00";
             eventModelview.EventRegisterStart = DateTime.Now;
             eventModelview.EventRegisterEnd = DateTime.Now;
@@ -69,6 +71,9 @@ namespace ApiTest.Test
             EventConfirmModelview eventConfirmModelview = JsonConvert.DeserializeObject<EventConfirmModelview>(data);
 
             Assert.IsTrue(eventConfirmModelview.SecretKey.Count() > 0);
+
+
+
         }
 
 

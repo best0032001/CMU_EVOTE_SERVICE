@@ -64,6 +64,7 @@ namespace Evote_Service.Model.Repository
               .Select(s => s[_random.Next(s.Length)]).ToArray());
             //  sent OTP
             userEntitys.SMSOTP = await _sMSRepository.getOTP(code, userEntitys.Tel) ;
+            userEntitys.SMSExpire = DateTime.Now.AddMinutes(5);
             userEntitys.SMSOTPRef = code;
             _evoteContext.SaveChanges();
             return true;
@@ -77,6 +78,8 @@ namespace Evote_Service.Model.Repository
             if (userEntitys.IsConfirmTel == true) { return false; }
 
             if (userEntitys.SMSOTP != otp) { return false; }
+            int res = DateTime.Compare(DateTime.Now, (DateTime)userEntitys.SMSExpire);
+            if (res >= 0) { return false; }
             userEntitys.IsConfirmTel = true;
             userEntitys.ConfirmTelTime = DateTime.Now;
             CheckUserStage(userEntitys);
@@ -226,6 +229,28 @@ namespace Evote_Service.Model.Repository
                     userEntity.eventVoteEntities.Add(eventVoteEntity);
                 }
             }
+            _evoteContext.SaveChanges();
+
+            return true;
+        }
+
+        public async Task<bool> reset(string lineId)
+        {
+            UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.LineId == lineId).FirstOrDefault();
+            if (userEntitys == null) { return false; }
+            if(userEntitys.UserStage!=4) { return false; }
+            userEntitys.UserStage = 1;
+            userEntitys.PersonalID = "";
+            userEntitys.Tel = "";
+            userEntitys.IsConfirmEmail = false;
+            userEntitys.ConfirmEmailTime = null;
+            userEntitys.IsConfirmKYC = false;
+            userEntitys.ConfirmKYCTime = null;
+          
+            userEntitys.IsConfirmPersonalID = false;
+            userEntitys.ConfirmPersonalIDTime = null;
+            userEntitys.IsConfirmTel = false;
+            userEntitys.ConfirmTelTime = null;
             _evoteContext.SaveChanges();
 
             return true;

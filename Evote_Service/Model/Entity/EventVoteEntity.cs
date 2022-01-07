@@ -8,7 +8,7 @@ namespace Evote_Service.Model.Entity
     public class EventVoteEntity
     {
         public int EventVoteEntityId { get; set; }
-        public int EventStatusId { get; set; } // 1 now 2 incoming 3 passed
+        public int EventStatusId { get; set; } 
         public int ApplicationEntityId { get; set; }
         public int EventTypeId { get; set; }
 
@@ -21,6 +21,8 @@ namespace Evote_Service.Model.Entity
         public string CreateUser { get; set; }
 
         public string PresidentEmail { get; set; }
+
+        public DateTime? PresidentUpdate { get; set; }
         public string UpdateUser { get; set; }
         public string Organization_Code { get; set; }
         public string OrganizationFullNameTha { get; set; }

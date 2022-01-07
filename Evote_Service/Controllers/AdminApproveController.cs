@@ -58,6 +58,7 @@ namespace Evote_Service.Controllers
                 {
                     json = JsonConvert.SerializeObject(userEntity);
                     UserModelView userModelView = JsonConvert.DeserializeObject<UserModelView>(json);
+                    userModelView.UserStageText = DataCache.RefUserStages.Where(w => w.RefUserStageID == userModelView.UserStage).First().UserStageName;
                     userModelViews.Add(userModelView);
                 }
 
@@ -135,6 +136,8 @@ namespace Evote_Service.Controllers
                     userModelViews.Add(userModelView);
                 }
 
+
+                // ขาดการส่ง Email
                 APIModel aPIModel = new APIModel();
                 aPIModel.data = userModelViews;
                 aPIModel.title = "Success";
@@ -171,6 +174,7 @@ namespace Evote_Service.Controllers
                     userModelViews.Add(userModelView);
                 }
 
+                // ขาดการส่ง Email
                 APIModel aPIModel = new APIModel();
                 aPIModel.data = userModelViews;
                 aPIModel.title = "Success";
@@ -225,7 +229,7 @@ namespace Evote_Service.Controllers
                 if (Cmuaccount == "unauthorized") { return Unauthorized(); }
                 UserEntity userEntity = await _IAdminRepository.getUserEntity(Cmuaccount, userEntityId, getClientIP());
                 if (userEntity == null) { return Unauthorized(); }
-                var path = Path.Combine(Directory.GetCurrentDirectory(), "uploadkyc", userEntity.fileNameKYC);
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "uploadface", userEntity.fileNameFace);
                 var memory = this.loadFile(path);
                 memory.Position = 0;
                 return File(memory, GetContentType(path), Path.GetFileName(path));

@@ -100,7 +100,7 @@ namespace Evote_Service.Controllers
                 try
                 {
                     Boolean active = responseGetToken.active;
-                    if (active == false) { return ""; }
+                    if (active == false) { cmuaccount = "unauthorized"; }
                 }
                 catch { }
 
@@ -112,7 +112,7 @@ namespace Evote_Service.Controllers
                 {
                     cmuaccount = responseGetToken.user.user_id + "@cmu.ac.th";
                 }
-                else { cmuaccount = ""; }
+                else { cmuaccount = "unauthorized"; }
          
 
             }

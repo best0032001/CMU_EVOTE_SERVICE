@@ -71,10 +71,11 @@ namespace Evote_Service.Model
         }
         private void innit()
         {
-            setDefaultAdmin();
-            setRefUserStage();
+          
+            setRef();
             setApplicationTest();
             setEventTest();
+            setDefaultAdmin();
         }
         private void setDefaultAdmin()
         {
@@ -84,6 +85,7 @@ namespace Evote_Service.Model
             {
                 UserAdminEntity userAdminEntityFirst = new UserAdminEntity();
                 userAdminEntityFirst.Cmuaccount = "cheewin.b@cmu.ac.th";
+                userAdminEntityFirst.FullName = "people 1";
                 userAdminEntityFirst.SuperAdmin = true;
                 userAdminEntityFirst.OrganizationFullNameTha = "Test OrganizationFullNameTha";
                 userAdminEntityFirst.Tel = Environment.GetEnvironmentVariable("ADMIN_TEL1");
@@ -91,6 +93,7 @@ namespace Evote_Service.Model
 
                 UserAdminEntity userAdminEntitySec = new UserAdminEntity();
                 userAdminEntitySec.Cmuaccount = "jirakit.s@cmu.ac.th";
+                userAdminEntitySec.FullName = "people 2";
                 userAdminEntitySec.SuperAdmin = true;
                 userAdminEntitySec.OrganizationFullNameTha = "Test OrganizationFullNameTha";
                 userAdminEntitySec.Tel = Environment.GetEnvironmentVariable("ADMIN_TEL2");
@@ -99,34 +102,52 @@ namespace Evote_Service.Model
             }
 
         }
-        private void setRefUserStage()
+        private void setRef()
         {
             List<RefUserStage> list = _evoteContext.RefUserStages.ToList();
             if (list.Count == 0)
             {
                 RefUserStage refUserStage1 = new RefUserStage();
                 refUserStage1.RefUserStageID = 1;
-                refUserStage1.UserStageName = "regis";
+                refUserStage1.UserStageName = "Regis";
                 _evoteContext.RefUserStages.Add(refUserStage1);
                 _evoteContext.SaveChanges();
 
                 RefUserStage refUserStage2 = new RefUserStage();
                 refUserStage2.RefUserStageID = 2;
-                refUserStage2.UserStageName = "confirm";
+                refUserStage2.UserStageName = "Confirm";
                 _evoteContext.RefUserStages.Add(refUserStage2);
                 _evoteContext.SaveChanges();
 
                 RefUserStage refUserStage3 = new RefUserStage();
                 refUserStage3.RefUserStageID = 3;
-                refUserStage3.UserStageName = "approved";
+                refUserStage3.UserStageName = "Approved";
                 _evoteContext.RefUserStages.Add(refUserStage3);
                 _evoteContext.SaveChanges();
 
                 RefUserStage refUserStage4 = new RefUserStage();
                 refUserStage4.RefUserStageID = 4;
-                refUserStage4.UserStageName = "rejected";
+                refUserStage4.UserStageName = "Rejected";
                 _evoteContext.RefUserStages.Add(refUserStage4);
                 _evoteContext.SaveChanges();
+
+
+            }
+            DataCache.RefUserStages = _evoteContext.RefUserStages.OrderBy(o => o.RefUserStageID).ToList();
+
+            List<EventStatus> eventStatuses = _evoteContext.EventStatus.ToList();
+            if (eventStatuses.Count == 0)
+            {
+                EventStatus eventStatus1 = new EventStatus();
+                eventStatus1.EventStatusId = 1;
+                eventStatus1.EventStatusName = "SetUP"; //   admin  สร้าง ยังลบแก้ไขได้
+                _evoteContext.EventStatus.Add(eventStatus1);
+                _evoteContext.SaveChanges();
+
+                EventStatus eventStatus2 = new EventStatus();
+                eventStatus2.EventStatusId = 2;
+                eventStatus2.EventStatusName = "PresidentConfirm"; //   admin  สร้างลบแก้ไขไม่ได้
+                _evoteContext.EventStatus.Add(eventStatus2);
             }
         }
 
@@ -182,7 +203,7 @@ namespace Evote_Service.Model
                 voterModelview.peopleModelviews.Add(peopleModelviewModel1);
                 voterModelview.peopleModelviews.Add(peopleModelviewModel2);
                 voterModelview.peopleModelviews.Add(peopleModelviewModel3);
-                _eventRepository.addVote(voterModelview, "cheewin.b@cmu.ac.th");
+                _eventRepository.addVoter(voterModelview, "cheewin.b@cmu.ac.th");
 
             }
         }

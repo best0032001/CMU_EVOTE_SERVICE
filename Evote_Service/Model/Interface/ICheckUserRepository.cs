@@ -9,7 +9,7 @@ namespace Evote_Service.Model.Interface
 {
     public interface ICheckUserRepository
     {
-
+        Task<Boolean> reset(String lineId);
         Task<UserModel> GetLineUserModel(String lineId);
 
         Task<UserEntity> GetLineUserEntity(String lineId);

@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-
+using Microsoft.EntityFrameworkCore;
 namespace Evote_Service.Model.Repository
 {
     public class AdminRepository : IAdminRepository
@@ -43,9 +43,14 @@ namespace Evote_Service.Model.Repository
             List<UserEntity> userEntities = new List<UserEntity>();
             UserAdminEntity userAdminEntity = _evoteContext.UserAdminEntitys.Where(w => w.Cmuaccount == cmuaccount).FirstOrDefault();
             if (userAdminEntity == null) { return null; }
-            UserEntity userEntity = _evoteContext.UserEntitys.Where(w => w.UserStage == 2 && w.UserEntityId == userEntityId).FirstOrDefault();
+            UserEntity userEntity = _evoteContext.UserEntitys.Where(w => w.UserStage == 2 && w.UserEntityId == userEntityId).Include(i=>i.eventVoteEntities).FirstOrDefault();
             if (userEntity == null) { return null; }
+            if (userEntity.eventVoteEntities == null)
+            {
+                userEntity.eventVoteEntities = new List<EventVoteEntity>();
+            }
             userEntity.UserStage = 3;
+
             userEntity.AdminApprovedIP = clientIP;
             userEntity.AdminApproved = cmuaccount;
             userEntity.ApprovedTime = DateTime.Now;
@@ -79,8 +84,12 @@ namespace Evote_Service.Model.Repository
             userEntity.AdminNotApproved = cmuaccount;
             userEntity.NotApprovedTime = DateTime.Now;
 
-            userEntity.IsConfirmKYC = adminApproveModelView.IsConfirmKYC;
-            userEntity.IsConfirmPersonalID = adminApproveModelView.IsConfirmPersonalID;
+            userEntity.IsConfirmEmail = false;
+            userEntity.IsConfirmTel = false;
+            userEntity.IsConfirmKYC = false;
+            userEntity.IsConfirmPersonalID = false;
+            //userEntity.IsConfirmKYC = adminApproveModelView.IsConfirmKYC;
+            //userEntity.IsConfirmPersonalID = adminApproveModelView.IsConfirmPersonalID;
             _evoteContext.SaveChanges();
             await _emailRepository.SendEmailAsync("CMU Evote service", userEntity.Email, "การยืนยันตัวของท่านไม่ได้รับยืนยัน", adminApproveModelView.comment, null);
 
@@ -104,6 +113,7 @@ namespace Evote_Service.Model.Repository
             userAdminEntity.Refresh_token = _refresh_token;
             userAdminEntity.SMSOTP = await _sMSRepository.getOTP(code, userAdminEntity.Tel);
             userAdminEntity.SMSOTPRef = code;
+            userAdminEntity.SMSExpire = DateTime.Now.AddMinutes(5);
             _evoteContext.SaveChanges();
 
 
@@ -115,6 +125,10 @@ namespace Evote_Service.Model.Repository
 
             UserAdminEntity userAdminEntity = _evoteContext.UserAdminEntitys.Where(w => w.SMSOTP == adminLoginOTPModelview.otp && w.SMSOTPRef == adminLoginOTPModelview.RefCode).FirstOrDefault();
             if (userAdminEntity == null) { return null; }
+
+            int res = DateTime.Compare(DateTime.Now, (DateTime)userAdminEntity.SMSExpire);
+            if (res >= 0) { return null; }
+
             userAdminEntity.SMSOTP = "";
             userAdminEntity.SMSOTPRef = "";
             AdminLoginLog adminLoginLog = new AdminLoginLog();

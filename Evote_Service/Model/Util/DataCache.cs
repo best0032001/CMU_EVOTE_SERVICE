@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Evote_Service.Model.Entity.Ref;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,6 +12,7 @@ namespace Evote_Service.Model.Util
         public static String authorization_code = "authorization_code";
         public static List<UserMock> UserMocks;
         public static List<AdminMock> AdminMocks;
+        public static List<RefUserStage> RefUserStages;
     }
 
     public class UserMock

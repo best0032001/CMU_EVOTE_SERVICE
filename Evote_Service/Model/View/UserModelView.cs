@@ -15,6 +15,8 @@ namespace Evote_Service.Model.View
         public String PersonalID { get; set; }
         public String Tel { get; set; }
         public int UserStage { get; set; }   //0  no regis //1 regis 2 confirm 3 approve
+
+        public String UserStageText { get; set; }   //0  no regis //1 regis 2 confirm 3 approve
         public int UserType { get; set; } // 1 CMU 2 non CMU
 
         public DateTime? ConfirmEmailTime { get; set; }

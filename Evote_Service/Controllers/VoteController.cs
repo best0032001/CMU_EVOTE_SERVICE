@@ -44,7 +44,7 @@ namespace Evote_Service.Controllers
         }
 
         [HttpPost("v1/Vote/OTP")]
-        [ProducesResponseType(typeof(UserModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(APIModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> VoteOTP([FromBody] VoteSMSModelView data)
@@ -72,7 +72,7 @@ namespace Evote_Service.Controllers
                 else
                 {
                     Cmuaccount = await this.checkAppID(applicationEntity.ClientId);
-                    if (Cmuaccount == "") { return Unauthorized(); }
+                    if (Cmuaccount == "unauthorized") { return Unauthorized(); }
                     userEntity = _evoteContext.UserEntitys.Where(w => w.Email == Cmuaccount && w.UserStage == 3 && w.UserType == 1).FirstOrDefault();
                     if (userEntity == null) { return Unauthorized(); }
 
@@ -84,7 +84,7 @@ namespace Evote_Service.Controllers
                 const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
                 String code = new string(Enumerable.Repeat(chars, 4)
                   .Select(s => s[_random.Next(s.Length)]).ToArray());
-                voterEntity.SMSCreate = DateTime.Now;
+                voterEntity.SMSExpire = DateTime.Now.AddMinutes(5);
                 voterEntity.SMSOTPRef = code;
                 voterEntity.SMSOTP = await _sMSRepository.getOTP(code, userEntity.Tel);
                 _evoteContext.SaveChanges();
@@ -98,7 +98,7 @@ namespace Evote_Service.Controllers
         }
 
         [HttpPost("v1/Vote")]
-        [ProducesResponseType(typeof(UserEntity), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(APIModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -128,7 +128,7 @@ namespace Evote_Service.Controllers
                 else
                 {
                     Cmuaccount = await this.checkAppID(applicationEntity.ClientId);
-                    if (Cmuaccount == "") { return Unauthorized(); }
+                    if (Cmuaccount == "unauthorized") { return Unauthorized(); }
                     userEntity = _evoteContext.UserEntitys.Where(w => w.Email == Cmuaccount && w.UserStage == 3 && w.UserType == 1).FirstOrDefault();
                     if (userEntity == null) { return Unauthorized(); }
 
@@ -139,7 +139,7 @@ namespace Evote_Service.Controllers
                 if (confirmVoter != null) { return Unauthorized(); }
                 VoterEntity voterEntity = _evoteContext.VoterEntitys.Where(w => w.Email == Email && w.EventVoteEntityId == applicationEntity.EventVoteEntitys[0].EventVoteEntityId).FirstOrDefault();
                 if (voterEntity == null) { return Unauthorized(); }
-                if (!(voterEntity.SMSOTP == data.OTP && voterEntity.SMSOTPRef == data.RefOTP)) { return Unauthorized(); }
+       
                 String TokenData = data.TokenData;
                 String SecretKey = "";
                 if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != "Development")
@@ -147,6 +147,9 @@ namespace Evote_Service.Controllers
                     int res = DateTime.Compare(DateTime.Now, applicationEntity.EventVoteEntitys[0].EventVotingEnd);
                     if (res >= 0) { return Unauthorized(); }
                     SecretKey = applicationEntity.EventVoteEntitys[0].SecretKey;
+                    if (!(voterEntity.SMSOTP == data.OTP && voterEntity.SMSOTPRef == data.RefOTP)) { return Unauthorized(); }
+                    res = DateTime.Compare(DateTime.Now, (DateTime)voterEntity.SMSExpire);
+                    if (res >= 0) { return Unauthorized(); }
                 }
                 else
                 {
@@ -211,7 +214,7 @@ namespace Evote_Service.Controllers
                 if (applicationEntity == null) { return Unauthorized(); }
                 if (applicationEntity.EventVoteEntitys.Count == 0) { return Unauthorized(); }
                 Cmuaccount = await this.checkAppID(applicationEntity.ClientId);
-                if (Cmuaccount == "") { return Unauthorized(); }
+                if (Cmuaccount == "unauthorized") { return Unauthorized(); }
             
                 if(applicationEntity.EventVoteEntitys[0].PresidentEmail!= Cmuaccount) { return Unauthorized(); }
                 if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != "Development")

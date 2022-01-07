@@ -56,7 +56,7 @@ namespace Evote_Service.Controllers
             {
                 lineId = await getLineUser();
                 if (lineId == "unauthorized") { return Unauthorized(); }
-             
+
                 UserModel userModel = await _ICheckUserRepository.GetLineUserModel(lineId);
                 if (userModel == null) { return StatusCode(204); }
                 aPIModel.data = userModel;
@@ -379,11 +379,11 @@ namespace Evote_Service.Controllers
 
                 int countFiles = Request.Form.Files.Count;
                 if (countFiles != 1) { return BadRequest(); }
-               // IFormFile fileKYC = filename;
+                // IFormFile fileKYC = filename;
                 IFormFile fileFace = face;
-              //  var pathKYC = Path.Combine(Directory.GetCurrentDirectory(), "uploadkyc");
+                //  var pathKYC = Path.Combine(Directory.GetCurrentDirectory(), "uploadkyc");
                 var pathFace = Path.Combine(Directory.GetCurrentDirectory(), "uploadface");
-               // FileModel fileModelKYC = this.SaveFile(pathKYC, fileKYC, 20);
+                // FileModel fileModelKYC = this.SaveFile(pathKYC, fileKYC, 20);
                 FileModel fileModelFace = this.SaveFile(pathFace, fileFace, 20);
                 String _facedata = facedata["facedata"];
 
@@ -428,6 +428,30 @@ namespace Evote_Service.Controllers
             {
                 return StatusErrorITSC("line", lineId, "", action, ex);
             }
+        }
+
+        [HttpGet("v1/User/reset")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> reset()
+        {
+            APIModel aPIModel = new APIModel();
+            // เมื่อUser เปิด Line UI  ทำการ GetLink Token แล้วส่งมาcheck Service ว่า  LINE ID นี้ Registerระบบหรือยัง
+            String lineId = "";
+            String action = "RegisterUserController.reset";
+            try
+            {
+                lineId = await getLineUser();
+                if (lineId == "unauthorized") { return Unauthorized(); }
+                if (await _ICheckUserRepository.reset(lineId) == false) { return Unauthorized(); }
+                UserModel userModel = await _ICheckUserRepository.GetLineUserModel(lineId);
+                if (userModel == null) { return StatusCode(204); }
+                aPIModel.data = userModel;
+                aPIModel.title = "Success";
+                return Ok(aPIModel);
+            }
+            catch (Exception ex) { return StatusErrorITSC("line", lineId, "", action, ex); }
         }
 
     }

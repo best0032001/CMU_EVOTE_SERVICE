@@ -24,5 +24,7 @@ namespace Evote_Service.Model.Util
         public DateTime? ConfirmPersonalIDTime { get; set; }
         public Boolean IsConfirmKYC { get; set; }
         public DateTime? ConfirmKYCTime { get; set; }
+
+        public String CommetNotApproved { get; set; }
     }
 }

@@ -44,7 +44,7 @@ namespace Evote_Service
             services.AddDbContext<ApplicationDBContext>(options => options.UseInMemoryDatabase(databaseName: "ApplicationDBContext").ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning)));
             if (webHostEnvironment.IsEnvironment("test"))
             {
-                services.AddDbContext<EvoteContext>(options => options.UseInMemoryDatabase(databaseName: "ApplicationDBContext").ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning)));
+                services.AddDbContext<EvoteContext>(options => options.UseInMemoryDatabase(databaseName: "EvoteContext").ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning)));
                 services.AddScoped<ISMSRepository, SMSRepositoryMock>();
                 services.AddScoped<IEmailRepository, EmailRepositoryMock>();
 
@@ -52,11 +52,13 @@ namespace Evote_Service
             }
             else
             {
+                var serverVersion = new MySqlServerVersion(new Version(8, 0, 25));
+                services.AddDbContext<EvoteContext>(options => options.UseInMemoryDatabase(databaseName: "ApplicationDBContext").ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning)));
                 services.AddScoped<ISMSRepository, SMSRepository>();
                 services.AddScoped<IEmailRepository, EmailRepository>();
                 origin = Environment.GetEnvironmentVariable("ORIGIN");
             }
-            services.AddDbContext<EvoteContext>(options => options.UseInMemoryDatabase(databaseName: "ApplicationDBContext").ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning)));
+          
             services.AddScoped<ICheckUserRepository, CheckUserRepository>();
             services.AddScoped<IAdminRepository, AdminRepository>();
             services.AddScoped<IUserRepository,UserRepository>();
