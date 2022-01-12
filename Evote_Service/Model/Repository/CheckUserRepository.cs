@@ -36,7 +36,19 @@ namespace Evote_Service.Model.Repository
             { userEntitys.Email = ""; }
             if (userEntitys.IsConfirmTel == false)
             { userEntitys.Tel = ""; }
-            return JsonConvert.DeserializeObject<UserModel>(JsonConvert.SerializeObject(userEntitys)); ;
+
+            UserModel userModel = JsonConvert.DeserializeObject<UserModel>(JsonConvert.SerializeObject(userEntitys));
+
+            String RAW_KEY = Environment.GetEnvironmentVariable("RAW_KEY");
+            String PASS_KEY = Environment.GetEnvironmentVariable("PASS_KEY");
+            Crypto crypto = new Crypto(PASS_KEY, RAW_KEY);
+            try {
+                userModel.Tel = crypto.DecryptFromBase64(userModel.Tel);
+                userModel.PersonalID = crypto.DecryptFromBase64(userModel.PersonalID);
+            }
+            catch { }
+         
+            return userModel;
         }
 
         public async Task<bool> RegisLineUser(UserEntity userEntity)
@@ -45,6 +57,11 @@ namespace Evote_Service.Model.Repository
             userEntity.UserType = 2;
             userEntity.CreateTime = DateTime.Now;
             userEntity.UserStage = 1;
+            Random _random = new Random();
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            String code = new string(Enumerable.Repeat(chars, 16)
+              .Select(s => s[_random.Next(s.Length)]).ToArray());
+            userEntity.UserCode = code;
             _evoteContext.UserEntitys.Add(userEntity);
             _evoteContext.SaveChanges();
             return true;
@@ -56,14 +73,18 @@ namespace Evote_Service.Model.Repository
             if (userEntitys == null) { return false; }
             if (userEntitys.UserStage!=1) { return false; }
             if (userEntitys.IsConfirmTel ==true) { return false; }
-            userEntitys.Tel = tel;
+
+            String RAW_KEY = Environment.GetEnvironmentVariable("RAW_KEY");
+            String PASS_KEY = Environment.GetEnvironmentVariable("PASS_KEY");
+            Crypto crypto = new Crypto(PASS_KEY, RAW_KEY);
+            userEntitys.Tel = crypto.Encrypt(tel);
             
             Random _random = new Random();
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
             String code = new string(Enumerable.Repeat(chars, 4)
               .Select(s => s[_random.Next(s.Length)]).ToArray());
             //  sent OTP
-            userEntitys.SMSOTP = await _sMSRepository.getOTP(code, userEntitys.Tel) ;
+            userEntitys.SMSOTP = await _sMSRepository.getOTP(code, tel) ;
             userEntitys.SMSExpire = DateTime.Now.AddMinutes(5);
             userEntitys.SMSOTPRef = code;
             _evoteContext.SaveChanges();
@@ -127,6 +148,11 @@ namespace Evote_Service.Model.Repository
         }
         public async Task<bool> CheckTel(string tel)
         {
+
+            String RAW_KEY = Environment.GetEnvironmentVariable("RAW_KEY");
+            String PASS_KEY = Environment.GetEnvironmentVariable("PASS_KEY");
+            Crypto crypto = new Crypto(PASS_KEY, RAW_KEY);
+            tel = crypto.Encrypt(tel);
             UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.Tel == tel & w.IsConfirmTel == true).FirstOrDefault();
             if (userEntitys == null) { return true; }
             return false;
@@ -154,11 +180,14 @@ namespace Evote_Service.Model.Repository
             UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.LineId == lineId).FirstOrDefault();
             if (userEntitys == null) { return false; }
             if (userEntitys.UserStage != 1) { return false; }
+            String RAW_KEY = Environment.GetEnvironmentVariable("RAW_KEY");
+            String PASS_KEY = Environment.GetEnvironmentVariable("PASS_KEY");
+            Crypto crypto = new Crypto(PASS_KEY, RAW_KEY);
             userEntitys.fileNamePersonalID = fileModel.fileName;
             userEntitys.fullPathPersonalID = fileModel.fullPath;
             userEntitys.dbPathPersonalID = fileModel.dbPath;
             userEntitys.IsConfirmPersonalID = true;
-            userEntitys.PersonalID = PersonalID;
+            userEntitys.PersonalID = crypto.Encrypt(PersonalID);
             userEntitys.ConfirmPersonalIDTime = DateTime.Now;
             CheckUserStage(userEntitys);
             _evoteContext.SaveChanges();
@@ -166,6 +195,10 @@ namespace Evote_Service.Model.Repository
         }
         public async Task<Boolean> CheckPersonalID(String PersonalID)
         {
+            String RAW_KEY = Environment.GetEnvironmentVariable("RAW_KEY");
+            String PASS_KEY = Environment.GetEnvironmentVariable("PASS_KEY");
+            Crypto crypto = new Crypto(PASS_KEY, RAW_KEY);
+            PersonalID = crypto.Encrypt(PersonalID);
             UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.PersonalID == PersonalID).FirstOrDefault();
             if (userEntitys == null) { return true; }
             return false;
@@ -204,6 +237,8 @@ namespace Evote_Service.Model.Repository
             if (userEntitys.IsConfirmEmail == true && userEntitys.IsConfirmKYC == true && userEntitys.IsConfirmPersonalID == true && userEntitys.IsConfirmTel == true)
             {
                 userEntitys.UserStage = 2;
+                String NOTI_ADMIN = Environment.GetEnvironmentVariable("NOTI_ADMIN");
+                _emailRepository.SendEmailAsync("CMU Evote service", NOTI_ADMIN, "Register Alert", "มีผู้ลงทะเบียนใหม่", null);
             }
             if (userEntitys.UserType == 1&& userEntitys.IsConfirmTel == true)
             {
@@ -220,16 +255,7 @@ namespace Evote_Service.Model.Repository
             _evoteContext.UserEntitys.Add(userEntity);
             _evoteContext.SaveChanges();
 
-            List<VoterEntity> voterEntitys= _evoteContext.VoterEntitys.Where(w => w.Email == userEntity.Email).ToList();
-            foreach (VoterEntity voterEntity in voterEntitys)
-            {
-                EventVoteEntity eventVoteEntity= _evoteContext.EventVoteEntitys.Where(w => w.EventVoteEntityId == voterEntity.EventVoteEntityId).FirstOrDefault();
-                if (eventVoteEntity != null)
-                {
-                    userEntity.eventVoteEntities.Add(eventVoteEntity);
-                }
-            }
-            _evoteContext.SaveChanges();
+       
 
             return true;
         }

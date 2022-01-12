@@ -8,6 +8,8 @@ namespace Evote_Service.Model.Entity
     public class UserEntity
     {
         public int UserEntityId { get; set; }
+
+        public String UserCode { get; set; }
         public String Email { get; set; }
         public String Organization_Code { get; set; }
         public String Organization_Name_TH { get; set; }
@@ -65,6 +67,6 @@ namespace Evote_Service.Model.Entity
         public String Refresh_token { get; set; }
         public String Expires_in { get; set; }
 
-        public List<EventVoteEntity> eventVoteEntities { get; set; }
+       // public List<EventVoteEntity> eventVoteEntities { get; set; }
     }
 }

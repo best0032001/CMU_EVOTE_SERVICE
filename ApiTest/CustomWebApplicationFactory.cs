@@ -13,6 +13,8 @@ namespace ApiTest
         {
             builder.UseEnvironment("test");
             Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");
+            Environment.SetEnvironmentVariable("RAW_KEY", "1111111111111111");
+            Environment.SetEnvironmentVariable("PASS_KEY", "TestKey");
         }
     }
 }

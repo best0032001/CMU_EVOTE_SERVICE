@@ -114,13 +114,17 @@ namespace Evote_Service.Controllers
                     return StatusCodeITSC("line", lineId, "", "LoginController.callback", 406, aPIModel);
                 }
                 userEntity = new UserEntity();
-                userEntity.eventVoteEntities = new List<EventVoteEntity>();
+              
                 userEntity.Email = responseprofile.cmuitaccount;
                 userEntity.IsConfirmEmail = true;
                 userEntity.Organization_Code = responseprofile.organization_code;
                 userEntity.Organization_Name_TH = responseprofile.organization_name_TH;
                 userEntity.LineId = lineId;
-                userEntity.PersonalID = personalid;
+
+                String RAW_KEY = Environment.GetEnvironmentVariable("RAW_KEY");
+                String PASS_KEY = Environment.GetEnvironmentVariable("PASS_KEY");
+                Crypto crypto = new Crypto(PASS_KEY, RAW_KEY);
+                userEntity.PersonalID = crypto.Encrypt(personalid);
                 userEntity.FullName = responseprofile.firstname_TH + " " + responseprofile.lastname_TH;
                 userEntity.Access_token = _access_token;
                 userEntity.Refresh_token = _refresh_token;

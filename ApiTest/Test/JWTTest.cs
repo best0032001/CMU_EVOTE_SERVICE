@@ -22,9 +22,16 @@ namespace ApiTest.Test
     public class JWTTest
     {
         private String SecretKey = "TW9zaGVFcmV6UHJpdmF0ZUtleQ==";
+        private String SecretKeyTest = "1111111111111111";
         [TestMethod]
         public async Task TestJWT()
         {
+            Crypto crypto = new Crypto(SecretKey, SecretKeyTest);
+
+            String dataTest = crypto.Encrypt("Test");
+
+            String Test = crypto.DecryptFromBase64(dataTest);
+            Assert.IsTrue(Test == "Test");
             VoteModel voteModel = new VoteModel();
             voteModel.data1 = "data1";
             voteModel.data2 = "data2";
@@ -37,12 +44,12 @@ namespace ApiTest.Test
             string token = GenerateToken(Claims);
             Assert.IsTrue(token.Length > 0);
 
-          //  String tokenFake = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3VzZXJkYXRhIjoie1wiZGF0YTFcIjpcImRhdGEzXCIsXCJkYXRhMlwiOlwiZGF0YTJcIixcImRhdGEzXCI6XCJkYXRhM1wifSIsIm5iZiI6MTYzOTQ2NzE4NywiZXhwIjoxNjM5NDY3MjQ3LCJpYXQiOjE2Mzk0NjcxODd9.xYdSfNa5D4GmpkkbjGsEgNL-rJ-TMAUOiPVhvDUA9VY";
+            //  String tokenFake = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3VzZXJkYXRhIjoie1wiZGF0YTFcIjpcImRhdGEzXCIsXCJkYXRhMlwiOlwiZGF0YTJcIixcImRhdGEzXCI6XCJkYXRhM1wifSIsIm5iZiI6MTYzOTQ2NzE4NywiZXhwIjoxNjM5NDY3MjQ3LCJpYXQiOjE2Mzk0NjcxODd9.xYdSfNa5D4GmpkkbjGsEgNL-rJ-TMAUOiPVhvDUA9VY";
             List<Claim> claims = GetTokenClaims(token).ToList();
             String data = claims.FirstOrDefault(e => e.Type.Equals(ClaimTypes.UserData)).Value;
 
             VoteModel model = JsonConvert.DeserializeObject<VoteModel>(data);
-            Assert.IsTrue(model.data1== "data1");
+            Assert.IsTrue(model.data1 == "data1");
         }
         string GenerateToken(Claim[] Claims)
         {
@@ -94,7 +101,7 @@ namespace ApiTest.Test
                 IssuerSigningKey = GetSymmetricSecurityKey(SecretKey)
             };
         }
-      
+
     }
 
 

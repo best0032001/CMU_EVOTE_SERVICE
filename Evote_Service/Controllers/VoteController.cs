@@ -86,7 +86,12 @@ namespace Evote_Service.Controllers
                   .Select(s => s[_random.Next(s.Length)]).ToArray());
                 voterEntity.SMSExpire = DateTime.Now.AddMinutes(5);
                 voterEntity.SMSOTPRef = code;
-                voterEntity.SMSOTP = await _sMSRepository.getOTP(code, userEntity.Tel);
+                String RAW_KEY = Environment.GetEnvironmentVariable("RAW_KEY");
+                String PASS_KEY = Environment.GetEnvironmentVariable("PASS_KEY");
+                Crypto crypto = new Crypto(PASS_KEY, RAW_KEY);
+
+                voterEntity.SMSOTP = await _sMSRepository.getOTP(code, crypto.DecryptFromBase64(userEntity.Tel));
+                //voterEntity.SMSOTP = await _sMSRepository.getOTP(code, userEntity.Tel);
                 _evoteContext.SaveChanges();
                 aPIModel.title = "Success";
                 aPIModel.data = code;

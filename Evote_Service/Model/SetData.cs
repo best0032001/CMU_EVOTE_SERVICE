@@ -51,15 +51,23 @@ namespace Evote_Service.Model
             UserEntity userEntity = new UserEntity();
             userEntity.Email = "cheewin.b@cmu.ac.th";
             userEntity.FullName = "test";
-            userEntity.Tel = "1234";
+
+            String RAW_KEY = Environment.GetEnvironmentVariable("RAW_KEY");
+            String PASS_KEY = Environment.GetEnvironmentVariable("PASS_KEY");
+            Crypto crypto = new Crypto(PASS_KEY, RAW_KEY);
+
+
+            userEntity.Tel = crypto.Encrypt("1234");
             userEntity.UserStage = 3;
             userEntity.UserType = 2;
             userEntity.LineId = "l02";
+            userEntity.PersonalID = crypto.Encrypt("1234");
 
             UserEntity userEntityTest = new UserEntity();
-            userEntityTest.Email = "test@test.com";
+            userEntityTest.Email = "jirakit.s@cmu.ac.th";
             userEntityTest.FullName = "test";
-            userEntityTest.Tel = "1234";
+            userEntityTest.Tel = crypto.Encrypt("1234");
+            userEntityTest.PersonalID = crypto.Encrypt("1234");
             userEntityTest.UserStage = 2;
 
 
@@ -164,6 +172,16 @@ namespace Evote_Service.Model
                 applicationEntity.ServerProductionIP = "10.10.10.prod";
                 applicationEntity.EventVoteEntitys = new List<EventVoteEntity>();
                 _evoteContext.ApplicationEntitys.Add(applicationEntity);
+                _evoteContext.SaveChanges();
+
+                ApplicationEntity applicationEntity2 = new ApplicationEntity();
+                applicationEntity2.ApplicationName = "ApplicationNametes2";
+                applicationEntity2.ClientId = Environment.GetEnvironmentVariable("CMU_CLIENT_ID");
+                applicationEntity2.LineAuth = true;
+                applicationEntity2.CMUAuth = false;
+                applicationEntity2.ServerProductionIP = Environment.GetEnvironmentVariable("E_COUNCIL_IP");
+                applicationEntity2.EventVoteEntitys = new List<EventVoteEntity>();
+                _evoteContext.ApplicationEntitys.Add(applicationEntity2);
                 _evoteContext.SaveChanges();
             }
         }

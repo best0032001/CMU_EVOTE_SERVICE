@@ -46,7 +46,9 @@ namespace Evote_Service.Controllers
             try
             {
                 String json = "";
-             
+                String RAW_KEY = Environment.GetEnvironmentVariable("RAW_KEY");
+                String PASS_KEY = Environment.GetEnvironmentVariable("PASS_KEY");
+                Crypto crypto = new Crypto(PASS_KEY, RAW_KEY);
                 Cmuaccount = await getCmuaccount();
                 if (Cmuaccount == "unauthorized") { return Unauthorized(); }
 
@@ -58,6 +60,8 @@ namespace Evote_Service.Controllers
                 {
                     json = JsonConvert.SerializeObject(userEntity);
                     UserModelView userModelView = JsonConvert.DeserializeObject<UserModelView>(json);
+                    userModelView.Tel = crypto.DecryptFromBase64(userModelView.Tel);
+                    userModelView.PersonalID = crypto.DecryptFromBase64(userModelView.PersonalID);
                     userModelView.UserStageText = DataCache.RefUserStages.Where(w => w.RefUserStageID == userModelView.UserStage).First().UserStageName;
                     userModelViews.Add(userModelView);
                 }
@@ -83,7 +87,10 @@ namespace Evote_Service.Controllers
             String action = "AdminApproveController.getUserApprove";
             try
             {
-               
+
+                String RAW_KEY = Environment.GetEnvironmentVariable("RAW_KEY");
+                String PASS_KEY = Environment.GetEnvironmentVariable("PASS_KEY");
+                Crypto crypto = new Crypto(PASS_KEY, RAW_KEY);
                 Cmuaccount = await getCmuaccount();
                 if (Cmuaccount == "unauthorized") { return Unauthorized(); }
 
@@ -95,6 +102,9 @@ namespace Evote_Service.Controllers
                 {
                     String json = JsonConvert.SerializeObject(userEntity);
                     UserModelView userModelView = JsonConvert.DeserializeObject<UserModelView>(json);
+                    userModelView.Tel = crypto.DecryptFromBase64(userModelView.Tel);
+                    userModelView.PersonalID = crypto.DecryptFromBase64(userModelView.PersonalID);
+                    userModelView.UserStageText = DataCache.RefUserStages.Where(w => w.RefUserStageID == userModelView.UserStage).First().UserStageName;
                     userModelViews.Add(userModelView);
                 }
 
@@ -118,7 +128,9 @@ namespace Evote_Service.Controllers
             String action = "AdminApproveController.adminApprove";
             try
             {
-               
+                String RAW_KEY = Environment.GetEnvironmentVariable("RAW_KEY");
+                String PASS_KEY = Environment.GetEnvironmentVariable("PASS_KEY");
+                Crypto crypto = new Crypto(PASS_KEY, RAW_KEY);
                 Cmuaccount = await getCmuaccount();
                 if (Cmuaccount == "unauthorized") { return Unauthorized(); }
                 if (userEntityId == 0) { return BadRequest(); }
@@ -133,6 +145,9 @@ namespace Evote_Service.Controllers
                 {
                     String json = JsonConvert.SerializeObject(userEntity);
                     UserModelView userModelView = JsonConvert.DeserializeObject<UserModelView>(json);
+                    userModelView.Tel = crypto.DecryptFromBase64(userModelView.Tel);
+                    userModelView.PersonalID = crypto.DecryptFromBase64(userModelView.PersonalID);
+                    userModelView.UserStageText = DataCache.RefUserStages.Where(w => w.RefUserStageID == userModelView.UserStage).First().UserStageName;
                     userModelViews.Add(userModelView);
                 }
 
@@ -159,6 +174,9 @@ namespace Evote_Service.Controllers
             String Cmuaccount = "";
             try
             {
+                String RAW_KEY = Environment.GetEnvironmentVariable("RAW_KEY");
+                String PASS_KEY = Environment.GetEnvironmentVariable("PASS_KEY");
+                Crypto crypto = new Crypto(PASS_KEY, RAW_KEY);
                 Cmuaccount = await getCmuaccount();
                 if (Cmuaccount == "unauthorized") { return Unauthorized(); }
                 if (data.userEntityId == 0 || data.comment == "") { return BadRequest(); }
@@ -171,6 +189,9 @@ namespace Evote_Service.Controllers
                 {
                     String json = JsonConvert.SerializeObject(userEntity);
                     UserModelView userModelView = JsonConvert.DeserializeObject<UserModelView>(json);
+                    userModelView.Tel = crypto.DecryptFromBase64(userModelView.Tel);
+                    userModelView.PersonalID = crypto.DecryptFromBase64(userModelView.PersonalID);
+                    userModelView.UserStageText = DataCache.RefUserStages.Where(w => w.RefUserStageID == userModelView.UserStage).First().UserStageName;
                     userModelViews.Add(userModelView);
                 }
 

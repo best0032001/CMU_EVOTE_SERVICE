@@ -83,7 +83,7 @@ namespace Evote_Service.Controllers
                 if (data.firstName == "" || data.lastName == "") { return BadRequest(); }
 
                 UserEntity userEntity = new UserEntity();
-                userEntity.eventVoteEntities = new List<EventVoteEntity>();
+             
                 userEntity.FullName = data.firstName + " " + data.lastName;
                 userEntity.Email = "";
                 userEntity.LineId = lineId;

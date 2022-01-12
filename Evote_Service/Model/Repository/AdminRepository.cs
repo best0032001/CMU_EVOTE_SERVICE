@@ -43,27 +43,16 @@ namespace Evote_Service.Model.Repository
             List<UserEntity> userEntities = new List<UserEntity>();
             UserAdminEntity userAdminEntity = _evoteContext.UserAdminEntitys.Where(w => w.Cmuaccount == cmuaccount).FirstOrDefault();
             if (userAdminEntity == null) { return null; }
-            UserEntity userEntity = _evoteContext.UserEntitys.Where(w => w.UserStage == 2 && w.UserEntityId == userEntityId).Include(i=>i.eventVoteEntities).FirstOrDefault();
+            UserEntity userEntity = _evoteContext.UserEntitys.Where(w => w.UserStage == 2 && w.UserEntityId == userEntityId).FirstOrDefault();
             if (userEntity == null) { return null; }
-            if (userEntity.eventVoteEntities == null)
-            {
-                userEntity.eventVoteEntities = new List<EventVoteEntity>();
-            }
+
             userEntity.UserStage = 3;
 
             userEntity.AdminApprovedIP = clientIP;
             userEntity.AdminApproved = cmuaccount;
             userEntity.ApprovedTime = DateTime.Now;
 
-            List<VoterEntity> voterEntitys = _evoteContext.VoterEntitys.Where(w => w.Email == userEntity.Email).ToList();
-            foreach (VoterEntity voterEntity in voterEntitys)
-            {
-                EventVoteEntity eventVoteEntity = _evoteContext.EventVoteEntitys.Where(w => w.EventVoteEntityId == voterEntity.EventVoteEntityId).FirstOrDefault();
-                if (eventVoteEntity != null)
-                {
-                    userEntity.eventVoteEntities.Add(eventVoteEntity);
-                }
-            }
+
             _evoteContext.SaveChanges();
 
             await _emailRepository.SendEmailAsync("CMU Evote service", userEntity.Email, "การยืนยันตัวของท่านได้รับการตรวจสอบแล้ว", "  ", null);
@@ -111,7 +100,7 @@ namespace Evote_Service.Model.Repository
               .Select(s => s[_random.Next(s.Length)]).ToArray());
             userAdminEntity.Access_token = _access_token;
             userAdminEntity.Refresh_token = _refresh_token;
-            userAdminEntity.SMSOTP = await _sMSRepository.getOTP(code, userAdminEntity.Tel);
+            userAdminEntity.SMSOTP = await _sMSRepository.getOTPNotSend(code, userAdminEntity.Tel);
             userAdminEntity.SMSOTPRef = code;
             userAdminEntity.SMSExpire = DateTime.Now.AddMinutes(5);
             _evoteContext.SaveChanges();
@@ -146,12 +135,23 @@ namespace Evote_Service.Model.Repository
             UserAdminEntity userAdminEntity = _evoteContext.UserAdminEntitys.Where(w => w.Cmuaccount == cmuaccount).FirstOrDefault();
             if (userAdminEntity == null) { return null; }
             UserEntity userEntity = new UserEntity();
-            userEntity = _evoteContext.UserEntitys.Where(w =>  w.UserEntityId == userEntityId).FirstOrDefault();
+            userEntity = _evoteContext.UserEntitys.Where(w => w.UserEntityId == userEntityId).FirstOrDefault();
             return userEntity;
         }
 
         public async Task<List<UserEntity>> searchUser(AdminSearchModelView adminSearchModelView, string cmuaccount)
         {
+            String RAW_KEY = Environment.GetEnvironmentVariable("RAW_KEY");
+            String PASS_KEY = Environment.GetEnvironmentVariable("PASS_KEY");
+            Crypto crypto = new Crypto(PASS_KEY, RAW_KEY);
+            if (adminSearchModelView.PersonalID != "")
+            {
+                adminSearchModelView.PersonalID = crypto.Encrypt(adminSearchModelView.PersonalID);
+            }
+            if (adminSearchModelView.Tel != "")
+            {
+                adminSearchModelView.Tel = crypto.Encrypt(adminSearchModelView.Tel);
+            }
             List<UserEntity> userEntities = new List<UserEntity>();
             UserAdminEntity userAdminEntity = _evoteContext.UserAdminEntitys.Where(w => w.Cmuaccount == cmuaccount).FirstOrDefault();
             if (userAdminEntity == null) { return null; }
@@ -159,8 +159,8 @@ namespace Evote_Service.Model.Repository
                 .WhereIf(adminSearchModelView.FullName != "", w => w.FullName.Contains(adminSearchModelView.FullName))
                 .WhereIf(adminSearchModelView.Email != "", w => w.Email.Contains(adminSearchModelView.Email))
                 .WhereIf(adminSearchModelView.Organization_Name_TH != "", w => w.Organization_Name_TH.Contains(adminSearchModelView.Organization_Name_TH))
-                .WhereIf(adminSearchModelView.PersonalID != "", w => w.PersonalID.Contains(adminSearchModelView.PersonalID))
-                .WhereIf(adminSearchModelView.Tel != "", w => w.Tel.Contains(adminSearchModelView.Tel))
+                .WhereIf(adminSearchModelView.PersonalID != "", w => w.PersonalID == adminSearchModelView.PersonalID)
+                .WhereIf(adminSearchModelView.Tel != "", w => w.Tel == adminSearchModelView.Tel)
                 .WhereIf(adminSearchModelView.UserStage != 0, w => w.UserStage == adminSearchModelView.UserStage)
                 .ToList();
             return userEntities;

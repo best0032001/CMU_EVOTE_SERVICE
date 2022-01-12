@@ -151,10 +151,14 @@ namespace Evote_Service.Controllers
         }
         protected String getTokenFormHeader()
         {
-            _accesstoken = Request.Headers["Authorization"];
-            _accesstoken = _accesstoken.Split(' ')[1];
-            return _accesstoken;
-
+            try {
+                _accesstoken = Request.Headers["Authorization"];
+                _accesstoken = _accesstoken.Split(' ')[1];
+                return _accesstoken;
+            }
+            catch {
+                return "";
+            }
         }
 
         protected async Task<String> getLineUser()

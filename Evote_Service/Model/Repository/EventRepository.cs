@@ -101,7 +101,7 @@ namespace Evote_Service.Model.Repository
         public async Task<bool> addVoter(VoterModelview voterModelview, string cmuaccount)
         {
             Boolean check = false;
-            List<UserEntity> userEntitys= _evoteContext.UserEntitys.Where(w=>w.UserStage==3).Include(i=>i.eventVoteEntities).ToList();
+          
             EventVoteEntity eventVoteEntity= _evoteContext.EventVoteEntitys.Where(w => w.EventVoteEntityId == voterModelview.EventVoteEntityId).Include(i=>i.voterEntities).First();
             foreach (PeopleModelview peopleModelview in voterModelview.peopleModelviews)
             {
@@ -116,15 +116,6 @@ namespace Evote_Service.Model.Repository
                     voterEntity.EventVoteEntityId = voterModelview.EventVoteEntityId;
                     voterEntity.Organization_Code = peopleModelview.Organization_Code;
                     _evoteContext.VoterEntitys.Add(voterEntity);
-                    UserEntity userEntity= userEntitys.Where(w => w.Email == voterEntity.Email).FirstOrDefault();
-                    if (userEntity != null)
-                    {
-                         EventVoteEntity eventVoteEntityCheck= userEntity.eventVoteEntities.Where(w => w.EventVoteEntityId == voterModelview.EventVoteEntityId).FirstOrDefault();
-                        if (eventVoteEntityCheck == null)
-                        {
-                            userEntity.eventVoteEntities.Add(eventVoteEntity);
-                        }
-                    }
 
                 }
               

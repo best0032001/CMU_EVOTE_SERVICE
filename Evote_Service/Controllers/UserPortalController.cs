@@ -45,17 +45,20 @@ namespace Evote_Service.Controllers
                 lineId = await getLineUser();
                 if (lineId == "unauthorized") { return Unauthorized(); }
                 APIModel aPIModel = new APIModel();
-                UserEntity userModel = await _userRepository.getEvent(lineId);
+
+                UserEntity userEntity= await _userRepository.getUserEntity(lineId);
+                List<EventModelview> eventModelviews = await _userRepository.getEventModelviewList(lineId);
                 UserPortalModelView userPortalModelView = new UserPortalModelView();
                 userPortalModelView.eventModelviewsNow = new List<EventModelview>();
                 userPortalModelView.eventModelviewsPassed = new List<EventModelview>();
                 userPortalModelView.eventModelviewsIncomming = new List<EventModelview>();
 
-                foreach (EventVoteEntity eventVoteEntity in userModel.eventVoteEntities)
+
+
+                foreach (EventModelview eventModelview in eventModelviews)
                 {
-                    String json = JsonConvert.SerializeObject(eventVoteEntity);
-                    EventModelview eventModelview = JsonConvert.DeserializeObject<EventModelview>(json);
-                    int res = DateTime.Compare(DateTime.Now, eventVoteEntity.EventVotingStart);
+                  
+                    int res = DateTime.Compare(DateTime.Now, eventModelview.EventVotingStart);
                     if (res < 0)
                     {
 
@@ -63,7 +66,7 @@ namespace Evote_Service.Controllers
                     }
                     else
                     {
-                        res = DateTime.Compare(DateTime.Now, eventVoteEntity.EventVotingEnd);
+                        res = DateTime.Compare(DateTime.Now, eventModelview.EventVotingEnd);
                         if (res > 0)
                         {
                             userPortalModelView.eventModelviewsPassed.Add(eventModelview);
@@ -76,7 +79,7 @@ namespace Evote_Service.Controllers
                 }
                 aPIModel.data = userPortalModelView;
                 aPIModel.title = "Success";
-                return StatusCodeITSC("line", lineId, userModel.Email, action, 200, aPIModel);
+                return StatusCodeITSC("line", lineId, userEntity.Email, action, 200, aPIModel);
             }
             catch (Exception ex)
             {
