@@ -48,6 +48,7 @@ namespace Evote_Service.Model.Repository
               .Select(s => s[_random.Next(s.Length)]).ToArray());
 
             EventVoteEntity eventVoteEntity = new EventVoteEntity();
+            eventVoteEntity.AppLink = eventModelview.AppLink;
             eventVoteEntity.voteRoundEntities = new List<VoteRoundEntity>();
             eventVoteEntity.voterEntities = new List<VoterEntity>();
             eventVoteEntity.EventStatusId = 1;
@@ -68,6 +69,7 @@ namespace Evote_Service.Model.Repository
             eventVoteEntity.EventRegisterStart = eventModelview.EventRegisterStart;
             eventVoteEntity.EventRegisterEnd = eventModelview.EventRegisterEnd;
             eventVoteEntity.EventVotingStart = eventModelview.EventVotingStart;
+        
             eventVoteEntity.EventVotingEnd = eventModelview.EventVotingEnd;
             eventVoteEntity.IsEnd = false;
             _evoteContext.EventVoteEntitys.Add(eventVoteEntity);

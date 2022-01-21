@@ -32,7 +32,7 @@ namespace Evote_Service.Model.Entity
         public DateTime EventRegisterEnd { get; set; }
         public DateTime EventVotingStart { get; set; }
         public DateTime EventVotingEnd { get; set; }
-
+        public string AppLink { get; set; }
         public Boolean IsEnd { get; set; }
 
         public Boolean IsDev { get; set; }

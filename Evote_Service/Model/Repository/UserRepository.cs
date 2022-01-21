@@ -58,7 +58,7 @@ namespace Evote_Service.Model.Repository
                                    EventVotingEnd = eventvote.EventVotingEnd,
                                    EventInformation = eventvote.EventInformation,
                                    PresidentEmail = eventvote.PresidentEmail,
-                                   AppLink = ""
+                                   AppLink = eventvote.AppLink
                                }).ToList();
 
             return eventModelviews;
