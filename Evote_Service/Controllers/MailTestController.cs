@@ -40,10 +40,10 @@ namespace Evote_Service.Controllers
         [HttpGet("v1/MailTest")]
         public async Task<ActionResult> mail()
         {
-            String NOTI_ADMIN = Environment.GetEnvironmentVariable("NOTI_ADMIN");
-            String Reply = Environment.GetEnvironmentVariable("MAIL_REPLY");
-            await _emailRepository.SendEmailAsync("CMU Evote service", NOTI_ADMIN, "no reply", "test", null);
-            await _emailRepository.SendEmailAsync("CMU Evote service", Reply,NOTI_ADMIN ," with reply", "test", null);
+            //String NOTI_ADMIN = Environment.GetEnvironmentVariable("NOTI_ADMIN");
+            //String Reply = Environment.GetEnvironmentVariable("MAIL_REPLY");
+            //await _emailRepository.SendEmailAsync("CMU Evote service", NOTI_ADMIN, "no reply", "test", null);
+            //await _emailRepository.SendEmailAsync("CMU Evote service", Reply,NOTI_ADMIN ," with reply", "test", null);
 
             return Ok();
         }

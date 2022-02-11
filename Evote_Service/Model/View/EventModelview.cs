@@ -10,13 +10,14 @@ namespace Evote_Service.Model.View
         public int EventTypeId { get; set; }
         public string EventTitle { get; set; }
         public string EventDetail { get; set; }
-
+        public int EventStatusId { get; set; }
 
         public string Organization_Code { get; set; }
         public string OrganizationFullNameTha { get; set; }
 
-        public DateTime EventRegisterStart { get; set; }
-        public DateTime EventRegisterEnd { get; set; }
+        //public DateTime EventRegisterStart { get; set; }
+        //public DateTime EventRegisterEnd { get; set; }
+        public Boolean IsUseTime { get; set; }
         public DateTime EventVotingStart { get; set; }
         public DateTime EventVotingEnd { get; set; }
         public string EventInformation { get; set; }
@@ -36,8 +37,9 @@ namespace Evote_Service.Model.View
         public string Organization_Code { get; set; }
         public string OrganizationFullNameTha { get; set; }
 
-        public DateTime EventRegisterStart { get; set; }
-        public DateTime EventRegisterEnd { get; set; }
+        //public DateTime EventRegisterStart { get; set; }
+        //public DateTime EventRegisterEnd { get; set; }
+        public Boolean IsUseTime { get; set; }
         public DateTime EventVotingStart { get; set; }
         public DateTime EventVotingEnd { get; set; }
         public string CreateUser { get; set; }

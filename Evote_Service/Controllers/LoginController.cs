@@ -114,7 +114,7 @@ namespace Evote_Service.Controllers
                     return StatusCodeITSC("line", lineId, "", "LoginController.callback", 406, aPIModel);
                 }
                 userEntity = new UserEntity();
-              
+
                 userEntity.Email = responseprofile.cmuitaccount;
                 userEntity.IsConfirmEmail = true;
                 userEntity.Organization_Code = responseprofile.organization_code;
@@ -200,6 +200,11 @@ namespace Evote_Service.Controllers
                 Cmuaccount = responseprofile.cmuitaccount;
                 UserAdminEntity userAdminEntity = await _IAdminRepository.getAdminByEmail(responseprofile.cmuitaccount);
                 if (userAdminEntity == null) { return Unauthorized(); }
+
+                userAdminEntity.FullName = responseprofile.firstname_TH + " " + responseprofile.lastname_TH;
+                userAdminEntity.Organization_Code = responseprofile.organization_code;
+                userAdminEntity.OrganizationFullNameTha = responseprofile.organization_name_TH;
+                await _IAdminRepository.updateAdmin(userAdminEntity);
                 String RefCode = await _IAdminRepository.sendLoginOTP(responseprofile.cmuitaccount, _access_token, _refresh_token);
                 aPIModel.data = RefCode;
                 aPIModel.title = "Success";
@@ -227,12 +232,12 @@ namespace Evote_Service.Controllers
                 aPIModel.title = "รหัส OTP ไม่ถูกต้อง หรือ หมดอายุ";
                 return StatusCodeITSC("CMU", "", "", "LoginController.AdminloginOTP", 503, aPIModel);
             }
-             
+
             userAdminEntity.Tel = "";
             userAdminEntity.Refresh_token = "";
             String json = JsonConvert.SerializeObject(userAdminEntity);
             UserAdminModelView userAdminModelView = JsonConvert.DeserializeObject<UserAdminModelView>(json);
-         
+
             aPIModel.data = userAdminEntity;
             aPIModel.title = "Success";
             return StatusCodeITSC("CMU", "", userAdminEntity.Cmuaccount, "LoginController.AdminloginOTP", 200, aPIModel);

@@ -13,7 +13,7 @@ namespace Evote_Service.Model.Repository.Mock
             return "1234";
         }
 
-        public async Task<string> getOTPNotSend(string RefCode, string tel)
+        public async Task<string> getOTPWithEmail(string RefCode, string tel)
         {
             return "1234";
         }

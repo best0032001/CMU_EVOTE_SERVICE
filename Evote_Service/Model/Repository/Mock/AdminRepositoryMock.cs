@@ -64,5 +64,10 @@ namespace Evote_Service.Model.Repository.Mockw
         {
             throw new NotImplementedException();
         }
+
+        public async Task<bool> updateAdmin(UserAdminEntity userAdminEntity)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

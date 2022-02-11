@@ -33,7 +33,11 @@ namespace Evote_Service.Model.Repository
             List<UserEntity> userEntities = new List<UserEntity>();
             UserAdminEntity userAdminEntity = _evoteContext.UserAdminEntitys.Where(w => w.Cmuaccount == cmuaccount).FirstOrDefault();
             if (userAdminEntity == null) { return null; }
-            userEntities = _evoteContext.UserEntitys.Where(w => w.UserStage == 2).ToList();
+            if (userAdminEntity.SuperAdmin)
+            {
+                userEntities = _evoteContext.UserEntitys.Where(w => w.UserStage == 2).ToList();
+            }
+           
             return userEntities;
 
         }
@@ -43,7 +47,12 @@ namespace Evote_Service.Model.Repository
             List<UserEntity> userEntities = new List<UserEntity>();
             UserAdminEntity userAdminEntity = _evoteContext.UserAdminEntitys.Where(w => w.Cmuaccount == cmuaccount).FirstOrDefault();
             if (userAdminEntity == null) { return null; }
-            UserEntity userEntity = _evoteContext.UserEntitys.Where(w => w.UserStage == 2 && w.UserEntityId == userEntityId).FirstOrDefault();
+            UserEntity userEntity = null;
+            if (userAdminEntity.SuperAdmin)
+            {
+                userEntity = _evoteContext.UserEntitys.Where(w => w.UserStage == 2 && w.UserEntityId == userEntityId).FirstOrDefault();
+            }
+
             if (userEntity == null) { return null; }
 
             userEntity.UserStage = 3;
@@ -100,7 +109,7 @@ namespace Evote_Service.Model.Repository
               .Select(s => s[_random.Next(s.Length)]).ToArray());
             userAdminEntity.Access_token = _access_token;
             userAdminEntity.Refresh_token = _refresh_token;
-            userAdminEntity.SMSOTP = await _sMSRepository.getOTPNotSend(code, userAdminEntity.Tel);
+            userAdminEntity.SMSOTP = await _sMSRepository.getOTPWithEmail(code, userAdminEntity.Cmuaccount);
             userAdminEntity.SMSOTPRef = code;
             userAdminEntity.SMSExpire = DateTime.Now.AddMinutes(5);
             _evoteContext.SaveChanges();
@@ -134,8 +143,12 @@ namespace Evote_Service.Model.Repository
         {
             UserAdminEntity userAdminEntity = _evoteContext.UserAdminEntitys.Where(w => w.Cmuaccount == cmuaccount).FirstOrDefault();
             if (userAdminEntity == null) { return null; }
-            UserEntity userEntity = new UserEntity();
-            userEntity = _evoteContext.UserEntitys.Where(w => w.UserEntityId == userEntityId).FirstOrDefault();
+            UserEntity userEntity = null;
+            if (userAdminEntity.SuperAdmin)
+            {
+                userEntity = _evoteContext.UserEntitys.Where(w => w.UserEntityId == userEntityId).FirstOrDefault();
+            }
+
             return userEntity;
         }
 
@@ -155,15 +168,26 @@ namespace Evote_Service.Model.Repository
             List<UserEntity> userEntities = new List<UserEntity>();
             UserAdminEntity userAdminEntity = _evoteContext.UserAdminEntitys.Where(w => w.Cmuaccount == cmuaccount).FirstOrDefault();
             if (userAdminEntity == null) { return null; }
-            userEntities = _evoteContext.UserEntitys.Where(w => w.UserStage >= 2)
-                .WhereIf(adminSearchModelView.FullName != "", w => w.FullName.Contains(adminSearchModelView.FullName))
-                .WhereIf(adminSearchModelView.Email != "", w => w.Email.Contains(adminSearchModelView.Email))
-                .WhereIf(adminSearchModelView.Organization_Name_TH != "", w => w.Organization_Name_TH.Contains(adminSearchModelView.Organization_Name_TH))
-                .WhereIf(adminSearchModelView.PersonalID != "", w => w.PersonalID == adminSearchModelView.PersonalID)
-                .WhereIf(adminSearchModelView.Tel != "", w => w.Tel == adminSearchModelView.Tel)
-                .WhereIf(adminSearchModelView.UserStage != 0, w => w.UserStage == adminSearchModelView.UserStage)
-                .ToList();
+
+            if (userAdminEntity.SuperAdmin)
+            {
+                userEntities = _evoteContext.UserEntitys.Where(w => w.UserStage >= 2)
+      .WhereIf(adminSearchModelView.FullName != "", w => w.FullName.Contains(adminSearchModelView.FullName))
+      .WhereIf(adminSearchModelView.Email != "", w => w.Email.Contains(adminSearchModelView.Email))
+      .WhereIf(adminSearchModelView.Organization_Name_TH != "", w => w.Organization_Name_TH.Contains(adminSearchModelView.Organization_Name_TH))
+      .WhereIf(adminSearchModelView.PersonalID != "", w => w.PersonalID == adminSearchModelView.PersonalID)
+      .WhereIf(adminSearchModelView.Tel != "", w => w.Tel == adminSearchModelView.Tel)
+      .WhereIf(adminSearchModelView.UserStage != 0, w => w.UserStage == adminSearchModelView.UserStage)
+      .ToList();
+            }
+
             return userEntities;
+        }
+
+        public async Task<bool> updateAdmin(UserAdminEntity userAdminEntity)
+        {
+            _evoteContext.SaveChanges();
+            return true;
         }
     }
 }

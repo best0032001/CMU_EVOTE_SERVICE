@@ -23,5 +23,8 @@ namespace Evote_Service.Model.Interface
         Task<Boolean> deleteVoter(VoterModelview voterModelview, String cmuaccount);
 
         Task<List<VoterModelDataView>> getVoter(int ApplicationEntityId, int eventVoteEntityId);
+
+        Task<List<UserModelDataView>> getUser(UserModelSearch userModelSearch);
+        
     }
 }

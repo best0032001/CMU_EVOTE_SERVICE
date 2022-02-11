@@ -58,15 +58,33 @@ namespace Evote_Service.Controllers
             {
                 APIModel aPIModel = new APIModel();
 
-                ApplicationEntity applicationEntity = _evoteContext.ApplicationEntitys.Where(w => w.ApplicationEntityId == data.ApplicationEntityId).Include(i => i.EventVoteEntitys.Where(e => e.EventVoteEntityId == data.EventVoteEntityId)).FirstOrDefault();
+                ApplicationEntity applicationEntity = _evoteContext.ApplicationEntitys.Where(w => w.ApplicationEntityId == data.ApplicationEntityId).FirstOrDefault();
+                EventVoteEntity eventVoteEntity = _evoteContext.EventVoteEntitys.Where(w => w.ApplicationEntityId == applicationEntity.ApplicationEntityId && w.EventVoteEntityId == data.EventVoteEntityId).FirstOrDefault();
                 if (applicationEntity == null) { return Unauthorized(); }
-                if (applicationEntity.EventVoteEntitys.Count == 0) { return Unauthorized(); }
+                if (eventVoteEntity == null) { return Unauthorized(); }
+                if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != "Development")
+                {
+                    if (eventVoteEntity.IsUseTime)
+                    {
+                        int res = DateTime.Compare(DateTime.Now, eventVoteEntity.EventVotingStart);
+                        if (res < 0) { return Unauthorized(); }
+                        res = DateTime.Compare(DateTime.Now, eventVoteEntity.EventVotingEnd);
+                        if (res >= 0) { return Unauthorized(); }
+                    }
+                    else
+                    {
+                        if (eventVoteEntity.EventStatusId != 2) { return Unauthorized(); }
+                    }
+
+                }
+
+
                 if (this.checkAppIP(applicationEntity.ServerProductionIP) == false) { return Unauthorized(); }
                 if (data.lineMode)
                 {
                     lineId = await getLineUser();
                     if (lineId == "unauthorized") { return Unauthorized(); }
-                    userEntity = _evoteContext.UserEntitys.Where(w => w.LineId == lineId && w.UserStage == 3 && w.UserType == 2).FirstOrDefault();
+                    userEntity = _evoteContext.UserEntitys.Where(w => w.LineId == lineId && w.UserStage == 3).FirstOrDefault();
                     if (userEntity == null) { return Unauthorized(); }
                 }
                 else
@@ -78,7 +96,7 @@ namespace Evote_Service.Controllers
 
                 }
                 Email = userEntity.Email;
-                VoterEntity voterEntity = _evoteContext.VoterEntitys.Where(w => w.Email == Email && w.EventVoteEntityId == applicationEntity.EventVoteEntitys[0].EventVoteEntityId).FirstOrDefault();
+                VoterEntity voterEntity = _evoteContext.VoterEntitys.Where(w => w.Email == Email && w.EventVoteEntityId == eventVoteEntity.EventVoteEntityId).FirstOrDefault();
                 if (voterEntity == null) { return Unauthorized(); }
                 Random _random = new Random();
                 const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -119,15 +137,33 @@ namespace Evote_Service.Controllers
             {
                 APIModel aPIModel = new APIModel();
 
-                ApplicationEntity applicationEntity = _evoteContext.ApplicationEntitys.Where(w => w.ApplicationEntityId == data.ApplicationEntityId).Include(i => i.EventVoteEntitys.Where(e => e.EventVoteEntityId == data.EventVoteEntityId)).FirstOrDefault();
+                ApplicationEntity applicationEntity = _evoteContext.ApplicationEntitys.Where(w => w.ApplicationEntityId == data.ApplicationEntityId).FirstOrDefault();
+                EventVoteEntity eventVoteEntity = _evoteContext.EventVoteEntitys.Where(w => w.ApplicationEntityId == applicationEntity.ApplicationEntityId && w.EventVoteEntityId == data.EventVoteEntityId).FirstOrDefault();
                 if (applicationEntity == null) { return Unauthorized(); }
-                if (applicationEntity.EventVoteEntitys.Count == 0) { return Unauthorized(); }
+                if (eventVoteEntity == null) { return Unauthorized(); }
+
+                if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != "Development")
+                {
+                    if (eventVoteEntity.IsUseTime)
+                    {
+                        int res = DateTime.Compare(DateTime.Now, eventVoteEntity.EventVotingStart);
+                        if (res < 0) { return Unauthorized(); }
+                        res = DateTime.Compare(DateTime.Now, eventVoteEntity.EventVotingEnd);
+                        if (res >= 0) { return Unauthorized(); }
+                    }
+                    else
+                    {
+                        if (eventVoteEntity.EventStatusId != 2) { return Unauthorized(); }
+                    }
+
+                }
+
                 if (this.checkAppIP(applicationEntity.ServerProductionIP) == false) { return Unauthorized(); }
                 if (data.lineMode)
                 {
                     lineId = await getLineUser();
                     if (lineId == "unauthorized") { return Unauthorized(); }
-                    userEntity = _evoteContext.UserEntitys.Where(w => w.LineId == lineId && w.UserStage == 3 && w.UserType == 2).FirstOrDefault();
+                    userEntity = _evoteContext.UserEntitys.Where(w => w.LineId == lineId && w.UserStage == 3).FirstOrDefault();
                     if (userEntity == null) { return Unauthorized(); }
                 }
                 else
@@ -140,36 +176,48 @@ namespace Evote_Service.Controllers
                 }
                 Email = userEntity.Email;
 
-                ConfirmVoter confirmVoter= _applicationDBContext.confirmVoters.Where(w => w.email == Email && w.EventVoteEntityId == applicationEntity.EventVoteEntitys[0].EventVoteEntityId && w.RoundNumber == data.VoteRound).FirstOrDefault();
+                ConfirmVoter confirmVoter = _applicationDBContext.confirmVoters.Where(w => w.email == Email && w.EventVoteEntityId == eventVoteEntity.EventVoteEntityId && w.RoundNumber == data.VoteRound).FirstOrDefault();
                 if (confirmVoter != null) { return Unauthorized(); }
-                VoterEntity voterEntity = _evoteContext.VoterEntitys.Where(w => w.Email == Email && w.EventVoteEntityId == applicationEntity.EventVoteEntitys[0].EventVoteEntityId).FirstOrDefault();
+                VoterEntity voterEntity = _evoteContext.VoterEntitys.Where(w => w.Email == Email && w.EventVoteEntityId == eventVoteEntity.EventVoteEntityId).FirstOrDefault();
                 if (voterEntity == null) { return Unauthorized(); }
-       
+
                 String TokenData = data.TokenData;
                 String SecretKey = "";
                 if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != "Development")
                 {
-                    int res = DateTime.Compare(DateTime.Now, applicationEntity.EventVoteEntitys[0].EventVotingEnd);
-                    if (res >= 0) { return Unauthorized(); }
-                    SecretKey = applicationEntity.EventVoteEntitys[0].SecretKey;
+                    int res = 0;
+                    if (eventVoteEntity.IsUseTime)
+                    {
+                        res = DateTime.Compare(DateTime.Now, eventVoteEntity.EventVotingStart);
+                        if (res < 0) { return Unauthorized(); }
+                        res = DateTime.Compare(DateTime.Now, eventVoteEntity.EventVotingEnd);
+                        if (res >= 0) { return Unauthorized(); }
+                    }
+                    else
+                    {
+                        if (eventVoteEntity.EventStatusId != 2) { return Unauthorized(); }
+                    }
+
+
+                    SecretKey = eventVoteEntity.SecretKey;
                     if (!(voterEntity.SMSOTP == data.OTP && voterEntity.SMSOTPRef == data.RefOTP)) { return Unauthorized(); }
                     res = DateTime.Compare(DateTime.Now, (DateTime)voterEntity.SMSExpire);
-                    if (res >= 0) { return Unauthorized(); }
+                    if (res > 0) { return Unauthorized(); }
                 }
                 else
                 {
                     //for test
                     SecretKey = "TW9zaGVFcmV6UHJpdmF0ZUtleQ==";
                 }
-  
-                
-              
+
+
+
                 if (!IsTokenValid(TokenData, SecretKey)) { return Unauthorized(); }
 
                 List<Claim> claims = GetTokenClaims(TokenData, SecretKey).ToList();
                 String dataVote = claims.FirstOrDefault(e => e.Type.Equals(ClaimTypes.UserData)).Value;
 
-                VoteRoundEntity voteRoundEntity = _evoteContext.voteRoundEntities.Where(w => w.EventVoteEntityId == applicationEntity.EventVoteEntitys[0].EventVoteEntityId && w.RoundNumber == data.VoteRound).FirstOrDefault();
+                VoteRoundEntity voteRoundEntity = _evoteContext.voteRoundEntities.Where(w => w.EventVoteEntityId == eventVoteEntity.EventVoteEntityId && w.RoundNumber == data.VoteRound).FirstOrDefault();
                 if (voteRoundEntity == null) { return Unauthorized(); }
 
 
@@ -215,21 +263,30 @@ namespace Evote_Service.Controllers
             {
                 APIModel aPIModel = new APIModel();
 
-                ApplicationEntity applicationEntity = _evoteContext.ApplicationEntitys.Where(w => w.ApplicationEntityId == data.ApplicationEntityId).Include(i => i.EventVoteEntitys.Where(e => e.EventVoteEntityId == data.EventVoteEntityId)).FirstOrDefault();
+
+                ApplicationEntity applicationEntity = _evoteContext.ApplicationEntitys.Where(w => w.ApplicationEntityId == data.ApplicationEntityId).FirstOrDefault();
+                EventVoteEntity eventVoteEntity = _evoteContext.EventVoteEntitys.Where(w => w.ApplicationEntityId == applicationEntity.ApplicationEntityId && w.EventVoteEntityId == data.EventVoteEntityId).FirstOrDefault();
                 if (applicationEntity == null) { return Unauthorized(); }
-                if (applicationEntity.EventVoteEntitys.Count == 0) { return Unauthorized(); }
+                if (eventVoteEntity == null) { return Unauthorized(); }
                 Cmuaccount = await this.checkAppID(applicationEntity.ClientId);
                 if (Cmuaccount == "unauthorized") { return Unauthorized(); }
-            
-                if(applicationEntity.EventVoteEntitys[0].PresidentEmail!= Cmuaccount) { return Unauthorized(); }
+
+                if (eventVoteEntity.PresidentEmail != Cmuaccount) { return Unauthorized(); }
                 if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != "Development")
                 {
-                    int res = DateTime.Compare(DateTime.Now, applicationEntity.EventVoteEntitys[0].EventVotingEnd);
-                    if (res <= 0) { return Unauthorized(); }
-                 
+                    if (eventVoteEntity.IsUseTime)
+                    {
+                        int res = DateTime.Compare(DateTime.Now, eventVoteEntity.EventVotingEnd);
+                        if (res <= 0) { return Unauthorized(); }
+                    }
+                    else
+                    {
+                        if (eventVoteEntity.EventStatusId != 2) { return Unauthorized(); }
+                    }
+
                 }
 
-                List<VoteEntity> voteEntities=  _applicationDBContext.voteEntities.Where(w => w.ApplicationEntityId == data.ApplicationEntityId && w.EventVoteEntityId == data.EventVoteEntityId && w.RoundNumber == data.VoteRound).OrderBy(o=>o.VoteData).ToList();
+                List<VoteEntity> voteEntities = _applicationDBContext.voteEntities.Where(w => w.ApplicationEntityId == data.ApplicationEntityId && w.EventVoteEntityId == eventVoteEntity.EventVoteEntityId && w.RoundNumber == data.VoteRound).OrderBy(o => o.VoteData).ToList();
                 aPIModel.data = voteEntities;
                 aPIModel.title = "Success";
                 return StatusCodeITSC("CMU", "", Cmuaccount, action, 200, aPIModel);
@@ -300,7 +357,7 @@ namespace Evote_Service.Controllers
                 }
                 _evoteContext.SaveChanges();
                 _applicationDBContext.SaveChanges();
-             
+
                 aPIModel.title = "Success";
                 return StatusCodeITSC("CMU", "", Cmuaccount, action, 200, aPIModel);
 
@@ -350,7 +407,7 @@ namespace Evote_Service.Controllers
             {
                 ValidateIssuer = false,
                 ValidateAudience = false,
-                ValidateLifetime=true,
+                ValidateLifetime = true,
                 ClockSkew = TimeSpan.Zero,
                 IssuerSigningKey = GetSymmetricSecurityKey(SecretKey)
             };

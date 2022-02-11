@@ -9,6 +9,6 @@ namespace Evote_Service.Model.Interface
     {
         Task<String> getOTP(String RefCode, String tel);
 
-        Task<String> getOTPNotSend(String RefCode, String tel);
+        Task<String> getOTPWithEmail(String RefCode, String Email);
     }
 }

@@ -57,25 +57,36 @@ namespace Evote_Service.Controllers
 
                 foreach (EventModelview eventModelview in eventModelviews)
                 {
-                  
-                    int res = DateTime.Compare(DateTime.Now, eventModelview.EventVotingStart);
-                    if (res < 0)
+                    if (eventModelview.IsUseTime)
                     {
+                        int res = DateTime.Compare(DateTime.Now, eventModelview.EventVotingStart);
+                        if (res < 0)
+                        {
 
-                        userPortalModelView.eventModelviewsIncomming.Add(eventModelview);
+                            userPortalModelView.eventModelviewsIncomming.Add(eventModelview);
+                        }
+                        else
+                        {
+                            res = DateTime.Compare(DateTime.Now, eventModelview.EventVotingEnd);
+                            if (res > 0)
+                            {
+                                userPortalModelView.eventModelviewsPassed.Add(eventModelview);
+                            }
+
+                            else
+                            {
+                                userPortalModelView.eventModelviewsNow.Add(eventModelview);
+                            }
+                        }
                     }
                     else
                     {
-                        res = DateTime.Compare(DateTime.Now, eventModelview.EventVotingEnd);
-                        if (res > 0)
-                        {
-                            userPortalModelView.eventModelviewsPassed.Add(eventModelview);
-                        }
-                        else
+                        if (eventModelview.EventStatusId == 2)
                         {
                             userPortalModelView.eventModelviewsNow.Add(eventModelview);
                         }
                     }
+ 
                 }
                 aPIModel.data = userPortalModelView;
                 aPIModel.title = "Success";

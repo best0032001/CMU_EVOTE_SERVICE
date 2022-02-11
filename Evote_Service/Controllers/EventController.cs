@@ -69,8 +69,6 @@ namespace Evote_Service.Controllers
                 if (this.checkAppIP(applicationEntity.ServerProductionIP) == false) { return Unauthorized(); }
                 Cmuaccount = await this.checkAppID(applicationEntity.ClientId);
                 if (Cmuaccount == "unauthorized") { return Unauthorized(); }
-
-
                 EventConfirmModelview eventConfirmModelview = await _eventRepository.addEvent(ApplicationEntityId, data, Cmuaccount);
 
                 APIModel aPIModel = new APIModel();
@@ -100,8 +98,7 @@ namespace Evote_Service.Controllers
                 EventVoteEntity eventVoteEntity = await _eventRepository.getEventEntityByEventVoteEntityId(ApplicationEntityId, EventVoteEntityId);
                 if (eventVoteEntity == null) { return BadRequest(); }
                 if (eventVoteEntity.PresidentEmail != Cmuaccount) { return Unauthorized(); }
-
-               Boolean  check = await _eventRepository.ConfirmEvent(ApplicationEntityId, EventVoteEntityId, Cmuaccount);
+                Boolean check = await _eventRepository.ConfirmEvent(ApplicationEntityId, EventVoteEntityId, Cmuaccount);
 
                 APIModel aPIModel = new APIModel();
                 aPIModel.data = null;
@@ -128,9 +125,13 @@ namespace Evote_Service.Controllers
                 if (Cmuaccount == "unauthorized") { return Unauthorized(); }
                 EventVoteEntity eventVoteEntity = await _eventRepository.getEventEntityByEventVoteEntityId(ApplicationEntityId, EventVoteEntityId);
                 if (eventVoteEntity.EventStatusId != 1) { return Unauthorized(); }
-                int res = DateTime.Compare(DateTime.Now, eventVoteEntity.EventVotingStart);
-                if(eventVoteEntity.CreateUser!= Cmuaccount) { return Unauthorized(); }
-                if (res >= 0) { return Unauthorized(); }
+                if (eventVoteEntity.CreateUser != Cmuaccount) { return Unauthorized(); }
+                if (eventVoteEntity.IsUseTime)
+                {
+                    int res = DateTime.Compare(DateTime.Now, eventVoteEntity.EventVotingStart);
+                    if (res >= 0) { return Unauthorized(); }
+                }
+
                 APIModel aPIModel = new APIModel();
                 Boolean check = await _eventRepository.deleteEvent(ApplicationEntityId, EventVoteEntityId, Cmuaccount);
                 if (check == false) { return StatusCodeITSC("CMU", "", Cmuaccount, action, 503, aPIModel); }
@@ -160,8 +161,15 @@ namespace Evote_Service.Controllers
                 EventVoteEntity eventVoteEntity = await _eventRepository.getEventEntityByEventVoteEntityId(ApplicationEntityId, data.EventVoteEntityId);
                 if (eventVoteEntity == null) { return BadRequest(); }
                 if (eventVoteEntity.CreateUser != Cmuaccount) { return Unauthorized(); }
-                int res = DateTime.Compare(DateTime.Now, eventVoteEntity.EventVotingStart);
-                if (res >= 0) { return Unauthorized(); }
+                if (eventVoteEntity.IsUseTime)
+                {
+                    int res = DateTime.Compare(DateTime.Now, eventVoteEntity.EventVotingStart);
+                    if (res >= 0) { return Unauthorized(); }
+                }
+                else
+                {
+                    if (eventVoteEntity.EventStatusId == 2) { return Unauthorized(); }
+                }
                 Boolean check = await _eventRepository.addVoter(data, Cmuaccount);
 
                 APIModel aPIModel = new APIModel();
@@ -173,7 +181,7 @@ namespace Evote_Service.Controllers
         }
 
         [HttpGet("v1/Voter")]
-        [ProducesResponseType(typeof(APIModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(List<VoterModelDataView>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> getVoter([FromQuery] int EventVoteEntityId, [FromQuery] int ApplicationEntityId)
@@ -202,7 +210,7 @@ namespace Evote_Service.Controllers
         }
 
 
-        [HttpDelete("v1/Voter")]
+        [HttpPut("v1/Voter")]
         [ProducesResponseType(typeof(APIModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -220,12 +228,47 @@ namespace Evote_Service.Controllers
                 EventVoteEntity eventVoteEntity = await _eventRepository.getEventEntityByEventVoteEntityId(ApplicationEntityId, data.EventVoteEntityId);
                 if (eventVoteEntity == null) { return BadRequest(); }
                 if (eventVoteEntity.CreateUser != Cmuaccount) { return Unauthorized(); }
-                int res = DateTime.Compare(DateTime.Now, eventVoteEntity.EventVotingStart);
-                if (res >= 0) return Unauthorized();
+                if (eventVoteEntity.IsUseTime)
+                {
+                    int res = DateTime.Compare(DateTime.Now, eventVoteEntity.EventVotingStart);
+                    if (res >= 0) return Unauthorized();
+                }
+                else
+                {
+                    if (eventVoteEntity.EventStatusId == 2) { return Unauthorized(); }
+                }
                 Boolean check = await _eventRepository.deleteVoter(data, Cmuaccount);
-
                 APIModel aPIModel = new APIModel();
                 aPIModel.data = null;
+                aPIModel.title = "Success";
+                return StatusCodeITSC("CMU", "", Cmuaccount, action, 200, aPIModel);
+            }
+            catch (Exception ex) { return StatusErrorITSC("CMU", "", Cmuaccount, action, ex); }
+        }
+
+
+        [HttpPost("v1/User")]
+        [ProducesResponseType(typeof(List<UserModelDataView>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> getUser([FromBody] UserModelSearch data, [FromQuery] int ApplicationEntityId)
+        {
+            String Cmuaccount = "";
+            String action = "EventController.getUser";
+            try
+            {
+                ApplicationEntity applicationEntity = await _eventRepository.getApplicationEntity(ApplicationEntityId);
+                if (applicationEntity == null) { return BadRequest(); }
+                if (this.checkAppIP(applicationEntity.ServerProductionIP) == false) { return Unauthorized(); }
+                Cmuaccount = await this.checkAppID(applicationEntity.ClientId);
+                if (Cmuaccount == "unauthorized") { return Unauthorized(); }
+                EventVoteEntity eventVoteEntity = await _eventRepository.getEventEntityByEventVoteEntityId(ApplicationEntityId, data.EventVoteEntityId);
+                if (eventVoteEntity == null) { return BadRequest(); }
+                if (eventVoteEntity.CreateUser != Cmuaccount) { return Unauthorized(); }
+                List<UserModelDataView> userModelDataViews = await _eventRepository.getUser(data);
+
+                APIModel aPIModel = new APIModel();
+                aPIModel.data = userModelDataViews;
                 aPIModel.title = "Success";
                 return StatusCodeITSC("CMU", "", Cmuaccount, action, 200, aPIModel);
             }

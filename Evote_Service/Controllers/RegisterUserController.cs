@@ -87,6 +87,8 @@ namespace Evote_Service.Controllers
                 userEntity.FullName = data.firstName + " " + data.lastName;
                 userEntity.Email = "";
                 userEntity.LineId = lineId;
+                userEntity.Organization_Code = data.organizationID;
+                userEntity.Organization_Name_TH = data.organizationNameTha;
                 APIModel aPIModel = new APIModel();
 
                 if (await _ICheckUserRepository.RegisLineUser(userEntity) == false)
@@ -123,7 +125,7 @@ namespace Evote_Service.Controllers
                 lineId = await getLineUser();
                 if (lineId == "unauthorized") { return Unauthorized(); }
                 if (data.email == "") { return BadRequest(); }
-
+                if (data.email.IndexOf("@cmu.ac.th") > 0) { return BadRequest(); }
                 APIModel aPIModel = new APIModel();
                 if (await _ICheckUserRepository.checkEmail(data.email.Trim()) == false)
                 {
@@ -450,6 +452,34 @@ namespace Evote_Service.Controllers
                 aPIModel.data = userModel;
                 aPIModel.title = "Success";
                 return Ok(aPIModel);
+            }
+            catch (Exception ex) { return StatusErrorITSC("line", lineId, "", action, ex); }
+        }
+
+        [HttpGet("v1/Organizations")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> getOrganizations()
+        {
+            APIModel aPIModel = new APIModel();
+            String lineId = "";
+            String action = "RegisterUserController.getOrganizations";
+            try
+            {
+                HttpClient httpClient = _clientFactory.CreateClient();
+                String APIOragn = Environment.GetEnvironmentVariable("API_ORGAN");
+                var response = await httpClient.GetAsync(APIOragn);
+                String responseString = await response.Content.ReadAsStringAsync();
+                APIModel dataTemp = JsonConvert.DeserializeObject<APIModel>(responseString);
+                String datajSON = JsonConvert.SerializeObject(dataTemp.data);
+                List<OrganizationModelView> list = JsonConvert.DeserializeObject<List<OrganizationModelView>>(datajSON);
+
+
+                APIModel model = new APIModel();
+                model.data = list;
+                model.title = "Success";
+                return Ok(model);
             }
             catch (Exception ex) { return StatusErrorITSC("line", lineId, "", action, ex); }
         }

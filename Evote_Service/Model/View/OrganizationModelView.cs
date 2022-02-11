@@ -5,12 +5,10 @@ using System.Threading.Tasks;
 
 namespace Evote_Service.Model.View
 {
-    public class UserRegisLiffModelView
+    public class OrganizationModelView
     {
-        public String firstName { get; set; }
-        public String lastName { get; set; }
-
         public String organizationID { get; set; }
         public String organizationNameTha { get; set; }
+        public String organizationNameEng { get; set; }
     }
 }

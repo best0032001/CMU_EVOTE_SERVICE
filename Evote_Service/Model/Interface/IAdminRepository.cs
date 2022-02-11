@@ -25,5 +25,7 @@ namespace Evote_Service.Model.Interface
 
         Task<UserEntity> getUserEntity(String cmuaccount, Int32 userEntityId, String clientIP);
 
+        Task<Boolean> updateAdmin(UserAdminEntity userAdminEntity);
+
     }
 }

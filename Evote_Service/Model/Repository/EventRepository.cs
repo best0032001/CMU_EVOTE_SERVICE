@@ -66,11 +66,20 @@ namespace Evote_Service.Model.Repository
             eventVoteEntity.OrganizationFullNameTha = eventModelview.OrganizationFullNameTha;
             eventVoteEntity.EventCreate = DateTime.Now;
             eventVoteEntity.EventUpdate = DateTime.Now;
-            eventVoteEntity.EventRegisterStart = eventModelview.EventRegisterStart;
-            eventVoteEntity.EventRegisterEnd = eventModelview.EventRegisterEnd;
-            eventVoteEntity.EventVotingStart = eventModelview.EventVotingStart;
-        
-            eventVoteEntity.EventVotingEnd = eventModelview.EventVotingEnd;
+            //eventVoteEntity.EventRegisterStart = eventModelview.EventRegisterStart;
+            //eventVoteEntity.EventRegisterEnd = eventModelview.EventRegisterEnd;
+            eventVoteEntity.IsUseTime = eventModelview.IsUseTime;
+            if (eventVoteEntity.IsUseTime)
+            {
+                eventVoteEntity.EventVotingStart = eventModelview.EventVotingStart;
+                eventVoteEntity.EventVotingEnd = eventModelview.EventVotingEnd;
+            }
+            else
+            {
+                eventVoteEntity.EventVotingStart = DateTime.Now;
+                eventVoteEntity.EventVotingEnd = DateTime.Now;
+            }
+
             eventVoteEntity.IsEnd = false;
             _evoteContext.EventVoteEntitys.Add(eventVoteEntity);
             _evoteContext.SaveChanges();
@@ -83,7 +92,7 @@ namespace Evote_Service.Model.Repository
             _evoteContext.voteRoundEntities.Add(voteRoundEntity);
             _evoteContext.SaveChanges();
 
-
+            eventConfirmModelview.IsUseTime = eventVoteEntity.IsUseTime;
             eventConfirmModelview.EventVoteEntityId = eventVoteEntity.EventVoteEntityId;
             eventConfirmModelview.SecretKey = eventVoteEntity.SecretKey;
             eventConfirmModelview.SecurityAlgorithm = eventVoteEntity.SecurityAlgorithm;
@@ -92,8 +101,9 @@ namespace Evote_Service.Model.Repository
             eventConfirmModelview.EventDetail = eventVoteEntity.EventDetail;
             eventConfirmModelview.Organization_Code = eventVoteEntity.Organization_Code;
             eventConfirmModelview.OrganizationFullNameTha = eventVoteEntity.OrganizationFullNameTha;
-            eventConfirmModelview.EventRegisterStart = eventVoteEntity.EventRegisterStart;
-            eventConfirmModelview.EventRegisterEnd = eventVoteEntity.EventRegisterEnd;
+            //eventConfirmModelview.EventRegisterStart = eventVoteEntity.EventRegisterStart;
+            //eventConfirmModelview.EventRegisterEnd = eventVoteEntity.EventRegisterEnd;
+            eventConfirmModelview.IsUseTime = eventVoteEntity.IsUseTime;
             eventConfirmModelview.EventVotingStart = eventVoteEntity.EventVotingStart;
             eventConfirmModelview.EventVotingEnd = eventVoteEntity.EventVotingEnd;
 
@@ -103,8 +113,8 @@ namespace Evote_Service.Model.Repository
         public async Task<bool> addVoter(VoterModelview voterModelview, string cmuaccount)
         {
             Boolean check = false;
-          
-            EventVoteEntity eventVoteEntity= _evoteContext.EventVoteEntitys.Where(w => w.EventVoteEntityId == voterModelview.EventVoteEntityId).Include(i=>i.voterEntities).First();
+
+            EventVoteEntity eventVoteEntity = _evoteContext.EventVoteEntitys.Where(w => w.EventVoteEntityId == voterModelview.EventVoteEntityId).Include(i => i.voterEntities).First();
             foreach (PeopleModelview peopleModelview in voterModelview.peopleModelviews)
             {
                 if (eventVoteEntity.voterEntities.Where(w => w.Email == peopleModelview.Email).FirstOrDefault() == null)
@@ -120,7 +130,7 @@ namespace Evote_Service.Model.Repository
                     _evoteContext.VoterEntitys.Add(voterEntity);
 
                 }
-              
+
             }
             _evoteContext.SaveChanges();
             check = true;
@@ -142,12 +152,20 @@ namespace Evote_Service.Model.Repository
         {
             List<VoterModelDataView> voterModelViews = new List<VoterModelDataView>();
 
-            EventVoteEntity eventVoteEntitys = _evoteContext.EventVoteEntitys.Where(w => w.ApplicationEntityId == ApplicationEntityId && w.EventVoteEntityId == eventVoteEntityId).Include(i=>i.voterEntities).FirstOrDefault();
+            EventVoteEntity eventVoteEntitys = _evoteContext.EventVoteEntitys.Where(w => w.ApplicationEntityId == ApplicationEntityId && w.EventVoteEntityId == eventVoteEntityId).Include(i => i.voterEntities).FirstOrDefault();
 
             foreach (VoterEntity voterEntity in eventVoteEntitys.voterEntities.ToList())
             {
                 String json = JsonConvert.SerializeObject(voterEntity);
                 VoterModelDataView voterModelView = JsonConvert.DeserializeObject<VoterModelDataView>(json);
+                if (voterEntity.UserType == 1)
+                {
+                    voterModelView.VoterType = "คนใน";
+                }
+                if (voterEntity.UserType == 2)
+                {
+                    voterModelView.VoterType = "คนนอก";
+                }
                 voterModelViews.Add(voterModelView);
             }
             return voterModelViews;
@@ -157,7 +175,8 @@ namespace Evote_Service.Model.Repository
         {
             bool check = false;
 
-            EventVoteEntity eventVoteEntitys = _evoteContext.EventVoteEntitys.Where(w => w.ApplicationEntityId == ApplicationEntityId && w.EventVoteEntityId == eventVoteEntityId&&w.CreateUser== cmuaccount).Include(i => i.voterEntities).FirstOrDefault();
+            EventVoteEntity eventVoteEntitys = _evoteContext.EventVoteEntitys.Where(w => w.ApplicationEntityId == ApplicationEntityId && w.EventVoteEntityId == eventVoteEntityId && w.CreateUser == cmuaccount&&w.EventStatusId==1).Include(i => i.voterEntities).FirstOrDefault();
+
 
             foreach (VoterEntity voterEntity in eventVoteEntitys.voterEntities.ToList())
             {
@@ -167,7 +186,7 @@ namespace Evote_Service.Model.Repository
             _evoteContext.SaveChanges();
 
             return true;
-           
+
         }
 
         public async Task<bool> deleteVoter(VoterModelview voterModelview, string cmuaccount)
@@ -175,7 +194,7 @@ namespace Evote_Service.Model.Repository
             bool check = false;
 
             EventVoteEntity eventVoteEntitys = _evoteContext.EventVoteEntitys.Where(w => w.EventVoteEntityId == voterModelview.EventVoteEntityId && w.CreateUser == cmuaccount).Include(i => i.voterEntities).FirstOrDefault();
-            List<VoterEntity> voterEntities= eventVoteEntitys.voterEntities.ToList();
+            List<VoterEntity> voterEntities = eventVoteEntitys.voterEntities.ToList();
             foreach (PeopleModelview peopleModelview in voterModelview.peopleModelviews)
             {
                 VoterEntity voterEntitie = voterEntities.Where(w => w.Email == peopleModelview.Email).FirstOrDefault();
@@ -199,6 +218,29 @@ namespace Evote_Service.Model.Repository
 
 
             return true;
+        }
+
+        public async Task<List<UserModelDataView>> getUser(UserModelSearch userModelSearch)
+        {
+            List<UserModelDataView> userModelDataViews = new List<UserModelDataView>();
+            List<UserEntity> userEntities = new List<UserEntity>();
+            if (userModelSearch.FullName == null) { userModelSearch.FullName = ""; }
+            if (userModelSearch.FullName != "")
+            {
+                userEntities = _evoteContext.UserEntitys.Where(w => w.UserType == 2 &&w.UserStage==3&& w.FullName.Contains(userModelSearch.FullName))
+               .ToList();
+            }
+           
+            foreach (UserEntity userEntity in userEntities)
+            {
+                UserModelDataView userModelDataView = new UserModelDataView();
+                userModelDataView.Email = userEntity.Email;
+                userModelDataView.FullName = userEntity.FullName;
+                userModelDataView.Organization_Code = userEntity.Organization_Code;
+                userModelDataViews.Add(userModelDataView);
+            }
+
+            return userModelDataViews;
         }
     }
 }

@@ -5,15 +5,17 @@ using System.Threading.Tasks;
 
 namespace Evote_Service.Model.View
 {
-    public class VoterModelDataView
+    public class UserModelSearch
     {
-        public int VoterEntityId { get; set; }
+        public String FullName { get; set; }
         public int EventVoteEntityId { get; set; }
+    }
+
+    public class UserModelDataView
+    {
         public String Email { get; set; }
         public String Organization_Code { get; set; }
         public String FullName { get; set; }
-
-        public String VoterType { get; set; }
 
     }
 }

@@ -22,6 +22,8 @@ namespace Evote_Service.Controllers
     [Route("api/")]
     public class SMSController : ITSCController
     {
+
+
         private IEventRepository _eventRepository;
         private ISMSRepository _sMSRepository;
         private EvoteContext _evoteContext;

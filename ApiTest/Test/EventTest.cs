@@ -49,8 +49,8 @@ namespace ApiTest.Test
             eventModelview.PresidentEmail = "cheewin.b@cmu.ac.th";
 
             eventModelview.OrganizationFullNameTha = "00";
-            eventModelview.EventRegisterStart = DateTime.Now;
-            eventModelview.EventRegisterEnd = DateTime.Now;
+            //eventModelview.EventRegisterStart = DateTime.Now;
+            //eventModelview.EventRegisterEnd = DateTime.Now;
             eventModelview.EventVotingStart = DateTime.Now;
             eventModelview.EventVotingEnd = DateTime.Now;
             EventInformation eventInformation = new EventInformation();

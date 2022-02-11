@@ -63,11 +63,14 @@ namespace Evote_Service.Model
             userEntity.LineId = "l02";
             userEntity.PersonalID = crypto.Encrypt("1234");
 
+            userEntity.Organization_Name_TH = "-";
+
             UserEntity userEntityTest = new UserEntity();
             userEntityTest.Email = "jirakit.s@cmu.ac.th";
             userEntityTest.FullName = "test";
             userEntityTest.Tel = crypto.Encrypt("1234");
             userEntityTest.PersonalID = crypto.Encrypt("1234");
+            userEntityTest.Organization_Name_TH = "-";
             userEntityTest.UserStage = 2;
 
 
@@ -95,7 +98,7 @@ namespace Evote_Service.Model
                 userAdminEntityFirst.Cmuaccount = "cheewin.b@cmu.ac.th";
                 userAdminEntityFirst.FullName = "people 1";
                 userAdminEntityFirst.SuperAdmin = true;
-                userAdminEntityFirst.OrganizationFullNameTha = "Test OrganizationFullNameTha";
+                userAdminEntityFirst.OrganizationFullNameTha = "-";
                 userAdminEntityFirst.Tel = Environment.GetEnvironmentVariable("ADMIN_TEL1");
                 _evoteContext.UserAdminEntitys.Add(userAdminEntityFirst);
 
@@ -103,7 +106,7 @@ namespace Evote_Service.Model
                 userAdminEntitySec.Cmuaccount = "jirakit.s@cmu.ac.th";
                 userAdminEntitySec.FullName = "people 2";
                 userAdminEntitySec.SuperAdmin = true;
-                userAdminEntitySec.OrganizationFullNameTha = "Test OrganizationFullNameTha";
+                userAdminEntitySec.OrganizationFullNameTha = "-";
                 userAdminEntitySec.Tel = Environment.GetEnvironmentVariable("ADMIN_TEL2");
                 _evoteContext.UserAdminEntitys.Add(userAdminEntitySec);
                 _evoteContext.SaveChanges();
@@ -156,6 +159,13 @@ namespace Evote_Service.Model
                 eventStatus2.EventStatusId = 2;
                 eventStatus2.EventStatusName = "PresidentConfirm"; //   admin  สร้างลบแก้ไขไม่ได้
                 _evoteContext.EventStatus.Add(eventStatus2);
+                _evoteContext.SaveChanges();
+
+                EventStatus eventStatus3 = new EventStatus();
+                eventStatus3.EventStatusId = 3;
+                eventStatus3.EventStatusName = "End Process"; //   
+                _evoteContext.EventStatus.Add(eventStatus3);
+                _evoteContext.SaveChanges();
             }
         }
 
@@ -195,12 +205,14 @@ namespace Evote_Service.Model
                 eventModelview.EventDetail = "Test";
                 eventModelview.Organization_Code = "00";
                 eventModelview.OrganizationFullNameTha = "00";
-                eventModelview.EventRegisterStart = DateTime.Now;
-                eventModelview.EventRegisterEnd = DateTime.Now;
+                //eventModelview.EventRegisterStart = DateTime.Now;
+                //eventModelview.EventRegisterEnd = DateTime.Now;
                 eventModelview.EventVotingStart = DateTime.Now;
                 eventModelview.EventVotingEnd = DateTime.Now;
                 eventModelview.PresidentEmail = "cheewin.b@cmu.ac.th";
                 _eventRepository.addEvent(1, eventModelview, "cheewin.b@cmu.ac.th");
+                _eventRepository.addEvent(2, eventModelview, "cheewin.b@cmu.ac.th");
+
 
                 VoterModelview voterModelview = new VoterModelview();
                 voterModelview.EventVoteEntityId = 1;
