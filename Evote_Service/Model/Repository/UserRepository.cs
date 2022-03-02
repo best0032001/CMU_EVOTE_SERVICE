@@ -44,9 +44,10 @@ namespace Evote_Service.Model.Repository
             UserEntity userEntity = _evoteContext.UserEntitys.Where(w => w.LineId == lineId).First();
             eventModelviews = (from vote in _evoteContext.VoterEntitys
                                join eventvote in _evoteContext.EventVoteEntitys on vote.EventVoteEntityId equals eventvote.EventVoteEntityId
-                               where vote.Email == userEntity.Email
+                               where vote.Email == userEntity.Email && eventvote.EventStatusId == 2
                                select new EventModelview
                                {
+                                   EventVoteEntityId = eventvote.EventVoteEntityId,
                                    EventTypeId = eventvote.EventTypeId,
                                    EventTitle = eventvote.EventTitle,
                                    EventDetail = eventvote.EventDetail,
@@ -58,10 +59,11 @@ namespace Evote_Service.Model.Repository
                                    EventVotingEnd = eventvote.EventVotingEnd,
                                    EventInformation = eventvote.EventInformation,
                                    PresidentEmail = eventvote.PresidentEmail,
+                                   IsUseTime= eventvote.IsUseTime,
                                    AppLink = eventvote.AppLink
                                }).ToList();
 
-            return eventModelviews;
+            return eventModelviews.OrderByDescending(o=>o.EventVoteEntityId).ToList();
         }
     }
 }

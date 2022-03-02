@@ -16,8 +16,9 @@ namespace Evote_Service.Model.Repository
         private EvoteContext _evoteContext;
         private readonly IHttpClientFactory _clientFactory;
         private ISMSRepository _sMSRepository;
-        private IEmailRepository  _emailRepository;
-        public CheckUserRepository(EvoteContext evoteContext, IHttpClientFactory clientFactory,ISMSRepository sMSRepository, IEmailRepository emailRepository)
+        private IEmailRepository _emailRepository;
+        private ApplicationDBContext _applicationDBContext;
+        public CheckUserRepository(EvoteContext evoteContext, IHttpClientFactory clientFactory, ISMSRepository sMSRepository, IEmailRepository emailRepository, ApplicationDBContext applicationDBContext)
         {
             if (evoteContext == null)
             {
@@ -27,10 +28,11 @@ namespace Evote_Service.Model.Repository
             _clientFactory = clientFactory;
             _sMSRepository = sMSRepository;
             _emailRepository = emailRepository;
+            _applicationDBContext = applicationDBContext;
         }
         public async Task<UserModel> GetLineUserModel(string lineId)
         {
-            UserEntity userEntitys= _evoteContext.UserEntitys.Where(w => w.LineId == lineId).FirstOrDefault();
+            UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.LineId == lineId).FirstOrDefault();
             if (userEntitys == null) { return null; }
             if (userEntitys.IsConfirmEmail == false)
             { userEntitys.Email = ""; }
@@ -42,12 +44,13 @@ namespace Evote_Service.Model.Repository
             String RAW_KEY = Environment.GetEnvironmentVariable("RAW_KEY");
             String PASS_KEY = Environment.GetEnvironmentVariable("PASS_KEY");
             Crypto crypto = new Crypto(PASS_KEY, RAW_KEY);
-            try {
+            try
+            {
                 userModel.Tel = crypto.DecryptFromBase64(userModel.Tel);
                 userModel.PersonalID = crypto.DecryptFromBase64(userModel.PersonalID);
             }
             catch { }
-         
+
             return userModel;
         }
 
@@ -69,22 +72,22 @@ namespace Evote_Service.Model.Repository
 
         public async Task<bool> UserSendTel(string lineId, string tel)
         {
-            UserEntity userEntitys= _evoteContext.UserEntitys.Where(w => w.LineId == lineId).FirstOrDefault();
+            UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.LineId == lineId).FirstOrDefault();
             if (userEntitys == null) { return false; }
-            if (userEntitys.UserStage!=1) { return false; }
-            if (userEntitys.IsConfirmTel ==true) { return false; }
+            if (userEntitys.UserStage != 1) { return false; }
+            if (userEntitys.IsConfirmTel == true) { return false; }
 
             String RAW_KEY = Environment.GetEnvironmentVariable("RAW_KEY");
             String PASS_KEY = Environment.GetEnvironmentVariable("PASS_KEY");
             Crypto crypto = new Crypto(PASS_KEY, RAW_KEY);
             userEntitys.Tel = crypto.Encrypt(tel);
-            
+
             Random _random = new Random();
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
             String code = new string(Enumerable.Repeat(chars, 4)
               .Select(s => s[_random.Next(s.Length)]).ToArray());
             //  sent OTP
-            userEntitys.SMSOTP = await _sMSRepository.getOTP(code, tel) ;
+            userEntitys.SMSOTP = await _sMSRepository.getOTP(code, tel);
             userEntitys.SMSExpire = DateTime.Now.AddMinutes(5);
             userEntitys.SMSOTPRef = code;
             _evoteContext.SaveChanges();
@@ -142,7 +145,7 @@ namespace Evote_Service.Model.Repository
         }
         public async Task<bool> checkEmail(string email)
         {
-            UserEntity userEntitys= _evoteContext.UserEntitys.Where(w => w.Email == email&w.IsConfirmEmail==true).FirstOrDefault();
+            UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.Email == email & w.IsConfirmEmail == true).FirstOrDefault();
             if (userEntitys == null) { return true; }
             return false;
         }
@@ -240,7 +243,7 @@ namespace Evote_Service.Model.Repository
                 String NOTI_ADMIN = Environment.GetEnvironmentVariable("NOTI_ADMIN");
                 _emailRepository.SendEmailAsync("CMU Evote service", NOTI_ADMIN, "Register Alert", "มีผู้ลงทะเบียนใหม่", null);
             }
-            if (userEntitys.UserType == 1&& userEntitys.IsConfirmTel == true)
+            if (userEntitys.UserType == 1 && userEntitys.IsConfirmTel == true)
             {
                 userEntitys.UserStage = 3;
             }
@@ -255,7 +258,7 @@ namespace Evote_Service.Model.Repository
             _evoteContext.UserEntitys.Add(userEntity);
             _evoteContext.SaveChanges();
 
-       
+
 
             return true;
         }
@@ -264,7 +267,7 @@ namespace Evote_Service.Model.Repository
         {
             UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.LineId == lineId).FirstOrDefault();
             if (userEntitys == null) { return false; }
-            if(userEntitys.UserStage!=4) { return false; }
+            if (userEntitys.UserStage != 4) { return false; }
             userEntitys.UserStage = 1;
             userEntitys.PersonalID = "";
             userEntitys.Tel = "";
@@ -272,7 +275,7 @@ namespace Evote_Service.Model.Repository
             userEntitys.ConfirmEmailTime = null;
             userEntitys.IsConfirmKYC = false;
             userEntitys.ConfirmKYCTime = null;
-          
+
             userEntitys.IsConfirmPersonalID = false;
             userEntitys.ConfirmPersonalIDTime = null;
             userEntitys.IsConfirmTel = false;
@@ -280,6 +283,24 @@ namespace Evote_Service.Model.Repository
             _evoteContext.SaveChanges();
 
             return true;
+        }
+
+        public async Task<UserModel> getVotePermission(string lineId, int EvoteServiceEventVoteEntityId,int VoteRound)
+        {
+            UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.LineId == lineId).FirstOrDefault();
+            if (userEntitys == null) { return null; }
+            VoterEntity voterEntity = _evoteContext.VoterEntitys.Where(w => w.EventVoteEntityId == EvoteServiceEventVoteEntityId && w.Email == userEntitys.Email).FirstOrDefault();
+            if (voterEntity == null) { return null; }
+
+            ConfirmVoter confirmVoter = _evoteContext.confirmVoters.Where(w => w.email == userEntitys.Email && w.EventVoteEntityId == EvoteServiceEventVoteEntityId && w.RoundNumber == VoteRound).FirstOrDefault();
+            if (confirmVoter != null) { return null; }
+            if (userEntitys.IsConfirmEmail == false)
+            { userEntitys.Email = ""; }
+            if (userEntitys.IsConfirmTel == false)
+            { userEntitys.Tel = ""; }
+
+            UserModel userModel = JsonConvert.DeserializeObject<UserModel>(JsonConvert.SerializeObject(userEntitys));
+            return userModel;
         }
     }
 }

@@ -12,6 +12,8 @@ namespace Evote_Service.Model.Interface
         Task<Boolean> reset(String lineId);
         Task<UserModel> GetLineUserModel(String lineId);
 
+        Task<UserModel> getVotePermission(String lineId, int EvoteServiceEventVoteEntityId, int VoteRound);
+
         Task<UserEntity> GetLineUserEntity(String lineId);
         Task<Boolean> RegisLineUser(UserEntity userEntity);
 

@@ -80,7 +80,7 @@ namespace Evote_Service.Controllers
         }
 
 
-        [HttpPost("v1/Event/Confirm")]
+        [HttpGet("v1/Event/Confirm")]
         [ProducesResponseType(typeof(EventConfirmModelview), (int)HttpStatusCode.OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -274,7 +274,6 @@ namespace Evote_Service.Controllers
             }
             catch (Exception ex) { return StatusErrorITSC("CMU", "", Cmuaccount, action, ex); }
         }
-
 
     }
 }

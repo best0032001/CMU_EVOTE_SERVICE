@@ -20,6 +20,8 @@ namespace Evote_Service.Model.Entity
 
         [Column(TypeName = "varchar(50)")]
         public String Organization_Code { get; set; }
+        [Column(TypeName = "varchar(250)")]
+        public String OrganizationFullNameTha { get; set; }
         [Column(TypeName = "varchar(50)")]
         public string CreateUser { get; set; }
         public DateTime VoterCreate { get; set; }

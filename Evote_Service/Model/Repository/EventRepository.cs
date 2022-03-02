@@ -127,6 +127,7 @@ namespace Evote_Service.Model.Repository
                     voterEntity.VoterCreate = DateTime.Now;
                     voterEntity.EventVoteEntityId = voterModelview.EventVoteEntityId;
                     voterEntity.Organization_Code = peopleModelview.Organization_Code;
+                    voterEntity.OrganizationFullNameTha = peopleModelview.OrganizationFullNameTha;
                     _evoteContext.VoterEntitys.Add(voterEntity);
 
                 }

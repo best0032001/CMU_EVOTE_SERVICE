@@ -31,6 +31,7 @@ namespace Evote_Service.Controllers
         private EvoteContext _evoteContext;
         private ApplicationDBContext _applicationDBContext;
         private ISMSRepository _sMSRepository;
+        private IEventRepository _eventRepository;
         public VoteController(ApplicationDBContext applicationDBContext, ISMSRepository sMSRepository, EvoteContext evoteContext, ILogger<ITSCController> logger, IEventRepository eventRepository, IHttpClientFactory clientFactory, IWebHostEnvironment env, IEmailRepository emailRepository, IVoteRepository voteRepository)
         {
 
@@ -39,6 +40,7 @@ namespace Evote_Service.Controllers
             _voteRepository = voteRepository;
             _evoteContext = evoteContext;
             _sMSRepository = sMSRepository;
+            _eventRepository = eventRepository;
             _applicationDBContext = applicationDBContext;
 
         }
@@ -176,7 +178,7 @@ namespace Evote_Service.Controllers
                 }
                 Email = userEntity.Email;
 
-                ConfirmVoter confirmVoter = _applicationDBContext.confirmVoters.Where(w => w.email == Email && w.EventVoteEntityId == eventVoteEntity.EventVoteEntityId && w.RoundNumber == data.VoteRound).FirstOrDefault();
+                ConfirmVoter confirmVoter = _evoteContext.confirmVoters.Where(w => w.email == Email && w.EventVoteEntityId == eventVoteEntity.EventVoteEntityId && w.RoundNumber == data.VoteRound).FirstOrDefault();
                 if (confirmVoter != null) { return Unauthorized(); }
                 VoterEntity voterEntity = _evoteContext.VoterEntitys.Where(w => w.Email == Email && w.EventVoteEntityId == eventVoteEntity.EventVoteEntityId).FirstOrDefault();
                 if (voterEntity == null) { return Unauthorized(); }
@@ -210,11 +212,8 @@ namespace Evote_Service.Controllers
                     SecretKey = "TW9zaGVFcmV6UHJpdmF0ZUtleQ==";
                 }
 
-
-
-                if (!IsTokenValid(TokenData, SecretKey)) { return Unauthorized(); }
-
-                List<Claim> claims = GetTokenClaims(TokenData, SecretKey).ToList();
+                List<Claim> claims = GetTokenClaims(TokenData, SecretKey);
+                if (claims == null) { return Unauthorized(); }
                 String dataVote = claims.FirstOrDefault(e => e.Type.Equals(ClaimTypes.UserData)).Value;
 
                 VoteRoundEntity voteRoundEntity = _evoteContext.voteRoundEntities.Where(w => w.EventVoteEntityId == eventVoteEntity.EventVoteEntityId && w.RoundNumber == data.VoteRound).FirstOrDefault();
@@ -228,7 +227,7 @@ namespace Evote_Service.Controllers
                 voteEntitie.ApplicationEntityId = applicationEntity.ApplicationEntityId;
                 voteEntitie.EventVoteEntityId = applicationEntity.EventVoteEntitys[0].EventVoteEntityId;
 
-                _applicationDBContext.voteEntities.Add(voteEntitie);
+                _evoteContext.voteEntities.Add(voteEntitie);
 
 
                 confirmVoter = new ConfirmVoter();
@@ -237,9 +236,9 @@ namespace Evote_Service.Controllers
                 confirmVoter.EventVoteEntityId = voteEntitie.EventVoteEntityId;
                 confirmVoter.RoundNumber = data.VoteRound;
 
+                _evoteContext.confirmVoters.Add(confirmVoter);
 
-
-                _applicationDBContext.SaveChanges();
+                _evoteContext.SaveChanges();
 
 
 
@@ -262,8 +261,6 @@ namespace Evote_Service.Controllers
             try
             {
                 APIModel aPIModel = new APIModel();
-
-
                 ApplicationEntity applicationEntity = _evoteContext.ApplicationEntitys.Where(w => w.ApplicationEntityId == data.ApplicationEntityId).FirstOrDefault();
                 EventVoteEntity eventVoteEntity = _evoteContext.EventVoteEntitys.Where(w => w.ApplicationEntityId == applicationEntity.ApplicationEntityId && w.EventVoteEntityId == data.EventVoteEntityId).FirstOrDefault();
                 if (applicationEntity == null) { return Unauthorized(); }
@@ -281,12 +278,13 @@ namespace Evote_Service.Controllers
                     }
                     else
                     {
-                        if (eventVoteEntity.EventStatusId != 2) { return Unauthorized(); }
+                        //if (eventVoteEntity.EventStatusId != 2) { return Unauthorized(); }
                     }
 
                 }
-
-                List<VoteEntity> voteEntities = _applicationDBContext.voteEntities.Where(w => w.ApplicationEntityId == data.ApplicationEntityId && w.EventVoteEntityId == eventVoteEntity.EventVoteEntityId && w.RoundNumber == data.VoteRound).OrderBy(o => o.VoteData).ToList();
+                eventVoteEntity.EventStatusId = 3;
+                _evoteContext.SaveChanges();
+                List<VoteEntity> voteEntities = _evoteContext.voteEntities.Where(w => w.ApplicationEntityId == data.ApplicationEntityId && w.EventVoteEntityId == eventVoteEntity.EventVoteEntityId && w.RoundNumber == data.VoteRound).OrderBy(o => o.VoteData).ToList();
                 aPIModel.data = voteEntities;
                 aPIModel.title = "Success";
                 return StatusCodeITSC("CMU", "", Cmuaccount, action, 200, aPIModel);
@@ -294,6 +292,37 @@ namespace Evote_Service.Controllers
             }
             catch (Exception ex) { return StatusErrorITSC("CMU", "", Cmuaccount, action, ex); }
         }
+
+
+
+        [HttpGet("v1/count")]
+        [ProducesResponseType(typeof(APIModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> countEvent([FromQuery] int EventVoteEntityId, [FromQuery] int RoundNumber, [FromQuery] int ApplicationEntityId)
+        {
+            String Cmuaccount = "";
+            String action = "VoteController.countEvent";
+            try
+            {
+                ApplicationEntity applicationEntity = await _eventRepository.getApplicationEntity(ApplicationEntityId);
+                if (applicationEntity == null) { return BadRequest(); }
+                if (this.checkAppIP(applicationEntity.ServerProductionIP) == false) { return Unauthorized(); }
+                Cmuaccount = await this.checkAppID(applicationEntity.ClientId);
+                if (Cmuaccount == "unauthorized") { return Unauthorized(); }
+                EventVoteEntity eventVoteEntity = await _eventRepository.getEventEntityByEventVoteEntityId(ApplicationEntityId, EventVoteEntityId);
+                if (eventVoteEntity.CreateUser != Cmuaccount) { return Unauthorized(); }
+
+                int n = _evoteContext.confirmVoters.Where(w => w.EventVoteEntityId == EventVoteEntityId && w.RoundNumber == RoundNumber).Count();
+
+                APIModel aPIModel = new APIModel();
+                aPIModel.data = n;
+                aPIModel.title = "Success";
+                return StatusCodeITSC("CMU", "", Cmuaccount, action, 200, aPIModel);
+            }
+            catch (Exception ex) { return StatusErrorITSC("CMU", "", Cmuaccount, action, ex); }
+        }
+
 
         [HttpGet("v1/VoteBatch")]
         [ProducesResponseType(typeof(List<VoteEntity>), (int)HttpStatusCode.OK)]
@@ -332,7 +361,7 @@ namespace Evote_Service.Controllers
         [HttpGet("v1/ConfirmBatch")]
         [ProducesResponseType(typeof(List<VoteEntity>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]      
         public async Task<IActionResult> ConfirmBatch()
         {
             String Cmuaccount = "";
@@ -365,10 +394,10 @@ namespace Evote_Service.Controllers
             catch (Exception ex) { return StatusErrorITSC("CMU", "", Cmuaccount, action, ex); }
         }
 
-        private IEnumerable<Claim> GetTokenClaims(string token, String SecretKey)
+        private List<Claim> GetTokenClaims(string token, String SecretKey)
         {
             if (string.IsNullOrEmpty(token))
-                throw new ArgumentException("Given token is null or empty.");
+            { return null; }
 
             TokenValidationParameters tokenValidationParameters = GetTokenValidationParameters(SecretKey);
 
@@ -376,31 +405,14 @@ namespace Evote_Service.Controllers
             try
             {
                 ClaimsPrincipal tokenValid = jwtSecurityTokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken validatedToken);
-                return tokenValid.Claims;
+                return tokenValid.Claims.ToList();
             }
             catch (Exception ex)
             {
-                throw ex;
+                return null;
             }
         }
-        private bool IsTokenValid(string token, String SecretKey)
-        {
-            if (string.IsNullOrEmpty(token))
-                throw new ArgumentException("Given token is null or empty.");
 
-            TokenValidationParameters tokenValidationParameters = GetTokenValidationParameters(SecretKey);
-
-            JwtSecurityTokenHandler jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
-            try
-            {
-                ClaimsPrincipal tokenValid = jwtSecurityTokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken validatedToken);
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
         private TokenValidationParameters GetTokenValidationParameters(String SecretKey)
         {
             return new TokenValidationParameters()

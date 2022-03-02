@@ -7,6 +7,7 @@ namespace Evote_Service.Model.View
 {
     public class EventModelview
     {
+        public int EventVoteEntityId { get; set; }
         public int EventTypeId { get; set; }
         public string EventTitle { get; set; }
         public string EventDetail { get; set; }
@@ -54,6 +55,7 @@ namespace Evote_Service.Model.View
     {
         public String Email { get; set; }
         public String Organization_Code { get; set; }
+        public String OrganizationFullNameTha { get; set; }
         public String FullName { get; set; }
         public int UserType { get; set; } // 1 CMU 2 non CMU
     }

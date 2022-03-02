@@ -11,6 +11,7 @@ namespace Evote_Service.Model.View
         public int EventVoteEntityId { get; set; }
         public String Email { get; set; }
         public String Organization_Code { get; set; }
+        public String OrganizationFullNameTha { get; set; }
         public String FullName { get; set; }
 
         public String VoterType { get; set; }
