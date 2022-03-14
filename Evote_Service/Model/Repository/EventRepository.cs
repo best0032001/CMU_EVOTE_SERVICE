@@ -49,11 +49,14 @@ namespace Evote_Service.Model.Repository
 
             EventVoteEntity eventVoteEntity = new EventVoteEntity();
             eventVoteEntity.AppLink = eventModelview.AppLink;
-            eventVoteEntity.voteRoundEntities = new List<VoteRoundEntity>();
+            eventVoteEntity.confirmVoters = new List<ConfirmVoter>();
+            eventVoteEntity.voteEntities = new List<VoteEntity>();
+
             eventVoteEntity.voterEntities = new List<VoterEntity>();
             eventVoteEntity.EventStatusId = 1;
+            eventVoteEntity.RoundNumber = 1;
             eventVoteEntity.ApplicationEntityId = ApplicationEntityId;
-            eventVoteEntity.EventTypeId = 0;
+            eventVoteEntity.EventTypeId = eventModelview.EventTypeId;
             eventVoteEntity.SecretKey = code;
             eventVoteEntity.SecurityAlgorithm = SecurityAlgorithms.HmacSha256Signature;
             eventVoteEntity.EventTitle = eventModelview.EventTitle;
@@ -82,14 +85,6 @@ namespace Evote_Service.Model.Repository
 
             eventVoteEntity.IsEnd = false;
             _evoteContext.EventVoteEntitys.Add(eventVoteEntity);
-            _evoteContext.SaveChanges();
-
-            VoteRoundEntity voteRoundEntity = new VoteRoundEntity();
-            voteRoundEntity.EventVoteEntityId = eventVoteEntity.EventVoteEntityId;
-            voteRoundEntity.RoundNumber = 1;
-            voteRoundEntity.confirmVoters = new List<ConfirmVoter>();
-            voteRoundEntity.voteEntities = new List<VoteEntity>();
-            _evoteContext.voteRoundEntities.Add(voteRoundEntity);
             _evoteContext.SaveChanges();
 
             eventConfirmModelview.IsUseTime = eventVoteEntity.IsUseTime;
@@ -208,13 +203,23 @@ namespace Evote_Service.Model.Repository
             return check;
         }
 
-        public async Task<bool> ConfirmEvent(int ApplicationEntityId, int eventVoteEntityId, string cmuaccount)
+        public async Task<bool> ConfirmEvent(int ApplicationEntityId, int eventVoteEntityId, string cmuaccount, int voteround)
         {
             bool check = false;
 
             EventVoteEntity eventVoteEntitys = _evoteContext.EventVoteEntitys.Where(w => w.EventVoteEntityId == eventVoteEntityId && w.PresidentEmail == cmuaccount).FirstOrDefault();
             eventVoteEntitys.EventStatusId = 2;
             eventVoteEntitys.PresidentUpdate = DateTime.Now;
+
+            if (voteround != 0)
+            {
+                String AppLink = eventVoteEntitys.AppLink;
+                int index = AppLink.IndexOf("voteround");
+                AppLink = AppLink.Substring(0, 86);
+                AppLink = AppLink + voteround;
+                eventVoteEntitys.AppLink = AppLink;
+                eventVoteEntitys.RoundNumber = voteround;
+            }
             _evoteContext.SaveChanges();
 
 

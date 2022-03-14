@@ -40,6 +40,8 @@ namespace Evote_Service.Controllers
         [HttpGet("v1/callback")]
         [ProducesResponseType(typeof(UserCMUAccountModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> callback([FromQuery] string code)
         {
@@ -111,7 +113,7 @@ namespace Evote_Service.Controllers
                 if (await _ICheckUserRepository.CheckPersonalID(personalid) == false)
                 {
                     aPIModel.title = "เลขบัตรนี้มีผู้ใช้งานแล้ว";
-                    return StatusCodeITSC("line", lineId, "", "LoginController.callback", 406, aPIModel);
+                    return StatusCodeITSC("line", lineId, "", "LoginController.callback", 403, aPIModel);
                 }
                 userEntity = new UserEntity();
 
@@ -199,7 +201,11 @@ namespace Evote_Service.Controllers
                 UserCMUAccountModel responseprofile = JsonConvert.DeserializeObject<UserCMUAccountModel>(responseString);
                 Cmuaccount = responseprofile.cmuitaccount;
                 UserAdminEntity userAdminEntity = await _IAdminRepository.getAdminByEmail(responseprofile.cmuitaccount);
-                if (userAdminEntity == null) { return Unauthorized(); }
+                aPIModel.title = "ท่านไม่ได้เป็นผู้ดูแลระบบ";
+                if (userAdminEntity == null) 
+                {
+                    StatusCodeITSC("CMU", "", responseprofile.cmuitaccount, "LoginController.admincallback", 401, aPIModel);
+                }
 
                 userAdminEntity.FullName = responseprofile.firstname_TH + " " + responseprofile.lastname_TH;
                 userAdminEntity.Organization_Code = responseprofile.organization_code;
@@ -220,7 +226,7 @@ namespace Evote_Service.Controllers
 
         [HttpPost("v1/admin/loginotp")]
         [ProducesResponseType(typeof(UserAdminModelView), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> AdminloginOTP([FromBody] AdminLoginOTPModelview data)
         {
@@ -230,7 +236,7 @@ namespace Evote_Service.Controllers
             if (userAdminEntity == null)
             {
                 aPIModel.title = "รหัส OTP ไม่ถูกต้อง หรือ หมดอายุ";
-                return StatusCodeITSC("CMU", "", "", "LoginController.AdminloginOTP", 503, aPIModel);
+                return StatusCodeITSC("CMU", "", "", "LoginController.AdminloginOTP", 400, aPIModel);
             }
 
             userAdminEntity.Tel = "";

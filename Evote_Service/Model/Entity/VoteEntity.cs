@@ -11,7 +11,6 @@ namespace Evote_Service.Model.Entity
         public int VoteEntityId { get; set; }
         public int ApplicationEntityId { get; set; }
         public int EventVoteEntityId { get; set; }
-        public int VoteRoundEntityId { get; set; }
         public int RoundNumber { get; set; }
 
         [Column(TypeName = "varchar(3000)")]

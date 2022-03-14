@@ -12,7 +12,7 @@ namespace Evote_Service.Model.Entity
         public int EventStatusId { get; set; } 
         public int ApplicationEntityId { get; set; }
         public int EventTypeId { get; set; }
-
+        public int RoundNumber { get; set; }
 
         [Column(TypeName = "varchar(1000)")]
         public string EventInformation { get; set; }
@@ -64,7 +64,8 @@ namespace Evote_Service.Model.Entity
         public Boolean IsEnd { get; set; }
 
         public Boolean IsDev { get; set; }
-        public List<VoteRoundEntity> voteRoundEntities { get; set; }//จำนวนครั้งการลงคะแนน  ของEvent นี้
+        public List<ConfirmVoter> confirmVoters { get; set; }
+        public List<VoteEntity> voteEntities { get; set; }
         public List<VoterEntity>  voterEntities { get; set; }  //ผู้มี สิทธิ์ Vote
     }
 }

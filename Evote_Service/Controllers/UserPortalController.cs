@@ -35,6 +35,7 @@ namespace Evote_Service.Controllers
         }
         [HttpGet("v1/Portal")]
         [ProducesResponseType(typeof(UserPortalModelView), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> getPortal()

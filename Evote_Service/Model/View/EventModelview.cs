@@ -12,7 +12,7 @@ namespace Evote_Service.Model.View
         public string EventTitle { get; set; }
         public string EventDetail { get; set; }
         public int EventStatusId { get; set; }
-
+        public int RoundNumber { get; set; }
         public string Organization_Code { get; set; }
         public string OrganizationFullNameTha { get; set; }
 

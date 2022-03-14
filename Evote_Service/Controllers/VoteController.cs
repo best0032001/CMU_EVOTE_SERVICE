@@ -111,7 +111,6 @@ namespace Evote_Service.Controllers
                 Crypto crypto = new Crypto(PASS_KEY, RAW_KEY);
 
                 voterEntity.SMSOTP = await _sMSRepository.getOTP(code, crypto.DecryptFromBase64(userEntity.Tel));
-                //voterEntity.SMSOTP = await _sMSRepository.getOTP(code, userEntity.Tel);
                 _evoteContext.SaveChanges();
                 aPIModel.title = "Success";
                 aPIModel.data = code;
@@ -216,26 +215,19 @@ namespace Evote_Service.Controllers
                 if (claims == null) { return Unauthorized(); }
                 String dataVote = claims.FirstOrDefault(e => e.Type.Equals(ClaimTypes.UserData)).Value;
 
-                VoteRoundEntity voteRoundEntity = _evoteContext.voteRoundEntities.Where(w => w.EventVoteEntityId == eventVoteEntity.EventVoteEntityId && w.RoundNumber == data.VoteRound).FirstOrDefault();
-                if (voteRoundEntity == null) { return Unauthorized(); }
-
-
+       
                 VoteEntity voteEntitie = new VoteEntity();
                 voteEntitie.VoteData = dataVote;
                 voteEntitie.RoundNumber = data.VoteRound;
-                voteEntitie.VoteRoundEntityId = voteRoundEntity.VoteRoundEntityId;
                 voteEntitie.ApplicationEntityId = applicationEntity.ApplicationEntityId;
                 voteEntitie.EventVoteEntityId = applicationEntity.EventVoteEntitys[0].EventVoteEntityId;
-
                 _evoteContext.voteEntities.Add(voteEntitie);
 
 
                 confirmVoter = new ConfirmVoter();
                 confirmVoter.email = Email;
-                confirmVoter.VoteRoundEntityId = voteRoundEntity.VoteRoundEntityId;
                 confirmVoter.EventVoteEntityId = voteEntitie.EventVoteEntityId;
                 confirmVoter.RoundNumber = data.VoteRound;
-
                 _evoteContext.confirmVoters.Add(confirmVoter);
 
                 _evoteContext.SaveChanges();
@@ -297,6 +289,7 @@ namespace Evote_Service.Controllers
 
         [HttpGet("v1/count")]
         [ProducesResponseType(typeof(APIModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> countEvent([FromQuery] int EventVoteEntityId, [FromQuery] int RoundNumber, [FromQuery] int ApplicationEntityId)

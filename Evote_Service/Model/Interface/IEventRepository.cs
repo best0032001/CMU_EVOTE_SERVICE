@@ -17,7 +17,7 @@ namespace Evote_Service.Model.Interface
 
         Task<Boolean> deleteEvent(int ApplicationEntityId, int eventVoteEntityId, String cmuaccount);
 
-        Task<Boolean> ConfirmEvent(int ApplicationEntityId, int eventVoteEntityId, String cmuaccount);
+        Task<Boolean> ConfirmEvent(int ApplicationEntityId, int eventVoteEntityId, String cmuaccount, int voteround);
         Task<Boolean> addVoter( VoterModelview voterModelview, String cmuaccount);
 
         Task<Boolean> deleteVoter(VoterModelview voterModelview, String cmuaccount);

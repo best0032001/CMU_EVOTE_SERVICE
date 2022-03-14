@@ -130,7 +130,7 @@ namespace Evote_Service.Controllers
                 if (await _ICheckUserRepository.checkEmail(data.email.Trim()) == false)
                 {
                     aPIModel.title = "Email นี้มีผู้ลงทะเบียนแล้ว";
-                    return StatusCodeITSC("line", lineId, "", action, 406, aPIModel);
+                    return StatusCodeITSC("line", lineId, "", action, 403, aPIModel);
                 }
                 if (await _ICheckUserRepository.UserSendEmail(lineId, data.email.Trim()) == false)
                 {
@@ -170,7 +170,7 @@ namespace Evote_Service.Controllers
                 if (await _ICheckUserRepository.CheckTel(data.tel.Trim()) == false)
                 {
                     aPIModel.title = "เบอร์โทรนี้ นี้มีผู้ลงทะเบียนแล้ว";
-                    return StatusCodeITSC("line", lineId, "", action, 406, aPIModel);
+                    return StatusCodeITSC("line", lineId, "", action, 403, aPIModel);
                 }
                 if (await _ICheckUserRepository.UserSendTel(lineId, data.tel.Trim()) == false)
                 {
@@ -207,7 +207,7 @@ namespace Evote_Service.Controllers
                 if (await _ICheckUserRepository.UserConfirmSMSOTP(lineId, data.otp) == false)
                 {
                     aPIModel.title = "รหัส OTP ไม่ถูกต้อง";
-                    return StatusCodeITSC("line", lineId, "", action, 503, aPIModel);
+                    return StatusCodeITSC("line", lineId, "", action, 400, aPIModel);
 
                 }
                 UserModel userModel = await _ICheckUserRepository.GetLineUserModel(lineId);
@@ -268,7 +268,7 @@ namespace Evote_Service.Controllers
                 if (await _ICheckUserRepository.UserConfirmEmailOTP(lineId, data.otp) == false)
                 {
                     aPIModel.title = "รหัส OTP ไม่ถูกต้อง";
-                    return StatusCodeITSC("line", lineId, "", action, 503, aPIModel);
+                    return StatusCodeITSC("line", lineId, "", action, 400, aPIModel);
 
                 }
                 UserModel userModel = await _ICheckUserRepository.GetLineUserModel(lineId);
@@ -304,7 +304,6 @@ namespace Evote_Service.Controllers
 
                 int countFiles = Request.Form.Files.Count;
                 if (countFiles != 1) { return BadRequest(); }
-                //    IFormFile file01 = Request.Form.Files["filename"];
                 IFormFile file01 = filename;
                 var path = Path.Combine(Directory.GetCurrentDirectory(), "uploadphotoid");
                 FileModel fileModel = this.SaveFile(path, file01, 20);
@@ -312,7 +311,7 @@ namespace Evote_Service.Controllers
                 if (await _ICheckUserRepository.CheckPersonalID(personalid) == false)
                 {
                     aPIModel.title = "เลขบัตรนี้มีผู้ใช้งานแล้ว";
-                    return StatusCodeITSC("line", lineId, "", action, 406, aPIModel);
+                    return StatusCodeITSC("line", lineId, "", action, 403, aPIModel);
                 }
                 if (await _ICheckUserRepository.UserPostphotoId(lineId, fileModel, personalid) == false)
                 {

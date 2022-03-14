@@ -72,7 +72,6 @@ namespace Evote_Service.Controllers
                 String PASS_KEY = Environment.GetEnvironmentVariable("PASS_KEY");
                 Crypto crypto = new Crypto(PASS_KEY, RAW_KEY);
                 userEntity.SMSOTP = await _sMSRepository.getOTP(code, crypto.DecryptFromBase64(userEntity.Tel));
-                //userEntity.SMSOTP = await _sMSRepository.getOTP(code, userEntity.Tel);
                 userEntity.SMSExpire = DateTime.Now.AddMinutes(5);
                 userEntity.SMSOTPRef = code;
                 _evoteContext.SaveChanges();

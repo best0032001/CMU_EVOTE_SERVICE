@@ -16,7 +16,6 @@ namespace Evote_Service.Model
         public DbSet<EventStatus> EventStatus { get; set; }
         public DbSet<ConfirmVoter> confirmVoters { get; set; }
         public DbSet<VoteEntity> voteEntities { get; set; }
-        public DbSet<VoteRoundEntity> voteRoundEntities { get; set; }
         public DbSet<VoterEntity> VoterEntitys { get; set; }
         public DbSet<AdminLoginLog> AdminLoginLogs { get; set; }
         public DbSet<EventVoteEntity> EventVoteEntitys { get; set; }

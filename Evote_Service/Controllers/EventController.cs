@@ -34,6 +34,7 @@ namespace Evote_Service.Controllers
         [HttpGet("v1/Event")]
         [ProducesResponseType(typeof(List<EventVoteEntity>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> getEvent([FromQuery] int ApplicationEntityId)
         {
@@ -57,6 +58,7 @@ namespace Evote_Service.Controllers
         [HttpPost("v1/Event")]
         [ProducesResponseType(typeof(EventConfirmModelview), (int)HttpStatusCode.OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> addEvent([FromBody] EventModelview data, [FromQuery] int ApplicationEntityId)
         {
@@ -82,9 +84,10 @@ namespace Evote_Service.Controllers
 
         [HttpGet("v1/Event/Confirm")]
         [ProducesResponseType(typeof(EventConfirmModelview), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> ConfirmEvent([FromQuery] int EventVoteEntityId, [FromQuery] int ApplicationEntityId)
+        public async Task<IActionResult> ConfirmEvent([FromQuery] int EventVoteEntityId, [FromQuery] int ApplicationEntityId, [FromQuery] int voteround)
         {
             String Cmuaccount = "";
             String action = "EventController.ConfirmEvent";
@@ -98,7 +101,7 @@ namespace Evote_Service.Controllers
                 EventVoteEntity eventVoteEntity = await _eventRepository.getEventEntityByEventVoteEntityId(ApplicationEntityId, EventVoteEntityId);
                 if (eventVoteEntity == null) { return BadRequest(); }
                 if (eventVoteEntity.PresidentEmail != Cmuaccount) { return Unauthorized(); }
-                Boolean check = await _eventRepository.ConfirmEvent(ApplicationEntityId, EventVoteEntityId, Cmuaccount);
+                Boolean check = await _eventRepository.ConfirmEvent(ApplicationEntityId, EventVoteEntityId, Cmuaccount, voteround);
 
                 APIModel aPIModel = new APIModel();
                 aPIModel.data = null;
@@ -111,6 +114,7 @@ namespace Evote_Service.Controllers
         [HttpDelete("v1/Event")]
         [ProducesResponseType(typeof(EventConfirmModelview), (int)HttpStatusCode.OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> deleteEvent([FromQuery] int EventVoteEntityId, [FromQuery] int ApplicationEntityId)
         {
@@ -145,6 +149,7 @@ namespace Evote_Service.Controllers
 
         [HttpPost("v1/Voter")]
         [ProducesResponseType(typeof(APIModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> addVoter([FromBody] VoterModelview data, [FromQuery] int ApplicationEntityId)
@@ -182,6 +187,7 @@ namespace Evote_Service.Controllers
 
         [HttpGet("v1/Voter")]
         [ProducesResponseType(typeof(List<VoterModelDataView>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> getVoter([FromQuery] int EventVoteEntityId, [FromQuery] int ApplicationEntityId)
@@ -213,6 +219,7 @@ namespace Evote_Service.Controllers
         [HttpPut("v1/Voter")]
         [ProducesResponseType(typeof(APIModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> deleteVoter([FromBody] VoterModelview data, [FromQuery] int ApplicationEntityId)
         {
@@ -250,6 +257,7 @@ namespace Evote_Service.Controllers
         [HttpPost("v1/User")]
         [ProducesResponseType(typeof(List<UserModelDataView>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> getUser([FromBody] UserModelSearch data, [FromQuery] int ApplicationEntityId)
         {

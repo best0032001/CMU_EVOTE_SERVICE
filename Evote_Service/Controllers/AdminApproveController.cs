@@ -35,7 +35,6 @@ namespace Evote_Service.Controllers
 
         [HttpPost("v1/Admin/Approve")]
         [ProducesResponseType(typeof(List<UserModelView>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(typeof(APIModel), (int)HttpStatusCode.ServiceUnavailable)]
@@ -79,7 +78,6 @@ namespace Evote_Service.Controllers
 
         [HttpGet("v1/Admin/Approve")]
         [ProducesResponseType(typeof(List<UserModelView>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(typeof(APIModel), (int)HttpStatusCode.ServiceUnavailable)]
@@ -208,7 +206,6 @@ namespace Evote_Service.Controllers
 
         [HttpGet("v1/admin/photoId")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
 
@@ -237,7 +234,6 @@ namespace Evote_Service.Controllers
 
         [HttpGet("v1/admin/kyc")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
 
