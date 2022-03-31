@@ -104,6 +104,21 @@ namespace Evote_Service.Model.Repository
 
             return eventConfirmModelview;
         }
+        public async Task<Boolean> updateEvent(int ApplicationEntityId, EventModelview eventModelview, string cmuaccount)
+        {
+            bool check = false;
+            EventVoteEntity eventVoteEntitys = _evoteContext.EventVoteEntitys.Where(w => w.ApplicationEntityId == ApplicationEntityId && w.EventVoteEntityId == eventModelview.EventVoteEntityId && w.CreateUser == cmuaccount && w.EventStatusId == 1).FirstOrDefault();
+            if (eventVoteEntitys == null) { return false; }
+
+            eventVoteEntitys.IsUseTime = eventModelview.IsUseTime;
+            eventVoteEntitys.EventTitle = eventModelview.EventTitle;
+            eventVoteEntitys.EventVotingStart = eventModelview.EventVotingStart;
+            eventVoteEntitys.EventVotingEnd = eventModelview.EventVotingEnd;
+            eventVoteEntitys.EventDetail = eventModelview.EventDetail;
+            _evoteContext.SaveChanges();
+
+            return true;
+        }
 
         public async Task<bool> addVoter(VoterModelview voterModelview, string cmuaccount)
         {
@@ -173,7 +188,7 @@ namespace Evote_Service.Model.Repository
 
             EventVoteEntity eventVoteEntitys = _evoteContext.EventVoteEntitys.Where(w => w.ApplicationEntityId == ApplicationEntityId && w.EventVoteEntityId == eventVoteEntityId && w.CreateUser == cmuaccount&&w.EventStatusId==1).Include(i => i.voterEntities).FirstOrDefault();
 
-
+            if (eventVoteEntitys == null) { return false; }
             foreach (VoterEntity voterEntity in eventVoteEntitys.voterEntities.ToList())
             {
                 _evoteContext.VoterEntitys.Remove(voterEntity);
@@ -248,5 +263,7 @@ namespace Evote_Service.Model.Repository
 
             return userModelDataViews;
         }
+
+      
     }
 }

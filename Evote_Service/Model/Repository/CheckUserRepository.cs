@@ -241,7 +241,8 @@ namespace Evote_Service.Model.Repository
             {
                 userEntitys.UserStage = 2;
                 String NOTI_ADMIN = Environment.GetEnvironmentVariable("NOTI_ADMIN");
-                _emailRepository.SendEmailAsync("CMU Evote service", NOTI_ADMIN, "Register Alert", "มีผู้ลงทะเบียนใหม่", null);
+                String body = userEntitys.FullName + " รอการตรวจสอบยืนยันตัวตน";
+                _emailRepository.SendEmailAsync("CMU Evote service", NOTI_ADMIN, "มีผู้ลงทะเบียนใหม่", body, null);
             }
             if (userEntitys.UserType == 1 && userEntitys.IsConfirmTel == true)
             {

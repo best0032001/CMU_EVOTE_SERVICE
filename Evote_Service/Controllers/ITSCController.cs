@@ -334,6 +334,23 @@ namespace Evote_Service.Controllers
 
             return fileModel;
         }
+        protected Boolean deleteFile(String fullPath)
+        {
+            Boolean b = false;
+            try
+            {
+
+                if (System.IO.File.Exists(fullPath))
+                {
+                    System.IO.File.Delete(fullPath);
+                    b = true;
+                }
+            }
+            catch { }
+            return b;
+
+
+        }
 
         protected MemoryStream loadFile(String fullPath)
         {

@@ -13,6 +13,7 @@ namespace Evote_Service.Model.Interface
         Task<List<EventVoteEntity>> getEventEntityByApplicationEntityId(int ApplicationEntityId);
         Task<EventVoteEntity> getEventEntityByEventVoteEntityId(int ApplicationEntityId,int eventVoteEntityId);
         Task<EventConfirmModelview> addEvent(int ApplicationEntityId,EventModelview eventModelview,String cmuaccount);
+        Task<Boolean> updateEvent(int ApplicationEntityId, EventModelview eventModelview, String cmuaccount);
 
 
         Task<Boolean> deleteEvent(int ApplicationEntityId, int eventVoteEntityId, String cmuaccount);

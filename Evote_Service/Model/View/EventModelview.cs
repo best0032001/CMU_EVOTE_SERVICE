@@ -24,6 +24,9 @@ namespace Evote_Service.Model.View
         public string EventInformation { get; set; }
         public string PresidentEmail { get; set; }
         public string AppLink { get; set; }
+        public Boolean IsToVote { get; set; }
+        public Boolean IsVote { get; set; }
+
 
     }
     public class EventConfirmModelview

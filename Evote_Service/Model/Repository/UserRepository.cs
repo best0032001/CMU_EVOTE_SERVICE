@@ -42,9 +42,9 @@ namespace Evote_Service.Model.Repository
         {
             List<EventModelview> eventModelviews = new List<EventModelview>();
             UserEntity userEntity = _evoteContext.UserEntitys.Where(w => w.LineId == lineId).First();
-            eventModelviews = (from vote in _evoteContext.VoterEntitys
-                               join eventvote in _evoteContext.EventVoteEntitys on vote.EventVoteEntityId equals eventvote.EventVoteEntityId
-                               where vote.Email == userEntity.Email && eventvote.EventStatusId == 2
+            eventModelviews = (from voter in _evoteContext.VoterEntitys
+                               join eventvote in _evoteContext.EventVoteEntitys on voter.EventVoteEntityId equals eventvote.EventVoteEntityId
+                               where voter.Email == userEntity.Email && eventvote.EventStatusId == 2
                                select new EventModelview
                                {
                                    EventVoteEntityId = eventvote.EventVoteEntityId,
@@ -55,15 +55,28 @@ namespace Evote_Service.Model.Repository
                                    OrganizationFullNameTha = eventvote.OrganizationFullNameTha,
                                    //EventRegisterStart = eventvote.EventRegisterStart,
                                    //EventRegisterEnd = eventvote.EventRegisterEnd,
+                                   RoundNumber = eventvote.RoundNumber,
                                    EventVotingStart = eventvote.EventVotingStart,
                                    EventVotingEnd = eventvote.EventVotingEnd,
                                    EventInformation = eventvote.EventInformation,
                                    PresidentEmail = eventvote.PresidentEmail,
-                                   IsUseTime= eventvote.IsUseTime,
-                                   AppLink = eventvote.AppLink
+                                   IsUseTime = eventvote.IsUseTime,
+                                   AppLink = eventvote.AppLink,
+                                   IsVote=false
                                }).ToList();
 
-            return eventModelviews.OrderByDescending(o=>o.EventVoteEntityId).ToList();
+            List<ConfirmVoter> confirmVoters = _evoteContext.confirmVoters.Where(w => w.email == userEntity.Email).ToList();
+
+            foreach (EventModelview eventModelview in eventModelviews)
+            {
+                ConfirmVoter confirmVoter = confirmVoters.Where(w => w.EventVoteEntityId == eventModelview.EventVoteEntityId && w.RoundNumber == eventModelview.RoundNumber).FirstOrDefault();
+                if (confirmVoter != null)
+                {
+                    eventModelview.IsVote = true;
+                }
+            }
+
+            return eventModelviews.OrderByDescending(o => o.EventVoteEntityId).ToList();
         }
     }
 }

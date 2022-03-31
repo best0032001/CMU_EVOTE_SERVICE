@@ -56,13 +56,22 @@ namespace Evote_Service.Controllers
                 userPortalModelView.eventModelviewsIncomming = new List<EventModelview>();
                 foreach (EventModelview eventModelview in eventModelviews)
                 {
+                    if (eventModelview.IsVote == false)
+                    {
+                        eventModelview.IsToVote = true;
+                    }
+                    else
+                    {
+                        eventModelview.IsToVote = false;
+                    }
+                   
                     if (eventModelview.IsUseTime)
                     {
 
                         int res = DateTime.Compare(DateTime.Now, eventModelview.EventVotingStart);
                         if (res < 0)
                         {
-
+                            eventModelview.IsToVote = false;
                             userPortalModelView.eventModelviewsIncomming.Add(eventModelview);
                         }
                         else

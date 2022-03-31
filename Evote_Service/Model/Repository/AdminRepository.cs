@@ -35,7 +35,7 @@ namespace Evote_Service.Model.Repository
             if (userAdminEntity == null) { return null; }
             if (userAdminEntity.SuperAdmin)
             {
-                userEntities = _evoteContext.UserEntitys.Where(w => w.UserStage == 2).ToList();
+                userEntities = _evoteContext.UserEntitys.Where(w => w.UserStage == 2).OrderByDescending(o=>o.UserEntityId).ToList();
             }
            
             return userEntities;
@@ -52,23 +52,16 @@ namespace Evote_Service.Model.Repository
             {
                 userEntity = _evoteContext.UserEntitys.Where(w => w.UserStage == 2 && w.UserEntityId == userEntityId).FirstOrDefault();
             }
-
             if (userEntity == null) { return null; }
-
             userEntity.UserStage = 3;
-
             userEntity.AdminApprovedIP = clientIP;
             userEntity.AdminApproved = cmuaccount;
             userEntity.ApprovedTime = DateTime.Now;
-
-
             _evoteContext.SaveChanges();
-
             await _emailRepository.SendEmailAsync("CMU Evote service", userEntity.Email, "การยืนยันตัวของท่านได้รับการตรวจสอบแล้ว", "  ", null);
-            userEntities = _evoteContext.UserEntitys.Where(w => w.UserStage == 2).ToList();
+            userEntities = _evoteContext.UserEntitys.Where(w => w.UserStage == 2).OrderByDescending(o => o.UserEntityId).ToList();
             return userEntities;
         }
-
         public async Task<List<UserEntity>> adminNotApprove(string cmuaccount, AdminApproveModelView adminApproveModelView, String clientIP)
         {
             List<UserEntity> userEntities = new List<UserEntity>();
@@ -91,7 +84,7 @@ namespace Evote_Service.Model.Repository
             _evoteContext.SaveChanges();
             await _emailRepository.SendEmailAsync("CMU Evote service", userEntity.Email, "การยืนยันตัวของท่านไม่ได้รับยืนยัน", adminApproveModelView.comment, null);
 
-            userEntities = _evoteContext.UserEntitys.Where(w => w.UserStage == 2).ToList();
+            userEntities = _evoteContext.UserEntitys.Where(w => w.UserStage == 2).OrderByDescending(o => o.UserEntityId).ToList();
             return userEntities;
         }
 

@@ -81,7 +81,40 @@ namespace Evote_Service.Controllers
             catch (Exception ex) { return StatusErrorITSC("CMU", "", Cmuaccount, action, ex); }
         }
 
+        [HttpPut("v1/Event")]
+        [ProducesResponseType(typeof(EventConfirmModelview), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> updateEvent([FromBody] EventModelview data, [FromQuery] int ApplicationEntityId)
+        {
+            String Cmuaccount = "";
+            String action = "EventController.updateEvent";
+            try
+            {
+                ApplicationEntity applicationEntity = await _eventRepository.getApplicationEntity(ApplicationEntityId);
+                if (applicationEntity == null) { return BadRequest(); }
+                if (this.checkAppIP(applicationEntity.ServerProductionIP) == false) { return Unauthorized(); }
+                Cmuaccount = await this.checkAppID(applicationEntity.ClientId);
+                if (Cmuaccount == "unauthorized") { return Unauthorized(); }
+                APIModel aPIModel = new APIModel();
+                if (await _eventRepository.updateEvent(ApplicationEntityId, data, Cmuaccount))
+                {
+                  
+                    aPIModel.data = null;
+                    aPIModel.title = "Success";
+                    return StatusCodeITSC("CMU", "", Cmuaccount, action, 200, aPIModel);
+                }
+                else
+                {
+                    aPIModel.title = "system error";
+                    return StatusCodeITSC("CMU", "", Cmuaccount, action, 503, aPIModel);
+                }
 
+           
+            }
+            catch (Exception ex) { return StatusErrorITSC("CMU", "", Cmuaccount, action, ex); }
+        }
         [HttpGet("v1/Event/Confirm")]
         [ProducesResponseType(typeof(EventConfirmModelview), (int)HttpStatusCode.OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
