@@ -16,6 +16,8 @@ RUN dotnet publish "Evote_Service.csproj" -c Release -o /app
 
 FROM base AS final
 WORKDIR /app
+RUN apk add icu-libs
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 RUN apk update && \
     apk add --no-cache tzdata
 COPY --from=publish /app .
