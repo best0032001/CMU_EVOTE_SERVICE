@@ -52,13 +52,13 @@ namespace Evote_Service
             }
             else
             {
-                var serverVersion = new MySqlServerVersion(new Version(8, 0, 25));
                 services.AddDbContext<EvoteContext>(options => options.UseInMemoryDatabase(databaseName: "ApplicationDBContext").ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning)));
                 services.AddScoped<ISMSRepository, SMSRepository>();
                 services.AddScoped<IEmailRepository, EmailRepository>();
                 origin = Environment.GetEnvironmentVariable("ORIGIN");
             }
-          
+            services.AddScoped<IUserManageRepository, UserManageRepository>();
+            services.AddScoped<IUserAdminRepository, UserAdminRepository>();
             services.AddScoped<ICheckUserRepository, CheckUserRepository>();
             services.AddScoped<IAdminRepository, AdminRepository>();
             services.AddScoped<IUserRepository,UserRepository>();

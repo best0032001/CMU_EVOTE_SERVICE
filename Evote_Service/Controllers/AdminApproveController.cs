@@ -26,13 +26,11 @@ namespace Evote_Service.Controllers
         private IAdminRepository _IAdminRepository;
         public AdminApproveController(ILogger<ITSCController> logger, IAdminRepository IAdminRepository, IHttpClientFactory clientFactory, IWebHostEnvironment env, IEmailRepository emailRepository)
         {
-        
-            this.loadConfig(logger, clientFactory, env); 
+
+            this.loadConfig(logger, clientFactory, env);
             _emailRepository = emailRepository;
             _IAdminRepository = IAdminRepository;
         }
-
-
         [HttpPost("v1/Admin/Approve")]
         [ProducesResponseType(typeof(List<UserModelView>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -44,29 +42,12 @@ namespace Evote_Service.Controllers
             String action = "AdminApproveController.searchApprove";
             try
             {
-                String json = "";
-                String RAW_KEY = Environment.GetEnvironmentVariable("RAW_KEY");
-                String PASS_KEY = Environment.GetEnvironmentVariable("PASS_KEY");
-                Crypto crypto = new Crypto(PASS_KEY, RAW_KEY);
                 Cmuaccount = await getCmuaccount();
                 if (Cmuaccount == "unauthorized") { return Unauthorized(); }
-
-
-
-                List<UserEntity> userEntities = await _IAdminRepository.searchUser(data,Cmuaccount);
+                List<UserEntity> userEntities = await _IAdminRepository.searchUserForApprove(data, Cmuaccount);
                 if (userEntities == null) { return Unauthorized(); }
 
-                List<UserModelView> userModelViews = new List<UserModelView>();
-                foreach (UserEntity userEntity in userEntities)
-                {
-                    json = JsonConvert.SerializeObject(userEntity);
-                    UserModelView userModelView = JsonConvert.DeserializeObject<UserModelView>(json);
-                    userModelView.Tel = crypto.DecryptFromBase64(userModelView.Tel);
-                    userModelView.PersonalID = crypto.DecryptFromBase64(userModelView.PersonalID);
-                    userModelView.UserStageText = DataCache.RefUserStages.Where(w => w.RefUserStageID == userModelView.UserStage).First().UserStageName;
-                    userModelViews.Add(userModelView);
-                }
-
+                List<UserModelView> userModelViews = this.MapUserModelView(userEntities);
                 APIModel aPIModel = new APIModel();
                 aPIModel.data = userModelViews;
                 aPIModel.title = "Success";
@@ -88,26 +69,13 @@ namespace Evote_Service.Controllers
             try
             {
 
-                String RAW_KEY = Environment.GetEnvironmentVariable("RAW_KEY");
-                String PASS_KEY = Environment.GetEnvironmentVariable("PASS_KEY");
-                Crypto crypto = new Crypto(PASS_KEY, RAW_KEY);
                 Cmuaccount = await getCmuaccount();
                 if (Cmuaccount == "unauthorized") { return Unauthorized(); }
 
                 List<UserEntity> userEntities = await _IAdminRepository.getUserWaitForApprove(Cmuaccount);
                 if (userEntities == null) { return Unauthorized(); }
 
-                List<UserModelView> userModelViews = new List<UserModelView>();
-                foreach (UserEntity userEntity in userEntities)
-                {
-                    String json = JsonConvert.SerializeObject(userEntity);
-                    UserModelView userModelView = JsonConvert.DeserializeObject<UserModelView>(json);
-                    userModelView.Tel = crypto.DecryptFromBase64(userModelView.Tel);
-                    userModelView.PersonalID = crypto.DecryptFromBase64(userModelView.PersonalID);
-                    userModelView.UserStageText = DataCache.RefUserStages.Where(w => w.RefUserStageID == userModelView.UserStage).First().UserStageName;
-                    userModelViews.Add(userModelView);
-                }
-
+                List<UserModelView> userModelViews = this.MapUserModelView(userEntities);
                 APIModel aPIModel = new APIModel();
                 aPIModel.data = userModelViews;
                 aPIModel.title = "Success";
@@ -128,30 +96,12 @@ namespace Evote_Service.Controllers
             String action = "AdminApproveController.adminApprove";
             try
             {
-                String RAW_KEY = Environment.GetEnvironmentVariable("RAW_KEY");
-                String PASS_KEY = Environment.GetEnvironmentVariable("PASS_KEY");
-                Crypto crypto = new Crypto(PASS_KEY, RAW_KEY);
                 Cmuaccount = await getCmuaccount();
                 if (Cmuaccount == "unauthorized") { return Unauthorized(); }
                 if (userEntityId == 0) { return BadRequest(); }
-
-           
-
                 List<UserEntity> userEntities = await _IAdminRepository.adminApprove(Cmuaccount, userEntityId, getClientIP());
                 if (userEntities == null) { return Unauthorized(); }
-
-                List<UserModelView> userModelViews = new List<UserModelView>();
-                foreach (UserEntity userEntity in userEntities)
-                {
-                    String json = JsonConvert.SerializeObject(userEntity);
-                    UserModelView userModelView = JsonConvert.DeserializeObject<UserModelView>(json);
-                    userModelView.Tel = crypto.DecryptFromBase64(userModelView.Tel);
-                    userModelView.PersonalID = crypto.DecryptFromBase64(userModelView.PersonalID);
-                    userModelView.UserStageText = DataCache.RefUserStages.Where(w => w.RefUserStageID == userModelView.UserStage).First().UserStageName;
-                    userModelViews.Add(userModelView);
-                }
-
-
+                List<UserModelView> userModelViews = this.MapUserModelView(userEntities);
                 // ขาดการส่ง Email
                 APIModel aPIModel = new APIModel();
                 aPIModel.data = userModelViews;
@@ -159,7 +109,8 @@ namespace Evote_Service.Controllers
 
                 return StatusCodeITSC("CMU", "", Cmuaccount, action, 200, aPIModel);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 return StatusErrorITSC("CMU", "", Cmuaccount, action, ex);
             }
         }
@@ -174,27 +125,13 @@ namespace Evote_Service.Controllers
             String Cmuaccount = "";
             try
             {
-                String RAW_KEY = Environment.GetEnvironmentVariable("RAW_KEY");
-                String PASS_KEY = Environment.GetEnvironmentVariable("PASS_KEY");
-                Crypto crypto = new Crypto(PASS_KEY, RAW_KEY);
                 Cmuaccount = await getCmuaccount();
                 if (Cmuaccount == "unauthorized") { return Unauthorized(); }
                 if (data.userEntityId == 0 || data.comment == "") { return BadRequest(); }
-
                 List<UserEntity> userEntities = await _IAdminRepository.adminNotApprove(Cmuaccount, data, getClientIP());
                 if (userEntities == null) { return Unauthorized(); }
 
-                List<UserModelView> userModelViews = new List<UserModelView>();
-                foreach (UserEntity userEntity in userEntities)
-                {
-                    String json = JsonConvert.SerializeObject(userEntity);
-                    UserModelView userModelView = JsonConvert.DeserializeObject<UserModelView>(json);
-                    userModelView.Tel = crypto.DecryptFromBase64(userModelView.Tel);
-                    userModelView.PersonalID = crypto.DecryptFromBase64(userModelView.PersonalID);
-                    userModelView.UserStageText = DataCache.RefUserStages.Where(w => w.RefUserStageID == userModelView.UserStage).First().UserStageName;
-                    userModelViews.Add(userModelView);
-                }
-
+                List<UserModelView> userModelViews = this.MapUserModelView(userEntities);
                 // ขาดการส่ง Email
                 APIModel aPIModel = new APIModel();
                 aPIModel.data = userModelViews;
@@ -224,6 +161,35 @@ namespace Evote_Service.Controllers
                 var memory = this.loadFile(path);
                 memory.Position = 0;
                 return File(memory, GetContentType(path), Path.GetFileName(path));
+            }
+            catch (Exception ex)
+            {
+                return StatusErrorITSC("line", lineId, "", action, ex);
+            }
+        }
+        [HttpGet("v1/admin/PeopleId")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+
+        public async Task<IActionResult> UserGetPeopleId([FromQuery] int userEntityId)
+        {
+            String Cmuaccount = "";
+            String lineId = "";
+            String action = "AdminApproveController.UserGetPeopleId";
+            try
+            {
+                Cmuaccount = await getCmuaccount();
+                if (Cmuaccount == "unauthorized") { return Unauthorized(); }
+                UserEntity userEntity = await _IAdminRepository.getUserEntity(Cmuaccount, userEntityId, getClientIP());
+                if (userEntity == null) { return Unauthorized(); }
+                String RAW_KEY = Environment.GetEnvironmentVariable("RAW_KEY");
+                String PASS_KEY = Environment.GetEnvironmentVariable("PASS_KEY");
+                Crypto crypto = new Crypto(PASS_KEY, RAW_KEY);
+                APIModel aPIModel = new APIModel();
+                aPIModel.data = crypto.DecryptFromBase64(userEntity.PersonalID);
+                aPIModel.title = "Success";
+                return StatusCodeITSC("CMU", "", Cmuaccount, "AdminApproveController.adminNotApprove", 200, aPIModel);
             }
             catch (Exception ex)
             {

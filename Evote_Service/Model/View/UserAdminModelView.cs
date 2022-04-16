@@ -12,8 +12,13 @@ namespace Evote_Service.Model.View
         public String Cmuaccount { get; set; }
         public string OrganizationFullNameTha { get; set; }
         public String Access_token { get; set; }
-        public Boolean SuperAdmin { get; set; }
-
-
+        //  public Boolean SuperAdmin { get; set; }
+        public List<UserMenuView> MenuList { get; set; }
+    }
+    public class UserMenuView
+    {
+        public String MenuName { get; set; }
+        public String MenuLink { get; set; }
+        public String icon { get; set; }
     }
 }

@@ -53,7 +53,12 @@ namespace Evote_Service.Model.Entity
         public String EmailOTPRef { get; set; }
 
 
+
         public Boolean IsConfirmEmail { get; set; }
+
+        public Boolean IsDeactivate { get; set; }
+
+        public Boolean IsReactivate { get; set; }
         public DateTime? ConfirmEmailTime { get; set; }
         public Boolean IsConfirmTel { get; set; }
         public DateTime? ConfirmTelTime { get; set; }
@@ -105,6 +110,18 @@ namespace Evote_Service.Model.Entity
         public String CommetNotApproved { get; set; }
         public DateTime? ApprovedTime { get; set; }
         public DateTime? NotApprovedTime { get; set; }
+
+        [Column(TypeName = "varchar(50)")]
+        public String AdminDeactivate { get; set; }
+        [Column(TypeName = "varchar(50)")]
+        public String AdminDeactivateIP { get; set; }
+        public DateTime? DeactivateTime { get; set; }
+
+        [Column(TypeName = "varchar(50)")]
+        public String AdminReactivate { get; set; }
+        [Column(TypeName = "varchar(50)")]
+        public String AdminReactivateIP { get; set; }
+        public DateTime? ReactivateTime { get; set; }
 
         [Column(TypeName = "varchar(50)")]
         public String Access_token { get; set; }

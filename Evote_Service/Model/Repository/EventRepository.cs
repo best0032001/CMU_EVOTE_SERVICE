@@ -248,7 +248,7 @@ namespace Evote_Service.Model.Repository
             if (userModelSearch.FullName == null) { userModelSearch.FullName = ""; }
             if (userModelSearch.FullName != "")
             {
-                userEntities = _evoteContext.UserEntitys.Where(w => w.UserType == 2 &&w.UserStage==3&& w.FullName.Contains(userModelSearch.FullName))
+                userEntities = _evoteContext.UserEntitys.Where(w => w.UserType == 2 &&w.UserStage==3&& w.FullName.Contains(userModelSearch.FullName)&&w.IsDeactivate==false)
                .ToList();
             }
            

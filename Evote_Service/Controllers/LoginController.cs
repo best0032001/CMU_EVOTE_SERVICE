@@ -208,7 +208,7 @@ namespace Evote_Service.Controllers
                 }
 
                 userAdminEntity.FullName = responseprofile.firstname_TH + " " + responseprofile.lastname_TH;
-                userAdminEntity.Organization_Code = responseprofile.organization_code;
+                //userAdminEntity.Organization_Code = responseprofile.organization_code;
                 userAdminEntity.OrganizationFullNameTha = responseprofile.organization_name_TH;
                 await _IAdminRepository.updateAdmin(userAdminEntity);
                 String RefCode = await _IAdminRepository.sendLoginOTP(responseprofile.cmuitaccount, _access_token, _refresh_token);
@@ -243,8 +243,35 @@ namespace Evote_Service.Controllers
             userAdminEntity.Refresh_token = "";
             String json = JsonConvert.SerializeObject(userAdminEntity);
             UserAdminModelView userAdminModelView = JsonConvert.DeserializeObject<UserAdminModelView>(json);
+            userAdminModelView.MenuList = new List<UserMenuView>();
 
-            aPIModel.data = userAdminEntity;
+            UserMenuView userMenuView1 = new UserMenuView();
+            userMenuView1.MenuName = "คนรออนุมัติ";
+            userMenuView1.MenuLink = "/admin";
+            userAdminModelView.MenuList.Add(userMenuView1);
+
+
+            UserMenuView userMenuView2 = new UserMenuView();
+            userMenuView2.MenuName = "ค้นหารายชื่อคน";
+            userMenuView2.MenuLink = "/search";
+            userAdminModelView.MenuList.Add(userMenuView2);
+
+
+            if (userAdminEntity.SuperAdmin)
+            {
+                UserMenuView userMenuView3 = new UserMenuView();
+                userMenuView3.MenuName = "จัดผู้ดูแลระดับสูงสุด";
+                userMenuView3.MenuLink = "/superadmin";
+                userAdminModelView.MenuList.Add(userMenuView3);
+            }
+            if (userAdminEntity.OrganAdmin)
+            {
+                UserMenuView userMenuView4 = new UserMenuView();
+                userMenuView4.MenuName = "จัดผู้ดูแลระดับส่วนงาน";
+                userMenuView4.MenuLink = "/organadmin";
+                userAdminModelView.MenuList.Add(userMenuView4);
+            }
+            aPIModel.data = userAdminModelView;
             aPIModel.title = "Success";
             return StatusCodeITSC("CMU", "", userAdminEntity.Cmuaccount, "LoginController.AdminloginOTP", 200, aPIModel);
 

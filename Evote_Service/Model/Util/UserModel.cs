@@ -7,7 +7,7 @@ namespace Evote_Service.Model.Util
 {
     public class UserModel
     {
-
+        public String LineId { get; set; }
         public String Email { get; set; }
         public String FullName { get; set; }
         public int UserStage { get; set; }

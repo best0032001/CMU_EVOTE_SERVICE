@@ -65,7 +65,7 @@ namespace ApiTest.Test
 
 
             AdminApproveModelView adminApproveModelView = new AdminApproveModelView();
-            adminApproveModelView.userEntityId = userEntities[1].UserEntityId;
+            adminApproveModelView.userEntityId = userEntities[0].UserEntityId;
             adminApproveModelView.comment = "test";
             json = JsonConvert.SerializeObject(adminApproveModelView);
             content = new StringContent(json);

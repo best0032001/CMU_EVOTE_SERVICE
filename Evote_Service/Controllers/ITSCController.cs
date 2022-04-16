@@ -1,6 +1,8 @@
 ﻿using Evote_Service.Model;
+using Evote_Service.Model.Entity;
 using Evote_Service.Model.Interface;
 using Evote_Service.Model.Util;
+using Evote_Service.Model.View;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -387,6 +389,60 @@ namespace Evote_Service.Controllers
                 {".gif", "image/gif"},
                 {".csv", "text/csv"}
             };
+        }
+
+
+        protected List<UserModelView> MapUserModelView(List<UserEntity> userEntities)
+        {
+            String json = "";
+            //String RAW_KEY = Environment.GetEnvironmentVariable("RAW_KEY");
+            //String PASS_KEY = Environment.GetEnvironmentVariable("PASS_KEY");
+            //Crypto crypto = new Crypto(PASS_KEY, RAW_KEY);
+            List<UserModelView> userModelViews = new List<UserModelView>();
+            foreach (UserEntity userEntity in userEntities)
+            {
+                json = JsonConvert.SerializeObject(userEntity);
+                UserModelView userModelView = JsonConvert.DeserializeObject<UserModelView>(json);
+                //userModelView.Tel = crypto.DecryptFromBase64(userModelView.Tel);
+                //userModelView.PersonalID = crypto.DecryptFromBase64(userModelView.PersonalID);
+                userModelView.Tel = "-";
+                userModelView.PersonalID = "-";
+                userModelView.UserStageText = DataCache.RefUserStages.Where(w => w.RefUserStageID == userModelView.UserStage).First().UserStageName;
+                if (userEntity.IsDeactivate)
+                {
+                    userModelView.isDelete = false;
+                    userModelView.UserStatus = "ถูกระงับการใช้งาน";
+                }
+                else
+                {
+                    userModelView.isDelete = true;
+                    userModelView.UserStatus = "ใช้งานปกติ";
+                }
+            
+
+
+                userModelViews.Add(userModelView);
+            }
+            return userModelViews;
+        }
+        protected async Task<APIModel> HrSearchUser(string _accesstoken, UserModelSearch data)
+        {
+
+            if (data.Name == null) { data.Name = ""; }
+            if (data.Surname == null) { data.Surname = ""; }
+            HttpClient httpClient = _clientFactory.CreateClient();
+            httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + _accesstoken);
+            data.Name = data.Name.Trim();
+            data.Surname = data.Surname.Trim();
+            String json = JsonConvert.SerializeObject(data);
+            var content = new StringContent(json);
+            content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+            String EvoteServiceAPI = Environment.GetEnvironmentVariable("HR_SEARCH_USER");
+            var response = await httpClient.PostAsync(EvoteServiceAPI, content);
+            response.EnsureSuccessStatusCode();
+            String responseString = await response.Content.ReadAsStringAsync();
+            APIModel dataTemp = JsonConvert.DeserializeObject<APIModel>(responseString);
+            return dataTemp;
         }
     }
 }

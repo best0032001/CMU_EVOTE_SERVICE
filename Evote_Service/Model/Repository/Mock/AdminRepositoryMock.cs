@@ -55,7 +55,7 @@ namespace Evote_Service.Model.Repository.Mockw
             throw new NotImplementedException();
         }
 
-        public Task<List<UserEntity>> searchUser(AdminSearchModelView adminSearchModelView, string cmuaccount)
+        public Task<List<UserEntity>> searchUserForApprove(AdminSearchModelView adminSearchModelView, string cmuaccount)
         {
             throw new NotImplementedException();
         }
@@ -66,6 +66,11 @@ namespace Evote_Service.Model.Repository.Mockw
         }
 
         public async Task<bool> updateAdmin(UserAdminEntity userAdminEntity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<UserEntity>> searchUser(AdminSearchModelView adminSearchModelView, string cmuaccount)
         {
             throw new NotImplementedException();
         }

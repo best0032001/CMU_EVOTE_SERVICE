@@ -35,9 +35,9 @@ namespace Evote_Service.Model.Repository
             if (userAdminEntity == null) { return null; }
             if (userAdminEntity.SuperAdmin)
             {
-                userEntities = _evoteContext.UserEntitys.Where(w => w.UserStage == 2).OrderByDescending(o=>o.UserEntityId).ToList();
+                userEntities = _evoteContext.UserEntitys.Where(w => w.UserStage == 2).OrderByDescending(o => o.UserEntityId).ToList();
             }
-           
+
             return userEntities;
 
         }
@@ -52,6 +52,10 @@ namespace Evote_Service.Model.Repository
             {
                 userEntity = _evoteContext.UserEntitys.Where(w => w.UserStage == 2 && w.UserEntityId == userEntityId).FirstOrDefault();
             }
+            else
+            {
+                userEntity = _evoteContext.UserEntitys.Where(w => w.UserStage == 2 && w.UserEntityId == userEntityId && w.Organization_Code == userAdminEntity.Organization_Code).FirstOrDefault();
+            }
             if (userEntity == null) { return null; }
             userEntity.UserStage = 3;
             userEntity.AdminApprovedIP = clientIP;
@@ -59,7 +63,10 @@ namespace Evote_Service.Model.Repository
             userEntity.ApprovedTime = DateTime.Now;
             _evoteContext.SaveChanges();
             await _emailRepository.SendEmailAsync("CMU Evote service", userEntity.Email, "การยืนยันตัวของท่านได้รับการตรวจสอบแล้ว", "  ", null);
-            userEntities = _evoteContext.UserEntitys.Where(w => w.UserStage == 2).OrderByDescending(o => o.UserEntityId).ToList();
+           // userEntities = _evoteContext.UserEntitys.Where(w => w.UserStage == 2).OrderByDescending(o => o.UserEntityId).ToList();
+            AdminSearchModelView adminSearchModelView = new AdminSearchModelView();
+            userEntities = await this.searchUserForApprove(adminSearchModelView, cmuaccount);
+
             return userEntities;
         }
         public async Task<List<UserEntity>> adminNotApprove(string cmuaccount, AdminApproveModelView adminApproveModelView, String clientIP)
@@ -67,7 +74,17 @@ namespace Evote_Service.Model.Repository
             List<UserEntity> userEntities = new List<UserEntity>();
             UserAdminEntity userAdminEntity = _evoteContext.UserAdminEntitys.Where(w => w.Cmuaccount == cmuaccount).FirstOrDefault();
             if (userAdminEntity == null) { return null; }
-            UserEntity userEntity = _evoteContext.UserEntitys.Where(w => w.UserStage == 2 && w.UserEntityId == adminApproveModelView.userEntityId).FirstOrDefault();
+            UserEntity userEntity = null;
+            if (userAdminEntity.SuperAdmin)
+            {
+                userEntity = _evoteContext.UserEntitys.Where(w => w.UserStage == 2 && w.UserEntityId == adminApproveModelView.userEntityId).FirstOrDefault();
+            }
+            else
+            {
+                userEntity = _evoteContext.UserEntitys.Where(w => w.UserStage == 2 && w.UserEntityId == adminApproveModelView.userEntityId && w.Organization_Code == userAdminEntity.Organization_Code).FirstOrDefault();
+            }
+
+            
             if (userEntity == null) { return null; }
             userEntity.UserStage = 4;
             userEntity.AdminNotApprovedIP = clientIP;
@@ -84,7 +101,9 @@ namespace Evote_Service.Model.Repository
             _evoteContext.SaveChanges();
             await _emailRepository.SendEmailAsync("CMU Evote service", userEntity.Email, "การยืนยันตัวของท่านไม่ได้รับยืนยัน", adminApproveModelView.comment, null);
 
-            userEntities = _evoteContext.UserEntitys.Where(w => w.UserStage == 2).OrderByDescending(o => o.UserEntityId).ToList();
+          //  userEntities = _evoteContext.UserEntitys.Where(w => w.UserStage == 2).OrderByDescending(o => o.UserEntityId).ToList();
+            AdminSearchModelView adminSearchModelView = new AdminSearchModelView();
+            userEntities = await this.searchUserForApprove(adminSearchModelView, cmuaccount);
             return userEntities;
         }
 
@@ -141,11 +160,15 @@ namespace Evote_Service.Model.Repository
             {
                 userEntity = _evoteContext.UserEntitys.Where(w => w.UserEntityId == userEntityId).FirstOrDefault();
             }
+            else
+            {
+                userEntity = _evoteContext.UserEntitys.Where(w => w.UserEntityId == userEntityId && w.Organization_Code == userAdminEntity.Organization_Code).FirstOrDefault();
+            }
 
             return userEntity;
         }
 
-        public async Task<List<UserEntity>> searchUser(AdminSearchModelView adminSearchModelView, string cmuaccount)
+        public async Task<List<UserEntity>> searchUserForApprove(AdminSearchModelView adminSearchModelView, string cmuaccount)
         {
             String RAW_KEY = Environment.GetEnvironmentVariable("RAW_KEY");
             String PASS_KEY = Environment.GetEnvironmentVariable("PASS_KEY");
@@ -164,14 +187,26 @@ namespace Evote_Service.Model.Repository
 
             if (userAdminEntity.SuperAdmin)
             {
-                userEntities = _evoteContext.UserEntitys.Where(w => w.UserStage >= 2)
-      .WhereIf(adminSearchModelView.FullName != "", w => w.FullName.Contains(adminSearchModelView.FullName))
-      .WhereIf(adminSearchModelView.Email != "", w => w.Email.Contains(adminSearchModelView.Email))
-      .WhereIf(adminSearchModelView.Organization_Name_TH != "", w => w.Organization_Name_TH.Contains(adminSearchModelView.Organization_Name_TH))
-      .WhereIf(adminSearchModelView.PersonalID != "", w => w.PersonalID == adminSearchModelView.PersonalID)
-      .WhereIf(adminSearchModelView.Tel != "", w => w.Tel == adminSearchModelView.Tel)
-      .WhereIf(adminSearchModelView.UserStage != 0, w => w.UserStage == adminSearchModelView.UserStage)
-      .ToList();
+                if (adminSearchModelView.Organization_Code == "")
+                {
+                    adminSearchModelView.Organization_Code = "0000000000";
+                }
+                userEntities = _evoteContext.UserEntitys.Where(w => w.UserStage == 2)
+                                .WhereIf(adminSearchModelView.Organization_Code != "0000000000", w => w.Organization_Code == adminSearchModelView.Organization_Code)
+                                .WhereIf(adminSearchModelView.FullName != "", w => w.FullName.Contains(adminSearchModelView.FullName))
+                                .WhereIf(adminSearchModelView.Email != "", w => w.Email.Contains(adminSearchModelView.Email))
+                                .WhereIf(adminSearchModelView.PersonalID != "", w => w.PersonalID.Contains(adminSearchModelView.PersonalID))
+                                .WhereIf(adminSearchModelView.Tel != "", w => w.Tel.Contains(adminSearchModelView.Tel))
+                                .ToList();
+            }
+            else
+            {
+                userEntities = _evoteContext.UserEntitys.Where(w => w.UserStage == 2 && w.Organization_Code == userAdminEntity.Organization_Code)
+                                .WhereIf(adminSearchModelView.FullName != "", w => w.FullName.Contains(adminSearchModelView.FullName))
+                                .WhereIf(adminSearchModelView.Email != "", w => w.Email.Contains(adminSearchModelView.Email))
+                                .WhereIf(adminSearchModelView.PersonalID != "", w => w.PersonalID.Contains(adminSearchModelView.PersonalID))
+                                .WhereIf(adminSearchModelView.Tel != "", w => w.Tel.Contains(adminSearchModelView.Tel))
+                                .ToList();
             }
 
             return userEntities;
@@ -182,5 +217,7 @@ namespace Evote_Service.Model.Repository
             _evoteContext.SaveChanges();
             return true;
         }
+
+       
     }
 }

@@ -33,7 +33,7 @@ namespace Evote_Service.Model.Repository
         public async Task<UserEntity> getUserEntity(string lineId)
         {
 
-            UserEntity userEntity = _evoteContext.UserEntitys.Where(w => w.LineId == lineId).First();
+            UserEntity userEntity = _evoteContext.UserEntitys.Where(w => w.LineId == lineId && w.IsDeactivate == false).First();
 
             return userEntity;
         }
@@ -41,7 +41,7 @@ namespace Evote_Service.Model.Repository
         public async Task<List<EventModelview>> getEventModelviewList(string lineId)
         {
             List<EventModelview> eventModelviews = new List<EventModelview>();
-            UserEntity userEntity = _evoteContext.UserEntitys.Where(w => w.LineId == lineId).First();
+            UserEntity userEntity = _evoteContext.UserEntitys.Where(w => w.LineId == lineId && w.IsDeactivate == false).First();
             eventModelviews = (from voter in _evoteContext.VoterEntitys
                                join eventvote in _evoteContext.EventVoteEntitys on voter.EventVoteEntityId equals eventvote.EventVoteEntityId
                                where voter.Email == userEntity.Email && eventvote.EventStatusId == 2

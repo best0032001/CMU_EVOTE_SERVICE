@@ -11,7 +11,7 @@ namespace Evote_Service.Model.Interface
     {
         Task<List<UserEntity>> getUserWaitForApprove(String cmuaccount);
 
-        Task<List<UserEntity>> searchUser(AdminSearchModelView adminSearchModelView, String cmuaccount);
+        Task<List<UserEntity>> searchUserForApprove(AdminSearchModelView adminSearchModelView, String cmuaccount);
 
         Task<List<UserEntity>> adminApprove(String cmuaccount,Int32 userEntityId,String clientIP);
 

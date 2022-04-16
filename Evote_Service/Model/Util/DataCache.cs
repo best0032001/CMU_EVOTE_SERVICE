@@ -1,4 +1,5 @@
 ﻿using Evote_Service.Model.Entity.Ref;
+using Evote_Service.Model.View;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,7 @@ namespace Evote_Service.Model.Util
         public static List<UserMock> UserMocks;
         public static List<AdminMock> AdminMocks;
         public static List<RefUserStage> RefUserStages;
+        public static List<OrganizationModelView> organList;
     }
 
     public class UserMock

@@ -23,7 +23,7 @@ namespace Evote_Service.Model.Entity
         public String Tel { get; set; }
 
         public Boolean SuperAdmin { get; set; }
-
+        public Boolean OrganAdmin { get; set; }
 
         [Column(TypeName = "varchar(50)")]
         public string Organization_Code { get; set; }
@@ -46,5 +46,10 @@ namespace Evote_Service.Model.Entity
         public String Access_token { get; set; }
         [Column(TypeName = "varchar(50)")]
         public String Refresh_token { get; set; }
+
+        [Column(TypeName = "varchar(50)")]
+        public string CreateUser { get; set; }
+        [Column(TypeName = "varchar(50)")]
+        public string CreateIP { get; set; }
     }
 }

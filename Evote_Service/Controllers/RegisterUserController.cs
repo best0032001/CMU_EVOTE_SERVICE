@@ -466,17 +466,19 @@ namespace Evote_Service.Controllers
             String action = "RegisterUserController.getOrganizations";
             try
             {
-                HttpClient httpClient = _clientFactory.CreateClient();
-                String APIOragn = Environment.GetEnvironmentVariable("API_ORGAN");
-                var response = await httpClient.GetAsync(APIOragn);
-                String responseString = await response.Content.ReadAsStringAsync();
-                APIModel dataTemp = JsonConvert.DeserializeObject<APIModel>(responseString);
-                String datajSON = JsonConvert.SerializeObject(dataTemp.data);
-                List<OrganizationModelView> list = JsonConvert.DeserializeObject<List<OrganizationModelView>>(datajSON);
-
-
+                if (DataCache.organList == null)
+                {
+                    HttpClient httpClient = _clientFactory.CreateClient();
+                    String APIOragn = Environment.GetEnvironmentVariable("API_ORGAN");
+                    var response = await httpClient.GetAsync(APIOragn);
+                    String responseString = await response.Content.ReadAsStringAsync();
+                    APIModel dataTemp = JsonConvert.DeserializeObject<APIModel>(responseString);
+                    String datajSON = JsonConvert.SerializeObject(dataTemp.data);
+                    List<OrganizationModelView> list = JsonConvert.DeserializeObject<List<OrganizationModelView>>(datajSON);
+                    DataCache.organList = list;
+                }
                 APIModel model = new APIModel();
-                model.data = list;
+                model.data = DataCache.organList;
                 model.title = "Success";
                 return Ok(model);
             }

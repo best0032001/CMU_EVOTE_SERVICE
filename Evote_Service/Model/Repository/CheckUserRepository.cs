@@ -32,7 +32,7 @@ namespace Evote_Service.Model.Repository
         }
         public async Task<UserModel> GetLineUserModel(string lineId)
         {
-            UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.LineId == lineId).FirstOrDefault();
+            UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.LineId == lineId&&w.IsDeactivate==false).FirstOrDefault();
             if (userEntitys == null) { return null; }
             if (userEntitys.IsConfirmEmail == false)
             { userEntitys.Email = ""; }
@@ -145,7 +145,7 @@ namespace Evote_Service.Model.Repository
         }
         public async Task<bool> checkEmail(string email)
         {
-            UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.Email == email & w.IsConfirmEmail == true).FirstOrDefault();
+            UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.Email == email & w.IsConfirmEmail == true && w.IsDeactivate == false).FirstOrDefault();
             if (userEntitys == null) { return true; }
             return false;
         }
@@ -156,7 +156,7 @@ namespace Evote_Service.Model.Repository
             String PASS_KEY = Environment.GetEnvironmentVariable("PASS_KEY");
             Crypto crypto = new Crypto(PASS_KEY, RAW_KEY);
             tel = crypto.Encrypt(tel);
-            UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.Tel == tel & w.IsConfirmTel == true).FirstOrDefault();
+            UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.Tel == tel & w.IsConfirmTel == true && w.IsDeactivate == false).FirstOrDefault();
             if (userEntitys == null) { return true; }
             return false;
         }
@@ -202,13 +202,13 @@ namespace Evote_Service.Model.Repository
             String PASS_KEY = Environment.GetEnvironmentVariable("PASS_KEY");
             Crypto crypto = new Crypto(PASS_KEY, RAW_KEY);
             PersonalID = crypto.Encrypt(PersonalID);
-            UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.PersonalID == PersonalID).FirstOrDefault();
+            UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.PersonalID == PersonalID && w.IsDeactivate == false).FirstOrDefault();
             if (userEntitys == null) { return true; }
             return false;
         }
         public async Task<UserEntity> GetLineUserEntity(string lineId)
         {
-            UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.LineId == lineId).FirstOrDefault();
+            UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.LineId == lineId && w.IsDeactivate == false).FirstOrDefault();
             if (userEntitys == null) { return null; }
             return userEntitys;
         }
@@ -288,7 +288,7 @@ namespace Evote_Service.Model.Repository
 
         public async Task<UserModel> getVotePermission(string lineId, int EvoteServiceEventVoteEntityId,int VoteRound)
         {
-            UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.LineId == lineId).FirstOrDefault();
+            UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.LineId == lineId && w.IsDeactivate == false).FirstOrDefault();
             if (userEntitys == null) { return null; }
             VoterEntity voterEntity = _evoteContext.VoterEntitys.Where(w => w.EventVoteEntityId == EvoteServiceEventVoteEntityId && w.Email == userEntitys.Email).FirstOrDefault();
             if (voterEntity == null) { return null; }
