@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Nest;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,7 +8,7 @@ namespace Evote_Service.Model.Util
 {
     public class LogModel
     {
-     
+        [Date(Name = "@timestamp")]
         public DateTime Timestamp { get; set; }
         public String ClientIp { get; set; }
         public String UserType { get; set; }

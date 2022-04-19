@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Nest;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -25,14 +26,15 @@ namespace Evote_Service.Controllers
     [ApiController]
     public class ITSCController : ControllerBase
     {
-
+        protected IElasticClient _elasticClient;
         protected DateTime _timestart;
         protected ILogger<ITSCController> _logger;
         protected IHttpClientFactory _clientFactory;
         protected IWebHostEnvironment _env;
         protected String _accesstoken = "";
         protected IEmailRepository _emailRepository;
-
+        private String _appID;
+        private String _appIndex;
         private String urlLine = "https://api.line.me/v2/profile";
         public ITSCController()
         {
@@ -43,6 +45,16 @@ namespace Evote_Service.Controllers
             _clientFactory = clientFactory;
             _env = env;
             _logger = logger;
+            _appID = Environment.GetEnvironmentVariable("CMU_CLIENT_ID");
+            _appIndex = Environment.GetEnvironmentVariable("APP_ID");
+            var defaultIndex = "logstash-" + DateTime.Now.ToString("yyyy-MM-dd");
+            String URL = Environment.GetEnvironmentVariable("ELK_URL");
+            if (URL == null)
+            {
+                URL = "http://x.x.x.x";
+            }
+            var settings = new ConnectionSettings(new Uri(URL)).DefaultIndex(defaultIndex);
+            _elasticClient = new ElasticClient(settings);
         }
         protected String getClientIP()
         {
@@ -87,7 +99,7 @@ namespace Evote_Service.Controllers
             String token = getTokenFormHeader();
             if (!_env.IsEnvironment("test"))
             {
-                
+
                 String urlOauthIntrospection = Environment.GetEnvironmentVariable("OAUTH_INTROSPEC");
                 var postData = new Dictionary<string, string>
             {
@@ -115,18 +127,20 @@ namespace Evote_Service.Controllers
                     cmuaccount = responseGetToken.user.user_id + "@cmu.ac.th";
                 }
                 else { cmuaccount = "unauthorized"; }
-         
+
 
             }
             else
             {
-                try {
+                try
+                {
                     cmuaccount = DataCache.AdminMocks.Where(w => w.token == token).First().Cmuaccount;
                 }
-                catch {
+                catch
+                {
                     cmuaccount = DataCache.UserMocks.Where(w => w.token == token).First().email;
                 }
-                
+
             }
 
             return cmuaccount;
@@ -153,12 +167,14 @@ namespace Evote_Service.Controllers
         }
         protected String getTokenFormHeader()
         {
-            try {
+            try
+            {
                 _accesstoken = Request.Headers["Authorization"];
                 _accesstoken = _accesstoken.Split(' ')[1];
                 return _accesstoken;
             }
-            catch {
+            catch
+            {
                 return "";
             }
         }
@@ -220,6 +236,8 @@ namespace Evote_Service.Controllers
             log.ClientIp = getClientIP();
             log.UserType = UserType;
             log.LineID = LineID;
+            log.appID = _appID;
+            log.appIndex = _appIndex;
             log.cmuaccount = cmuaccount;
             log.HttpCode = "500";
             log.action = action;
@@ -233,6 +251,7 @@ namespace Evote_Service.Controllers
             }
             log.responseTime = (log.Timestamp - _timestart).TotalSeconds;
             String errorText = log.logdate + " " + Newtonsoft.Json.JsonConvert.SerializeObject(log);
+            _elasticClient.IndexDocumentAsync(log);
             _logger.LogInformation(errorText);
             String NOTI_ADMIN = Environment.GetEnvironmentVariable("NOTI_ADMIN");
             _emailRepository.SendEmailAsync("CMU Evote service", NOTI_ADMIN, "Error Alert", errorText, null);
@@ -244,6 +263,8 @@ namespace Evote_Service.Controllers
             log.ClientIp = getClientIP();
             log.UserType = UserType;
             log.LineID = LineID;
+            log.appID = _appID;
+            log.appIndex = _appIndex;
             log.cmuaccount = cmuaccount;
             log.HttpCode = "" + code;
             log.action = action;
@@ -253,6 +274,7 @@ namespace Evote_Service.Controllers
             log.logdata = "";
             log.responseTime = (log.Timestamp - _timestart).TotalSeconds;
             _logger.LogInformation(log.logdate + " " + Newtonsoft.Json.JsonConvert.SerializeObject(log));
+            _elasticClient.IndexDocumentAsync(log);
             return this.StatusCode(code, aPIModel);
         }
 
@@ -418,7 +440,7 @@ namespace Evote_Service.Controllers
                     userModelView.isDelete = true;
                     userModelView.UserStatus = "ใช้งานปกติ";
                 }
-            
+
 
 
                 userModelViews.Add(userModelView);

@@ -54,7 +54,7 @@ namespace Evote_Service.Model.Repository
                 {
                     adminSearchModelView.Organization_Code = "0000000000";
                 }
-                userEntities = _evoteContext.UserEntitys.Where(w => w.UserStage == 3)
+                userEntities = _evoteContext.UserEntitys.Where(w => w.UserStage == 3 && w.UserType == 2)
                                 .WhereIf(adminSearchModelView.Organization_Code != "0000000000", w => w.Organization_Code == adminSearchModelView.Organization_Code)
                                 .WhereIf(adminSearchModelView.FullName != "", w => w.FullName.Contains(adminSearchModelView.FullName))
                                 .WhereIf(adminSearchModelView.Email != "", w => w.Email.Contains(adminSearchModelView.Email))
@@ -65,7 +65,7 @@ namespace Evote_Service.Model.Repository
             }
             else
             {
-                userEntities = _evoteContext.UserEntitys.Where(w => w.UserStage == 3 && w.Organization_Code == userAdminEntity.Organization_Code)
+                userEntities = _evoteContext.UserEntitys.Where(w => w.UserStage == 3 && w.UserType == 2 && w.Organization_Code == userAdminEntity.Organization_Code)
                                 .WhereIf(adminSearchModelView.FullName != "", w => w.FullName.Contains(adminSearchModelView.FullName))
                                 .WhereIf(adminSearchModelView.Email != "", w => w.Email.Contains(adminSearchModelView.Email))
                                 .WhereIf(adminSearchModelView.PersonalID != "", w => w.PersonalID.Contains(adminSearchModelView.PersonalID))
