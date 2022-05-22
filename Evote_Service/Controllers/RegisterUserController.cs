@@ -57,7 +57,7 @@ namespace Evote_Service.Controllers
                 lineId = await getLineUser();
                 if (lineId == "unauthorized") { return Unauthorized(); }
 
-                UserModel userModel = await _ICheckUserRepository.GetLineUserModel(lineId);
+                UserModel userModel = await _ICheckUserRepository.GetLineUserModelByRegisProcess(lineId);
                 if (userModel == null) { return StatusCode(204); }
                 aPIModel.data = userModel;
                 aPIModel.title = "Success";

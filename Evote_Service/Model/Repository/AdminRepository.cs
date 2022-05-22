@@ -145,6 +145,7 @@ namespace Evote_Service.Model.Repository
             adminLoginLog.Cmuaccount = userAdminEntity.Cmuaccount;
             adminLoginLog.LoginTime = DateTime.Now;
             adminLoginLog.ClientIP = clientIP;
+            _evoteContext.AdminLoginLogs.Add(adminLoginLog);
             _evoteContext.SaveChanges();
 
 

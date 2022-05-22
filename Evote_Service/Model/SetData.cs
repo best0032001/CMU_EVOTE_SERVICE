@@ -82,7 +82,7 @@ namespace Evote_Service.Model
         }
         private void innit()
         {
-          
+
             setRef();
             setApplicationTest();
             setEventTest();
@@ -119,25 +119,25 @@ namespace Evote_Service.Model
             if (list.Count == 0)
             {
                 RefUserStage refUserStage1 = new RefUserStage();
-                refUserStage1.RefUserStageID = 1;
+                //refUserStage1.RefUserStageID = 1;
                 refUserStage1.UserStageName = "Regis";
                 _evoteContext.RefUserStages.Add(refUserStage1);
                 _evoteContext.SaveChanges();
 
                 RefUserStage refUserStage2 = new RefUserStage();
-                refUserStage2.RefUserStageID = 2;
+                //refUserStage2.RefUserStageID = 2;
                 refUserStage2.UserStageName = "Confirm";
                 _evoteContext.RefUserStages.Add(refUserStage2);
                 _evoteContext.SaveChanges();
 
                 RefUserStage refUserStage3 = new RefUserStage();
-                refUserStage3.RefUserStageID = 3;
+                //refUserStage3.RefUserStageID = 3;
                 refUserStage3.UserStageName = "Approved";
                 _evoteContext.RefUserStages.Add(refUserStage3);
                 _evoteContext.SaveChanges();
 
                 RefUserStage refUserStage4 = new RefUserStage();
-                refUserStage4.RefUserStageID = 4;
+                //refUserStage4.RefUserStageID = 4;
                 refUserStage4.UserStageName = "Rejected";
                 _evoteContext.RefUserStages.Add(refUserStage4);
                 _evoteContext.SaveChanges();
@@ -150,19 +150,19 @@ namespace Evote_Service.Model
             if (eventStatuses.Count == 0)
             {
                 EventStatus eventStatus1 = new EventStatus();
-                eventStatus1.EventStatusId = 1;
+                //eventStatus1.EventStatusId = 1;
                 eventStatus1.EventStatusName = "SetUP"; //   admin  สร้าง ยังลบแก้ไขได้
                 _evoteContext.EventStatus.Add(eventStatus1);
                 _evoteContext.SaveChanges();
 
                 EventStatus eventStatus2 = new EventStatus();
-                eventStatus2.EventStatusId = 2;
+                //eventStatus2.EventStatusId = 2;
                 eventStatus2.EventStatusName = "PresidentConfirm"; //   admin  สร้างลบแก้ไขไม่ได้
                 _evoteContext.EventStatus.Add(eventStatus2);
                 _evoteContext.SaveChanges();
 
                 EventStatus eventStatus3 = new EventStatus();
-                eventStatus3.EventStatusId = 3;
+                //eventStatus3.EventStatusId = 3;
                 eventStatus3.EventStatusName = "End Process"; //   
                 _evoteContext.EventStatus.Add(eventStatus3);
                 _evoteContext.SaveChanges();

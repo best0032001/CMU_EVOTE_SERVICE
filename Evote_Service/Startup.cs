@@ -44,6 +44,7 @@ namespace Evote_Service
             services.AddDbContext<ApplicationDBContext>(options => options.UseInMemoryDatabase(databaseName: "ApplicationDBContext").ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning)));
             if (webHostEnvironment.IsEnvironment("test"))
             {
+
                 services.AddDbContext<EvoteContext>(options => options.UseInMemoryDatabase(databaseName: "EvoteContext").ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning)));
                 services.AddScoped<ISMSRepository, SMSRepositoryMock>();
                 services.AddScoped<IEmailRepository, EmailRepositoryMock>();
@@ -52,7 +53,8 @@ namespace Evote_Service
             }
             else
             {
-                services.AddDbContext<EvoteContext>(options => options.UseInMemoryDatabase(databaseName: "ApplicationDBContext").ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning)));
+                String DefaultConnection = Environment.GetEnvironmentVariable("CONNECTION");
+                services.AddDbContext<EvoteContext>(options => options.UseSqlServer(DefaultConnection));               
                 services.AddScoped<ISMSRepository, SMSRepository>();
                 services.AddScoped<IEmailRepository, EmailRepository>();
                 origin = Environment.GetEnvironmentVariable("ORIGIN");

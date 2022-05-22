@@ -39,6 +39,7 @@ namespace Evote_Service.Model.Repository
             if (userEntitys.IsConfirmTel == false)
             { userEntitys.Tel = ""; }
 
+
             UserModel userModel = JsonConvert.DeserializeObject<UserModel>(JsonConvert.SerializeObject(userEntitys));
 
             String RAW_KEY = Environment.GetEnvironmentVariable("RAW_KEY");
@@ -301,6 +302,38 @@ namespace Evote_Service.Model.Repository
             { userEntitys.Tel = ""; }
 
             UserModel userModel = JsonConvert.DeserializeObject<UserModel>(JsonConvert.SerializeObject(userEntitys));
+            return userModel;
+        }
+
+        public async Task<UserModel> GetLineUserModelByRegisProcess(string lineId)
+        {
+            UserEntity userEntitys = _evoteContext.UserEntitys.Where(w => w.LineId == lineId && w.IsDeactivate == false).FirstOrDefault();
+            if (userEntitys == null) { return null; }
+            if (userEntitys.IsConfirmEmail == false)
+            { userEntitys.Email = ""; }
+            if (userEntitys.IsConfirmTel == false)
+            { userEntitys.Tel = ""; }
+
+            if (userEntitys.UserType == 1 && userEntitys.IsConfirmTel == false)
+            {
+                _evoteContext.UserEntitys.Remove(userEntitys);
+                _evoteContext.SaveChanges();
+
+                return null;
+            }
+
+            UserModel userModel = JsonConvert.DeserializeObject<UserModel>(JsonConvert.SerializeObject(userEntitys));
+
+            String RAW_KEY = Environment.GetEnvironmentVariable("RAW_KEY");
+            String PASS_KEY = Environment.GetEnvironmentVariable("PASS_KEY");
+            Crypto crypto = new Crypto(PASS_KEY, RAW_KEY);
+            try
+            {
+                userModel.Tel = crypto.DecryptFromBase64(userModel.Tel);
+                userModel.PersonalID = crypto.DecryptFromBase64(userModel.PersonalID);
+            }
+            catch { }
+
             return userModel;
         }
     }

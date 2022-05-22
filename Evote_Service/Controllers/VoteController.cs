@@ -214,13 +214,13 @@ namespace Evote_Service.Controllers
                 List<Claim> claims = GetTokenClaims(TokenData, SecretKey);
                 if (claims == null) { return Unauthorized(); }
                 String dataVote = claims.FirstOrDefault(e => e.Type.Equals(ClaimTypes.UserData)).Value;
+                //String dataVote = data.TokenData;
 
-       
                 VoteEntity voteEntitie = new VoteEntity();
                 voteEntitie.VoteData = dataVote;
                 voteEntitie.RoundNumber = data.VoteRound;
                 voteEntitie.ApplicationEntityId = applicationEntity.ApplicationEntityId;
-                voteEntitie.EventVoteEntityId = applicationEntity.EventVoteEntitys[0].EventVoteEntityId;
+                voteEntitie.EventVoteEntityId = eventVoteEntity.EventVoteEntityId;
                 _evoteContext.voteEntities.Add(voteEntitie);
 
 
@@ -231,8 +231,18 @@ namespace Evote_Service.Controllers
                 _evoteContext.confirmVoters.Add(confirmVoter);
 
                 _evoteContext.SaveChanges();
+                String Body = "";
+                if (eventVoteEntity.EventTypeId == 3)
+                {
+                    Body = "<h2>รายละเอียด :  ท่านได้มาลงคะแนน " + eventVoteEntity.EventTitle + " รอบที่ "+ voteEntitie.RoundNumber + "</h2> <br><br><br> ( กรุณาเก็บโค้ดนี้ไว้ เพื่อเป็นหลักฐานในการลงคะแนน ) <br><br><br> " + dataVote;
+                }
+                else
+                {
+                    Body = "<h2>รายละเอียด :  ท่านได้มาลงคะแนน " + eventVoteEntity.EventTitle+ "</h2> <br><br><br> ( กรุณาเก็บโค้ดนี้ไว้ เพื่อเป็นหลักฐานในการลงคะแนน ) <br><br><br> " + dataVote;
+                }
+            
 
-
+                await _emailRepository.SendEmailAsync("CMU Evote service", userEntity.Email, "ท่านได้ลงคะแนน "+ eventVoteEntity.EventTitle, Body, null);
 
                 aPIModel.title = "Success";
                 return StatusCodeITSC("CMU", "", Cmuaccount, action, 200, aPIModel);
