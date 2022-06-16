@@ -83,7 +83,8 @@ namespace Evote_Service.Controllers
                 if (data.firstName == "" || data.lastName == "") { return BadRequest(); }
 
                 UserEntity userEntity = new UserEntity();
-             
+                data.firstName = data.firstName.Trim();
+                data.lastName = data.lastName.Trim();
                 userEntity.FullName = data.firstName + " " + data.lastName;
                 userEntity.Email = "";
                 userEntity.LineId = lineId;
@@ -308,6 +309,12 @@ namespace Evote_Service.Controllers
                 var path = Path.Combine(Directory.GetCurrentDirectory(), "uploadphotoid");
                 FileModel fileModel = this.SaveFile(path, file01, 20);
                 APIModel aPIModel = new APIModel();
+                if (fileModel.isSave == false)
+                {
+                    aPIModel.title = " Server Error";
+                    return StatusCodeITSC("line", lineId, "", action, 503, aPIModel);
+                }
+
                 if (await _ICheckUserRepository.CheckPersonalID(personalid) == false)
                 {
                     aPIModel.title = "เลขบัตรนี้มีผู้ใช้งานแล้ว";
@@ -386,9 +393,13 @@ namespace Evote_Service.Controllers
                 var pathFace = Path.Combine(Directory.GetCurrentDirectory(), "uploadface");
                 // FileModel fileModelKYC = this.SaveFile(pathKYC, fileKYC, 20);
                 FileModel fileModelFace = this.SaveFile(pathFace, fileFace, 20);
-                String _facedata = facedata["facedata"];
-
                 APIModel aPIModel = new APIModel();
+                if (fileModelFace.isSave == false)
+                {
+                    aPIModel.title = " Server Error";
+                    return StatusCodeITSC("line", lineId, "", action, 503, aPIModel);
+                }
+                String _facedata = facedata["facedata"];
                 if (await _ICheckUserRepository.UserPostphotoKyc(lineId, fileModelFace, _facedata) == false)
                 {
                     aPIModel.title = "ระบบขัดข้องบันทึกข้อมูลไม่สำเร็จ";

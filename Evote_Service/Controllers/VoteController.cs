@@ -201,9 +201,19 @@ namespace Evote_Service.Controllers
 
 
                     SecretKey = eventVoteEntity.SecretKey;
-                    if (!(voterEntity.SMSOTP == data.OTP && voterEntity.SMSOTPRef == data.RefOTP)) { return Unauthorized(); }
+                    if (!(voterEntity.SMSOTP == data.OTP && voterEntity.SMSOTPRef == data.RefOTP))
+                    {
+                        aPIModel.data = null;
+                        aPIModel.title = "รหัส OTP ไม่ถูกต้อง";
+                        return StatusCodeITSC("CMU", "", Cmuaccount, action, 401, aPIModel);
+                    }
                     res = DateTime.Compare(DateTime.Now, (DateTime)voterEntity.SMSExpire);
-                    if (res > 0) { return Unauthorized(); }
+                    if (res > 0) 
+                    {
+                        aPIModel.data = null;
+                        aPIModel.title = "รหัส OTP หมดอายุ";
+                        return StatusCodeITSC("CMU", "", Cmuaccount, action, 401, aPIModel);
+                    }
                 }
                 else
                 {
@@ -234,15 +244,15 @@ namespace Evote_Service.Controllers
                 String Body = "";
                 if (eventVoteEntity.EventTypeId == 3)
                 {
-                    Body = "<h2>รายละเอียด :  ท่านได้มาลงคะแนน " + eventVoteEntity.EventTitle + " รอบที่ "+ voteEntitie.RoundNumber + "</h2> <br><br><br> ( กรุณาเก็บโค้ดนี้ไว้ เพื่อเป็นหลักฐานในการลงคะแนน ) <br><br><br> " + dataVote;
+                    Body = "<h2>รายละเอียด :  ท่านได้มาลงคะแนน " + eventVoteEntity.EventTitle + " รอบที่ " + voteEntitie.RoundNumber + "</h2> <br><br><br> ( กรุณาเก็บโค้ดนี้ไว้ เพื่อเป็นหลักฐานในการลงคะแนน ) <br><br><br> " + dataVote;
                 }
                 else
                 {
-                    Body = "<h2>รายละเอียด :  ท่านได้มาลงคะแนน " + eventVoteEntity.EventTitle+ "</h2> <br><br><br> ( กรุณาเก็บโค้ดนี้ไว้ เพื่อเป็นหลักฐานในการลงคะแนน ) <br><br><br> " + dataVote;
+                    Body = "<h2>รายละเอียด :  ท่านได้มาลงคะแนน " + eventVoteEntity.EventTitle + "</h2> <br><br><br> ( กรุณาเก็บโค้ดนี้ไว้ เพื่อเป็นหลักฐานในการลงคะแนน ) <br><br><br> " + dataVote;
                 }
-            
 
-                await _emailRepository.SendEmailAsync("CMU Evote service", userEntity.Email, "ท่านได้ลงคะแนน "+ eventVoteEntity.EventTitle, Body, null);
+
+                await _emailRepository.SendEmailAsync("CMU Evote service", userEntity.Email, "ท่านได้ลงคะแนน " + eventVoteEntity.EventTitle, Body, null);
 
                 aPIModel.title = "Success";
                 return StatusCodeITSC("CMU", "", Cmuaccount, action, 200, aPIModel);
@@ -364,7 +374,7 @@ namespace Evote_Service.Controllers
         [HttpGet("v1/ConfirmBatch")]
         [ProducesResponseType(typeof(List<VoteEntity>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]      
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> ConfirmBatch()
         {
             String Cmuaccount = "";
